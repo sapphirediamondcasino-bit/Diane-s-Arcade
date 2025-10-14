@@ -783,6 +783,21 @@ isBot: player.isBot || false
         });
         loadAchievementsLeaderboard();
     }, 30000);
+        // Add to leaderboard.html <script>
+async function loadDiscordScores(gameId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/leaderboard/${gameId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            // Merge Discord scores with local scores
+            return data.leaderboard;
+        }
+    } catch (error) {
+        console.log('Discord scores unavailable:', error);
+    }
+    return [];
+}
 </script>
 </body>
 </html>

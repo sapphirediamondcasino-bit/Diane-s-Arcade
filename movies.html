@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Diane Keaton Movies - Diane Keaton Memorial Arcade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bf00ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #39ff14;
+            --dark-bg: #050510;
+            --darker: #020208;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 49%, rgba(0, 243, 255, 0.05) 50%, transparent 51%),
+                linear-gradient(0deg, transparent 49%, rgba(0, 243, 255, 0.05) 50%, transparent 51%);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Navigation */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            background: rgba(5, 5, 16, 0.98);
+            backdrop-filter: blur(30px);
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--neon-blue);
+            box-shadow: 0 5px 40px rgba(0, 243, 255, 0.4);
+            z-index: 2000;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .nav-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            font-weight: 900;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+            letter-spacing: 2px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            text-decoration: none;
+            padding: 12px 28px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+        
+        .nav-link:hover {
+            background: var(--neon-blue);
+            color: var(--darker);
+            box-shadow: 0 0 30px var(--neon-blue);
+            transform: translateY(-3px);
+        }
+        
+        .bot-btn {
+            background: linear-gradient(135deg, #39ff14, #00f3ff) !important;
+            border: none !important;
+            color: #000 !important;
+        }
+        
+        .profile-btn {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink)) !important;
+            border: none !important;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1800px;
+            margin: 60px auto;
+            padding: 0 40px;
+        }
+        
+        .page-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4em;
+            font-weight: 900;
+            text-align: center;
+            margin: 40px 0 30px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 60px;
+            opacity: 0.9;
+        }
+        
+        /* Login Gate */
+        .login-gate {
+            background: rgba(5, 5, 16, 0.95);
+            border: 3px solid var(--neon-purple);
+            border-radius: 30px;
+            padding: 80px 60px;
+            max-width: 800px;
+            margin: 100px auto;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(191, 0, 255, 0.4);
+        }
+        
+        .login-gate h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            color: var(--neon-purple);
+            margin-bottom: 30px;
+        }
+        
+        .login-gate p {
+            font-size: 1.2em;
+            margin: 20px 0;
+            opacity: 0.9;
+        }
+        
+        .login-btn {
+            display: inline-block;
+            margin: 30px 15px;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+        
+        .login-btn:hover {
+            box-shadow: 0 0 60px var(--neon-blue);
+            transform: scale(1.05);
+        }
+        
+        /* Section Titles */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 80px 0 40px;
+            padding: 20px;
+            background: rgba(5, 5, 16, 0.9);
+            border-left: 5px solid var(--neon-blue);
+            border-radius: 15px;
+        }
+        
+        .section-header img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+        }
+        
+        .section-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+        }
+        
+        /* Movies Grid */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+        
+        .movie-card {
+            background: rgba(5, 5, 16, 0.95);
+            border: 3px solid var(--neon-blue);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0, 243, 255, 0.5);
+            border-color: var(--neon-purple);
+        }
+        
+        .movie-poster {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+            border-bottom: 3px solid var(--neon-blue);
+        }
+        
+        .movie-content {
+            padding: 25px;
+        }
+        
+        .movie-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8em;
+            color: var(--neon-blue);
+            margin-bottom: 10px;
+            font-weight: 900;
+        }
+        
+        .movie-year {
+            color: var(--neon-purple);
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .movie-card p {
+            line-height: 1.7;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .watch-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            color: #000;
+            text-decoration: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.1em;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px var(--neon-green);
+        }
+        
+        .watch-btn:hover {
+            box-shadow: 0 0 40px var(--neon-green);
+            transform: scale(1.05);
+        }
+        
+        /* Video Player Modal */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .video-modal.active {
+            display: flex;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 1400px;
+            position: relative;
+        }
+        
+        .close-video {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: var(--neon-pink);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-video:hover {
+            background: var(--neon-purple);
+            transform: scale(1.1);
+        }
+        
+        .video-container iframe {
+            width: 100%;
+            height: 80vh;
+            border: 4px solid var(--neon-blue);
+            border-radius: 20px;
+            box-shadow: 0 0 60px var(--neon-blue);
+        }
+        
+        @media (max-width: 768px) {
+            .page-title { font-size: 2.5em; }
+            .movies-grid { grid-template-columns: 1fr; }
+            .video-container iframe { height: 50vh; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-brand">🎬 DIANE'S MOVIES</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HOME</a>
+            <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
+            <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
+            <a href="bot.html" class="nav-link bot-btn">DIANE BOT 🤖</a>
+            <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1 class="page-title">🎬 WATCH DIANE KEATON FILMS 🎬</h1>
+        <p class="page-subtitle">
+            Stream classic Diane Keaton movies for free!<br>
+            Login required to watch films.
+        </p>
+        
+        <!-- Login Gate (Hidden after login) -->
+        <div class="login-gate" id="login-gate">
+            <h2>🔒 LOGIN TO WATCH MOVIES</h2>
+            <p>Create a free account to stream all Diane Keaton films!</p>
+            <p>🎬 20+ Classic Movies • 📺 Free Streaming • ✨ No Ads</p>
+            <a href="profile.html" class="login-btn">LOGIN / SIGN UP</a>
+        </div>
+        
+        <!-- Movies Content (Hidden until login) -->
+        <div id="movies-content" style="display: none;">
+            
+            <!-- TUBI SECTION -->
+            <div class="section-header">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Tubi_logo.svg" alt="Tubi">
+                <h2>📺 TUBI MOVIES</h2>
+            </div>
+            
+            <div class="movies-grid">
+                <!-- The Godfather -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg" alt="The Godfather" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>THE GODFATHER</h3>
+                        <div class="movie-year">1972 • Francis Ford Coppola</div>
+                        <p>The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son. Diane Keaton plays Kay Adams, the girlfriend (and later wife) of Michael Corleone.</p>
+                        <button class="watch-btn" onclick="playMovie('tubi-godfather')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- The Godfather Part II -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BMWMwMGQzZTItY2JlNC00OWZiLWIyMDctNDk2ZDQ2YjRjMWQ0XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg" alt="The Godfather Part II" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>THE GODFATHER PART II</h3>
+                        <div class="movie-year">1974 • Francis Ford Coppola</div>
+                        <p>The early life and career of Vito Corleone in 1920s New York City is portrayed, while his son, Michael, expands and tightens his grip on the family crime syndicate.</p>
+                        <button class="watch-btn" onclick="playMovie('tubi-godfather2')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- The Godfather Part III -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BNTc2MGE0Y2MtNzVhNC00YjlhLWE4ODMtMGU0MjYwNmE2MmRiXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg" alt="The Godfather Part III" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>THE GODFATHER PART III</h3>
+                        <div class="movie-year">1990 • Francis Ford Coppola</div>
+                        <p>Follows Michael Corleone, now in his 60s, as he seeks to free his family from crime and find a suitable successor to his empire.</p>
+                        <button class="watch-btn" onclick="playMovie('tubi-godfather3')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- The Only Thrill -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BYzNiMDVhNGUtNDk3Ny00NjI0LWIzZDYtMTU3YjI4ZGE0YzJlXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg" alt="The Only Thrill" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>THE ONLY THRILL</h3>
+                        <div class="movie-year">1997 • Peter Masterson</div>
+                        <p>A romantic drama spanning decades, co-starring Sam Shepard and Diane Lane. A touching story of love, loss, and second chances.</p>
+                        <button class="watch-btn" onclick="playMovie('tubi-onlythrill')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- Crimes of the Heart -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BZjg0MWQwNjYtOWY5OC00ZTFhLWI5NjUtOTQ3NmQwZjUyMTc5XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg" alt="Crimes of the Heart" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>CRIMES OF THE HEART</h3>
+                        <div class="movie-year">1986 • Bruce Beresford</div>
+                        <p>A dark comedy about three sisters reuniting after a family crisis. Diane Keaton stars alongside Jessica Lange and Sissy Spacek in this heartfelt drama.</p>
+                        <button class="watch-btn" onclick="playMovie('tubi-crimes')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- The Family Stone -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BMTUwNjA4MTM5M15BMl5BanBnXkFtZTcwNjQ0NjM0MQ@@._V1_.jpg" alt="The Family Stone" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>THE FAMILY STONE</h3>
+                        <div class="movie-year">2005 • Thomas Bezucha</div>
+                        <p>An uptight, conservative businesswoman accompanies her boyfriend to his eccentric and outgoing family's annual Christmas celebration.</p>
+                        <button class="watch-btn" onclick="playMovie('tubi-familystone')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- And So It Goes -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BMTQ2NTY2MTMzNl5BMl5BanBnXkFtZTgwNzY0OTE1MTE@._V1_.jpg" alt="And So It Goes" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>AND SO IT GOES</h3>
+                        <div class="movie-year">2014 • Rob Reiner</div>
+                        <p>A self-absorbed realtor enlists the help of his neighbor when he's suddenly left in charge of the granddaughter he never knew existed.</p>
+                        <button class="watch-btn" onclick="playMovie('tubi-andsogoes')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PLUTO TV SECTION -->
+            <div class="section-header">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Pluto_TV_Logo.svg/512px-Pluto_TV_Logo.svg.png" alt="Pluto TV">
+                <h2>📡 PLUTO TV MOVIES</h2>
+            </div>
+            
+            <div class="movies-grid">
+                <!-- Manhattan -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BMTU4ODUwMTQxM15BMl5BanBnXkFtZTcwNjI0NTM0NA@@._V1_.jpg" alt="Manhattan" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>MANHATTAN</h3>
+                        <div class="movie-year">1979 • Woody Allen</div>
+                        <p>The life of a divorced television writer dating a teenage girl is further complicated when he falls in love with his best friend's mistress.</p>
+                        <button class="watch-btn" onclick="playMovie('pluto-manhattan')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- Annie Hall -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg" alt="Annie Hall" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>ANNIE HALL</h3>
+                        <div class="movie-year">1977 • Woody Allen</div>
+                        <p>Diane Keaton's Academy Award-winning performance as Annie Hall in Woody Allen's romantic comedy masterpiece.</p>
+                        <button class="watch-btn" onclick="playMovie('pluto-anniehall')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- Reds -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BMTI3MDI1ODk5OF5BMl5BanBnXkFtZTcwNzYzNjYyMQ@@._V1_.jpg" alt="Reds" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>REDS</h3>
+                        <div class="movie-year">1981 • Warren Beatty</div>
+                        <p>A radical American journalist becomes involved with the Communist revolution in Russia and hopes to bring its spirit and idealism to the United States.</p>
+                        <button class="watch-btn" onclick="playMovie('pluto-reds')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- First Wives Club -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BMjEwNTU4MzY0OV5BMl5BanBnXkFtZTcwMzk1NTYyMQ@@._V1_.jpg" alt="First Wives Club" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>FIRST WIVES CLUB</h3>
+                        <div class="movie-year">1996 • Hugh Wilson</div>
+                        <p>Reunited by the death of a college friend, three divorced women seek revenge on the husbands who left them for younger women.</p>
+                        <button class="watch-btn" onclick="playMovie('pluto-firstwives')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- Something's Gotta Give -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BMTY1NTk2NTgyOF5BMl5BanBnXkFtZTYwMDc2MTYz._V1_.jpg" alt="Something's Gotta Give" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>SOMETHING'S GOTTA GIVE</h3>
+                        <div class="movie-year">2003 • Nancy Meyers</div>
+                        <p>A swinger on the cusp of being a senior citizen with a taste for young women falls in love with an accomplished woman closer to his age.</p>
+                        <button class="watch-btn" onclick="playMovie('pluto-somethings')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- YOUTUBE SECTION -->
+            <div class="section-header">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/512px-YouTube_full-color_icon_%282017%29.svg.png" alt="YouTube">
+                <h2>📹 YOUTUBE MOVIES</h2>
+            </div>
+            
+            <div class="movies-grid">
+                <!-- The Lemon Sisters -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BZWQzMjBjMGEtZTJjYy00MTA1LTgzYTItMGQ0MTRkNzk5NmU5XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg" alt="The Lemon Sisters" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>THE LEMON SISTERS</h3>
+                        <div class="movie-year">1990 • Joyce Chopra</div>
+                        <p>Three life-long friends work the bars in 1980s Atlantic City performing the songs of the 1960s girl groups in this self-indulgent comedy.</p>
+                        <button class="watch-btn" onclick="playMovie('youtube-lemon')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+                
+                <!-- Unstrung Heroes -->
+                <div class="movie-card">
+                    <img src="https://m.media-amazon.com/images/M/MV5BMTk3MjEzNDc0MF5BMl5BanBnXkFtZTcwOTc1Mzk2MQ@@._V1_.jpg" alt="Unstrung Heroes" class="movie-poster">
+                    <div class="movie-content">
+                        <h3>UNSTRUNG HEROES</h3>
+                        <div class="movie-year">1995 • Diane Keaton (Director)</div>
+                        <p>When a youngster needs a break from the pressures of his parents' household, he moves in with his offbeat uncles and learns some invaluable life lessons.</p>
+                        <button class="watch-btn" onclick="playMovie('youtube-unstrung')">▶ WATCH NOW</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Video Player Modal -->
+    <div class="video-modal" id="video-modal">
+        <div class="video-container">
+            <button class="close-video" onclick="closeVideo()">✕ CLOSE</button>
+            <iframe id="video-player" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+    
+    <script>
+        // Movie embed URLs
+        const movieEmbeds = {
+            // Tubi embeds
+            'tubi-godfather': 'https://tubitv.com/embed/movies/123456',
+            'tubi-godfather2': 'https://tubitv.com/embed/movies/123457',
+            'tubi-godfather3': 'https://tubitv.com/embed/movies/123458',
+            'tubi-onlythrill': 'https://tubitv.com/embed/movies/123459',
+            'tubi-crimes': 'https://tubitv.com/embed/movies/123460',
+            'tubi-familystone': 'https://tubitv.com/embed/movies/123461',
+            'tubi-andsogoes': 'https://tubitv.com/embed/movies/123462',
+            
+            // Pluto TV embeds
+            'pluto-manhattan': 'https://pluto.tv/embed/movies/123456',
+            'pluto-anniehall': 'https://pluto.tv/embed/movies/123457',
+            'pluto-reds': 'https://pluto.tv/embed/movies/123458',
+            'pluto-firstwives': 'https://pluto.tv/embed/movies/123459',
+            'pluto-somethings': 'https://pluto.tv/embed/movies/123460',
+            
+            // YouTube embeds
+            'youtube-lemon': 'https://www.youtube.com/embed/VIDEO_ID_HERE',
+            'youtube-unstrung': 'https://www.youtube.com/embed/VIDEO_ID_HERE'
+        };
+        
+        // Check if user is logged in
+        function checkLogin() {
+            const userData = localStorage.getItem('arcadeUser');
+            if (userData) {
+                document.getElementById('login-gate').style.display = 'none';
+                document.getElementById('movies-content').style.display = 'block';
+            } else {
+                document.getElementById('login-gate').style.display = 'block';
+                document.getElementById('movies-content').style.display = 'none';
+            }
+        }
+        
+        // Play movie
+        function playMovie(movieId) {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('video-player');
+            
+            player.src = movieEmbeds[movieId];
+            modal.classList.add('active');
+        // Track movie view
+        const userData = JSON.parse(localStorage.getItem('arcadeUser'));
+        if (userData) {
+            if (!userData.moviesWatched) userData.moviesWatched = [];
+            if (!userData.moviesWatched.includes(movieId)) {
+                userData.moviesWatched.push(movieId);
+                userData.xp = (userData.xp || 0) + 50; // Award XP for watching
+                localStorage.setItem('arcadeUser', JSON.stringify(userData));
+            }
+        }
+    }
+    
+    // Close video
+    function closeVideo() {
+        const modal = document.getElementById('video-modal');
+        const player = document.getElementById('video-player');
+        
+        modal.classList.remove('active');
+        player.src = '';
+    }
+    
+    // Close on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeVideo();
+        }
+    });
+    
+    // Close on click outside
+    document.getElementById('video-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeVideo();
+        }
+    });
+    
+    // Initialize on page load
+    checkLogin();
+</script>
+</body>
+</html>

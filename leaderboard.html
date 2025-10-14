@@ -417,175 +417,12 @@
     <div class="container">
         <h1 class="page-title">🏆 LEADERBOARDS 🏆</h1>
         
-        <div class="category-tabs">
-            <button class="category-tab active" onclick="showCategory('global')">🌍 GLOBAL</button>
-            <button class="category-tab" onclick="showCategory('motherload')">⛏️ MOTHERLOAD</button>
-            <button class="category-tab" onclick="showCategory('happywheels')">🎡 HAPPY WHEELS</button>
-            <button class="category-tab" onclick="showCategory('gunblood')">🔫 GUN BLOOD</button>
-            <button class="category-tab" onclick="showCategory('raftwars')">🚣 RAFT WARS</button>
-            <button class="category-tab" onclick="showCategory('robotunicorn')">🦄 ROBOT UNICORN</button>
-            <button class="category-tab" onclick="showCategory('achievements')">🏅 ACHIEVEMENTS</button>
+        <div class="category-tabs" id="category-tabs">
+            <!-- Dynamically populated -->
         </div>
         
-        <!-- Global Leaderboard -->
-        <div class="leaderboard-section active" id="global-section">
-            <div class="leaderboard-header">
-                <h2 class="leaderboard-title">🌍 GLOBAL RANKINGS</h2>
-                <p class="leaderboard-subtitle">Top players by total XP across all games</p>
-            </div>
-            
-            <div class="podium" id="global-podium"></div>
-            
-            <div class="leaderboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RANK</th>
-                            <th>PLAYER</th>
-                            <th>LEVEL</th>
-                            <th>TOTAL XP</th>
-                            <th>ACHIEVEMENTS</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="global-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Game Leaderboards -->
-        <div class="leaderboard-section" id="motherload-section">
-            <div class="leaderboard-header">
-                <h2 class="leaderboard-title">⛏️ MOTHERLOAD HIGH SCORES</h2>
-                <p class="leaderboard-subtitle">Top miners in the galaxy!</p>
-            </div>
-            <div class="podium" id="motherload-podium"></div>
-            <div class="leaderboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RANK</th>
-                            <th>PLAYER</th>
-                            <th>HIGH SCORE</th>
-                            <th>DATE</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="motherload-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="leaderboard-section" id="happywheels-section">
-            <div class="leaderboard-header">
-                <h2 class="leaderboard-title">🎡 HAPPY WHEELS HIGH SCORES</h2>
-                <p class="leaderboard-subtitle">Masters of ragdoll mayhem!</p>
-            </div>
-            <div class="podium" id="happywheels-podium"></div>
-            <div class="leaderboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RANK</th>
-                            <th>PLAYER</th>
-                            <th>HIGH SCORE</th>
-                            <th>DATE</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="happywheels-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="leaderboard-section" id="gunblood-section">
-            <div class="leaderboard-header">
-                <h2 class="leaderboard-title">🔫 GUN BLOOD HIGH SCORES</h2>
-                <p class="leaderboard-subtitle">Fastest guns in the West!</p>
-            </div>
-            <div class="podium" id="gunblood-podium"></div>
-            <div class="leaderboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RANK</th>
-                            <th>PLAYER</th>
-                            <th>HIGH SCORE</th>
-                            <th>DATE</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gunblood-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="leaderboard-section" id="raftwars-section">
-            <div class="leaderboard-header">
-                <h2 class="leaderboard-title">🚣 RAFT WARS HIGH SCORES</h2>
-                <p class="leaderboard-subtitle">Treasure defenders supreme!</p>
-            </div>
-            <div class="podium" id="raftwars-podium"></div>
-            <div class="leaderboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RANK</th>
-                            <th>PLAYER</th>
-                            <th>HIGH SCORE</th>
-                            <th>DATE</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="raftwars-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="leaderboard-section" id="robotunicorn-section">
-            <div class="leaderboard-header">
-                <h2 class="leaderboard-title">🦄 ROBOT UNICORN ATTACK HIGH SCORES</h2>
-                <p class="leaderboard-subtitle">Always believe in your dreams!</p>
-            </div>
-            <div class="podium" id="robotunicorn-podium"></div>
-            <div class="leaderboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RANK</th>
-                            <th>PLAYER</th>
-                            <th>HIGH SCORE</th>
-                            <th>DATE</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="robotunicorn-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Achievements Leaderboard -->
-        <div class="leaderboard-section" id="achievements-section">
-            <div class="leaderboard-header">
-                <h2 class="leaderboard-title">🏅 ACHIEVEMENT HUNTERS</h2>
-                <p class="leaderboard-subtitle">Most achievements unlocked</p>
-            </div>
-            <div class="podium" id="achievements-podium"></div>
-            <div class="leaderboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RANK</th>
-                            <th>PLAYER</th>
-                            <th>ACHIEVEMENTS</th>
-                            <th>COMPLETION</th>
-                            <th>LATEST ACHIEVEMENT</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="achievements-tbody"></tbody>
-                </table>
-            </div>
+        <div id="leaderboards-container">
+            <!-- Dynamically populated -->
         </div>
         
         <div class="footer">
@@ -596,11 +433,26 @@
     
     <script>
         const GAMES = {
-            motherload: { name: 'MotherLoad', icon: '⛏️' },
-            happywheels: { name: 'Happy Wheels', icon: '🎡' },
-            gunblood: { name: 'Gun Blood', icon: '🔫' },
-            raftwars: { name: 'Raft Wars', icon: '🚣' },
-            robotunicornattack: { name: 'Robot Unicorn Attack', icon: '🦄' }
+            motherload: { name: 'MotherLoad', icon: '⛏️', subtitle: 'Top miners in the galaxy!' },
+            happywheels: { name: 'Happy Wheels', icon: '🎡', subtitle: 'Masters of ragdoll mayhem!' },
+            gunblood: { name: 'Gun Blood', icon: '🔫', subtitle: 'Fastest guns in the West!' },
+            raftwars: { name: 'Raft Wars', icon: '🚣', subtitle: 'Treasure defenders supreme!' },
+            raftwars2: { name: 'Raft Wars 2', icon: '🚣', subtitle: 'Water park warriors!' },
+            robotunicornattack: { name: 'Robot Unicorn Attack', icon: '🦄', subtitle: 'Always believe in your dreams!' },
+            retrounicornattack: { name: 'Retro Unicorn Attack', icon: '🌈', subtitle: 'Classic unicorn runner!' },
+            ruahm: { name: 'Robot Unicorn Heavy Metal', icon: '🎸', subtitle: 'Metal never dies!' },
+            earntodie: { name: 'Earn to Die', icon: '🧟', subtitle: 'Zombie crushers unite!' },
+            earntodie2012: { name: 'Earn to Die 2012', icon: '🧟‍♂️', subtitle: 'Apocalypse racers!' },
+            EarntoDie2016: { name: 'Earn to Die 2016', icon: '💀', subtitle: 'Undead obliterators!' },
+            EarntoDiePart2: { name: 'Earn to Die Part 2', icon: '🔥', subtitle: 'High octane chaos!' },
+            bushshootout: { name: 'Bush Shootout', icon: '🎯', subtitle: 'Retro shooting legends!' },
+            candymachine: { name: 'Candy Machine', icon: '🍬', subtitle: 'Sweet puzzle masters!' },
+            jawbreaker: { name: 'Jawbreaker', icon: '🍭', subtitle: 'Candy storm crushers!' },
+            gold01: { name: 'Gold Miner', icon: '⚔️', subtitle: 'Treasure grabbers!' },
+            tomandjerrybowling: { name: 'Tom & Jerry Bowling', icon: '🎳', subtitle: 'Cartoon strike champions!' },
+            'hive-hero': { name: 'Hive Hero', icon: '🐝', subtitle: 'Queen bee commanders!' },
+            tj_trapomatic: { name: 'TJ Trapomatic', icon: '🎨', subtitle: 'Master inventors!' },
+            rickandmorty: { name: 'Rick and Morty', icon: '🔬', subtitle: 'Portal masters!' }
         };
         
         function getAllPlayers() {
@@ -627,8 +479,8 @@
             document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.leaderboard-section').forEach(section => section.classList.remove('active'));
             
-            event.target.classList.add('active');
-            document.getElementById(category + '-section').classList.add('active');
+            document.querySelector(`[data-category="${category}"]`)?.classList.add('active');
+            document.getElementById(category + '-section')?.classList.add('active');
         }
         
         function createPodium(players, containerId, scoreType = 'xp') {
@@ -754,6 +606,107 @@
             });
         }
         
+        function buildLeaderboards() {
+            const tabsContainer = document.getElementById('category-tabs');
+            const leaderboardsContainer = document.getElementById('leaderboards-container');
+            
+            // Build tabs
+            tabsContainer.innerHTML = `
+                <button class="category-tab active" data-category="global" onclick="showCategory('global')">🌍 GLOBAL</button>
+            `;
+            
+            Object.keys(GAMES).forEach(gameId => {
+                const game = GAMES[gameId];
+                tabsContainer.innerHTML += `
+                    <button class="category-tab" data-category="${gameId}" onclick="showCategory('${gameId}')">${game.icon} ${game.name.toUpperCase()}</button>
+                `;
+            });
+            
+            tabsContainer.innerHTML += `
+                <button class="category-tab" data-category="achievements" onclick="showCategory('achievements')">🏅 ACHIEVEMENTS</button>
+            `;
+            
+            // Build Global section
+            leaderboardsContainer.innerHTML = `
+                <div class="leaderboard-section active" id="global-section">
+                    <div class="leaderboard-header">
+                        <h2 class="leaderboard-title">🌍 GLOBAL RANKINGS</h2>
+                        <p class="leaderboard-subtitle">Top players by total XP across all games</p>
+                    </div>
+                    <div class="podium" id="global-podium"></div>
+                    <div class="leaderboard-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>RANK</th>
+                                    <th>PLAYER</th>
+                                    <th>LEVEL</th>
+                                    <th>TOTAL XP</th>
+                                    <th>ACHIEVEMENTS</th>
+                                    <th>ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="global-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Build game sections
+            Object.keys(GAMES).forEach(gameId => {
+                const game = GAMES[gameId];
+                leaderboardsContainer.innerHTML += `
+                    <div class="leaderboard-section" id="${gameId}-section">
+                        <div class="leaderboard-header">
+                            <h2 class="leaderboard-title">${game.icon} ${game.name.toUpperCase()} HIGH SCORES</h2>
+                            <p class="leaderboard-subtitle">${game.subtitle}</p>
+                        </div>
+                        <div class="podium" id="${gameId}-podium"></div>
+                        <div class="leaderboard-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>RANK</th>
+                                        <th>PLAYER</th>
+                                        <th>HIGH SCORE</th>
+                                        <th>DATE</th>
+                                        <th>ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="${gameId}-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Build achievements section
+            leaderboardsContainer.innerHTML += `
+                <div class="leaderboard-section" id="achievements-section">
+                    <div class="leaderboard-header">
+                        <h2 class="leaderboard-title">🏅 ACHIEVEMENT HUNTERS</h2>
+                        <p class="leaderboard-subtitle">Most achievements unlocked</p>
+                    </div>
+                    <div class="podium" id="achievements-podium"></div>
+                    <div class="leaderboard-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>RANK</th>
+                                    <th>PLAYER</th>
+                                    <th>ACHIEVEMENTS</th>
+                                    <th>COMPLETION</th>
+                                    <th>LATEST ACHIEVEMENT</th>
+                                    <th>ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="achievements-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
         function loadGlobalLeaderboard() {
             const players = getAllPlayers();
             const sortedPlayers = players
@@ -765,26 +718,26 @@
                 }))
                 .sort((a, b) => b.xp - a.xp);
             
-            createPodium(sortedPlayers,
-                         'global-podium', 'xp');
-populateTable(sortedPlayers, 'global-tbody', 'global');
+            createPodium(sortedPlayers, 'global-podium', 'xp');
+            populateTable(sortedPlayers, 'global-tbody', 'global');
+        }
+        
+        function loadGameLeaderboard(gameId) {
+            const players = getAllPlayers();
+            const gamePlayers = [];
+            
+            players.forEach(player => {
+                if (player.highScores && player.highScores[gameId]) {
+                    gamePlayers.push({
+                        username: player.username,
+                        avatar: player.avatar,
+                        score: player.highScores[gameId].score ||
+                            0,
+date: player.highScores[gameId].date || 'N/A',
+isBot: player.isBot || false
+});
 }
-    function loadGameLeaderboard(gameId) {
-        const players = getAllPlayers();
-        const gamePlayers = [];
-        
-        players.forEach(player => {
-            if (player.highScores && player.highScores[gameId]) {
-                gamePlayers.push({
-                    username: player.username,
-                    avatar: player.avatar,
-                    score: player.highScores[gameId].score || 0,
-                    date: player.highScores[gameId].date || 'N/A',
-                    isBot: player.isBot || false
-                });
-            }
-        });
-        
+});
         const sortedPlayers = gamePlayers.sort((a, b) => b.score - a.score);
         
         createPodium(sortedPlayers, gameId + '-podium', 'score');
@@ -813,20 +766,23 @@ populateTable(sortedPlayers, 'global-tbody', 'global');
         populateTable(sortedPlayers, 'achievements-tbody', 'achievements');
     }
     
-    // Initialize all leaderboards
     function initializeLeaderboards() {
+        buildLeaderboards();
         loadGlobalLeaderboard();
-        loadGameLeaderboard('motherload');
-        loadGameLeaderboard('happywheels');
-        loadGameLeaderboard('gunblood');
-        loadGameLeaderboard('raftwars');
-        loadGameLeaderboard('robotunicornattack');
+        Object.keys(GAMES).forEach(gameId => {
+            loadGameLeaderboard(gameId);
+        });
         loadAchievementsLeaderboard();
     }
     
-    // Load leaderboards on page load
     initializeLeaderboards();
-    
-    // Refresh leaderboards every 30 seconds
-    setInterval(initializeLeaderboards, 30000);
+    setInterval(() => {
+        loadGlobalLeaderboard();
+        Object.keys(GAMES).forEach(gameId => {
+            loadGameLeaderboard(gameId);
+        });
+        loadAchievementsLeaderboard();
+    }, 30000);
 </script>
+</body>
+</html>

@@ -17,6 +17,7 @@
             --neon-blue: #00f3ff;
             --neon-purple: #bf00ff;
             --neon-pink: #ff00ff;
+            --neon-green: #39ff14;
             --dark-bg: #050510;
             --darker: #020208;
         }
@@ -61,6 +62,8 @@
             z-index: 1000;
             position: sticky;
             top: 0;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .game-title {
@@ -228,6 +231,139 @@
             opacity: 0.8;
         }
         
+        /* EMBED CODE SECTION */
+        .embed-section {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 40px;
+        }
+        
+        .embed-container {
+            background: rgba(5, 5, 16, 0.9);
+            border: 3px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
+        }
+        
+        .embed-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 30px var(--neon-blue);
+        }
+        
+        .embed-subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .embed-input-group {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid var(--neon-purple);
+            margin-bottom: 20px;
+        }
+        
+        .embed-label {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-purple);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+            font-weight: 700;
+        }
+        
+        .embed-input-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .embed-input {
+            flex: 1;
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-family: 'Roboto', monospace;
+            font-size: 1em;
+            padding: 15px;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .embed-input:focus {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px rgba(191, 0, 255, 0.5);
+        }
+        
+        .copy-btn {
+            padding: 15px 35px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px var(--neon-blue);
+            font-size: 1em;
+            letter-spacing: 1px;
+        }
+        
+        .copy-btn:hover {
+            box-shadow: 0 0 40px var(--neon-blue);
+            transform: scale(1.05);
+        }
+        
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .copy-btn.copied {
+            background: var(--neon-green);
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+        
+        .embed-preview {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 2px solid var(--neon-green);
+        }
+        
+        .embed-preview h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-green);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .embed-preview ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .embed-preview li {
+            padding: 10px 0;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .embed-preview li::before {
+            content: '✅ ';
+            color: var(--neon-green);
+        }
+        
+        /* RECOMMENDED SECTION */
         .recommended-section {
             max-width: 1600px;
             margin: 80px auto;
@@ -292,6 +428,8 @@
         @media (max-width: 768px) {
             .top-bar { flex-direction: column; gap: 15px; }
             #game { width: 98vw; height: calc(100vh - 200px); }
+            .embed-input-wrapper { flex-direction: column; }
+            .copy-btn { width: 100%; }
         }
     </style>
 </head>
@@ -321,6 +459,59 @@
         </div>
     </div>
     
+    <!-- EMBED CODE SECTION -->
+    <div class="embed-section">
+        <div class="embed-container">
+            <h2 class="embed-title">📋 SHARE ON DISCORD</h2>
+            <p class="embed-subtitle">
+                Copy the link below to share this game in Discord!<br>
+                Scores are automatically tracked when played through this link.
+            </p>
+            
+            <div class="embed-input-group">
+                <label class="embed-label">🔗 Direct Game Link:</label>
+                <div class="embed-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="game-url" 
+                        class="embed-input" 
+                        readonly
+                    >
+                    <button class="copy-btn" onclick="copyGameURL()">
+                        📋 COPY
+                    </button>
+                </div>
+            </div>
+            
+            <div class="embed-input-group">
+                <label class="embed-label">🎮 Discord Bot Command:</label>
+                <div class="embed-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="discord-command" 
+                        class="embed-input" 
+                        readonly
+                    >
+                    <button class="copy-btn" onclick="copyDiscordCommand()">
+                        📋 COPY
+                    </button>
+                </div>
+            </div>
+            
+            <div class="embed-preview">
+                <h3>✨ How Tracking Works:</h3>
+                <ul>
+                    <li>Players click the link and play the game</li>
+                    <li>Scores are automatically saved to their profile</li>
+                    <li>Leaderboards update in real-time</li>
+                    <li>No manual submission needed!</li>
+                    <li>Works from Discord, website, or anywhere</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- RECOMMENDED GAMES -->
     <div class="recommended-section">
         <h2 class="section-title">🎮 PLAY NEXT</h2>
         <div class="recommended-grid" id="recommended-games"></div>
@@ -329,35 +520,163 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const gameName = urlParams.get('game');
+        const siteBaseURL = 'https://sapphirediamondcasino-bit.github.io/Diane-s-Arcade';
         
         const games = {
-            'motherload': { name: 'MOTHERLOAD', file: '1269 - MotherLoad.swf', image: 'https://archive.org/serve/motherload_202209/motherload_202209_screenshot.gif', desc: 'Dig deep for Martian minerals!', related: ['earntodie', 'gold01', 'raftwars'] },
-            'happywheels': { name: 'HAPPY WHEELS', file: 'HappyWheels.swf', image: 'https://archive.org/serve/billiardss/00_A.png', desc: 'Ragdoll physics mayhem!', related: ['earntodie', 'robotunicornattack', 'ruahm'] },
-            'gunblood': { name: 'GUN BLOOD', file: 'gunblood.swf', image: 'https://archive.org/download/gun-blood-flash-game/gunblood-menu.png', desc: 'Quick-draw western duels!', related: ['bushshootout', 'raftwars', 'raftwars2'] },
-            'raftwars': { name: 'RAFT WARS', file: 'raftwars.swf', image: 'https://archive.org/serve/raft-wars_202207/raft-wars_202207_screenshot.gif', desc: 'Defend your treasure!', related: ['raftwars2', 'gunblood', 'gold01'] },
-            'raftwars2': { name: 'RAFT WARS 2', file: 'raftwars2.swf', image: 'https://archive.org/serve/miniclip_raft_wars_2/miniclip_raft_wars_2_screenshot.gif', desc: 'More raft battles!', related: ['raftwars', 'gunblood', 'motherload'] },
-            'robotunicornattack': { name: 'ROBOT UNICORN ATTACK', file: 'robotunicornattack_flash.swf', image: 'https://archive.org/serve/robotunicornattack_flash/RobotUnicornAttack_screenshot.jpg', desc: 'Chase your dreams!', related: ['ruahm', 'happywheels', 'earntodie'] },
-            'ruahm': { name: 'ROBOT UNICORN ATTACK: HEAVY METAL', file: 'ruahm.swf', image: 'https://archive.org/serve/ruahm/ruahm_screenshot.gif', desc: 'Heavy metal edition!', related: ['robotunicornattack', 'happywheels', 'earntodie'] },
-            'retrounicornattack': { name: 'RETRO UNICORN ATTACK', file: 'Retro-unicorn-attack.swf', image: 'https://archive.org/serve/robot_unicorn_attack/robot_unicorn_attack_screenshot.gif', desc: 'Classic unicorn runner!', related: ['robotunicornattack', 'ruahm', 'happywheels'] },
-            'earntodie': { name: 'EARN TO DIE', file: 'EarnToDie_NotDoppler_dec.swf', image: 'https://archive.org/serve/etd_20220311/etd_20220311_screenshot.gif', desc: 'Drive through zombies!', related: ['earntodie2012', 'EarntoDie2016', 'EarntoDiePart2'] },
-            'earntodie2012': { name: 'EARN TO DIE 2012', file: 'earn-to-die-2012.swf', image: 'https://archive.org/serve/earntodie2012/earntodie2012_screenshot.gif', desc: 'Zombie roadkill 2012!', related: ['earntodie', 'EarntoDie2016', 'EarntoDiePart2'] },
-            'EarntoDie2016': { name: 'EARN TO DIE 2016', file: 'Earn to Die 2016.swf', image: 'https://archive.org/serve/earntodie2016/earntodie2016_screenshot.gif', desc: 'Apocalypse 2016!', related: ['earntodie', 'earntodie2012', 'EarntoDiePart2'] },
-            'EarntoDiePart2': { name: 'EARN TO DIE PART 2', file: 'Earn to Die Part 2.swf', image: 'https://archive.org/serve/earntodiepart2/earntodiepart2_screenshot.gif', desc: 'Ultimate sequel!', related: ['earntodie', 'earntodie2012', 'EarntoDie2016'] },
-            'bushshootout': { name: 'BUSH SHOOTOUT', file: '1452__bushshootout_game.swf', image: 'https://i.ytimg.com/vi/ykZC9y5R5TY/maxresdefault.jpg', desc: 'Retro political shooter!', related: ['gunblood', 'raftwars', 'tomandjerrybowling'] },
-            'candymachine': { name: 'CANDY MACHINE DELUXE', file: 'flash_candymachinedeluxe.swf', image: 'https://archive.org/serve/flash_candymachinedeluxe/flash_candymachinedeluxe_screenshot.png', desc: 'Sweet puzzle fun!', related: ['jawbreaker', 'gold01', 'tomandjerrybowling'] },
-            'jawbreaker': { name: 'JAWBREAKER', file: 'jawbreaker.swf', image: 'https://archive.org/serve/miniclip_jawbreaker/miniclip_jawbreaker_screenshot.gif', desc: 'Candy smashing action!', related: ['candymachine', 'gold01', 'tomandjerrybowling'] },
-            'gold01': { name: 'GOLD MINER', file: 'gold01.swf', image: 'https://img.gamepix.com/games/gold-miner/cover/gold-miner.png?width=600&height=340&fit=cover', desc: 'Grab treasures!', related: ['motherload', 'raftwars', 'candymachine'] },
-            'tomandjerrybowling': { name: 'TOM & JERRY BOWLING', file: 'tomandjerrybowling.swf', image: 'https://archive.org/serve/tom-and-jerry-bowling/00_B.png', desc: 'Cartoon bowling!', related: ['candymachine', 'gold01', 'bushshootout'] },
-            'hive-hero': { name: 'HIVE HERO', file: 'hive-hero.swf', image: 'https://archive.org/serve/miniclip_hive_hero/miniclip_hive_hero_screenshot.gif', desc: 'Become the ultimate bee!', related: ['motherload', 'gold01', 'earntodie'] },
-            'tj_trapomatic': { name: 'TJ TRAPOMATIC', file: 'tj_trapomatic.swf', image: 'https://archive.org/serve/tj_trapomatic/tj_trapomatic_screenshot.gif', desc: 'Contraption madness!', related: ['hive-hero', 'candymachine', 'tomandjerrybowling'] },
-            'rickandmorty': { name: 'RICK AND MORTY', file: 'rick-and-morty.swf', image: "https://archive.org/serve/rick-and-mortys-rushed-licensed-adventure/Rick%20and%20Morty's%20Rushed%20Licensed%20Adventure%20sceenshot.jpg", desc: 'Interdimensional adventure!', related: ['happywheels', 'robotunicornattack', 'ruahm'] }
+            'motherload': { 
+                name: 'MOTHERLOAD', 
+                file: '1269 - MotherLoad.swf', 
+                image: 'https://archive.org/serve/motherload_202209/motherload_202209_screenshot.gif', 
+                desc: 'Dig deep for Martian minerals!', 
+                related: ['earntodie', 'gold01', 'raftwars'] 
+            },
+            'happywheels': { 
+                name: 'HAPPY WHEELS', 
+                file: 'HappyWheels.swf', 
+                image: 'https://archive.org/serve/billiardss/00_A.png', 
+                desc: 'Ragdoll physics mayhem!', 
+                related: ['earntodie', 'robotunicornattack', 'ruahm'] 
+            },
+            'gunblood': { 
+                name: 'GUN BLOOD', 
+                file: 'gunblood.swf', 
+                image: 'https://archive.org/download/gun-blood-flash-game/gunblood-menu.png', 
+                desc: 'Quick-draw western duels!', 
+                related: ['bushshootout', 'raftwars', 'raftwars2'] 
+            },
+            'raftwars': { 
+                name: 'RAFT WARS', 
+                file: 'raftwars.swf', 
+                image: 'https://archive.org/serve/raft-wars_202207/raft-wars_202207_screenshot.gif', 
+                desc: 'Defend your treasure!', 
+                related: ['raftwars2', 'gunblood', 'gold01'] 
+            },
+            'raftwars2': { 
+                name: 'RAFT WARS 2', 
+                file: 'raftwars2.swf', 
+                image: 'https://archive.org/serve/miniclip_raft_wars_2/miniclip_raft_wars_2_screenshot.gif', 
+                desc: 'More raft battles!', 
+                related: ['raftwars', 'gunblood', 'motherload'] 
+            },
+            'robotunicornattack': { 
+                name: 'ROBOT UNICORN ATTACK', 
+                file: 'robotunicornattack_flash.swf', 
+                image: 'https://archive.org/serve/robotunicornattack_flash/RobotUnicornAttack_screenshot.jpg', 
+                desc: 'Chase your dreams!', 
+                related: ['ruahm', 'retrounicornattack', 'happywheels'] 
+            },
+            'ruahm': { 
+                name: 'ROBOT UNICORN ATTACK: HEAVY METAL', 
+                file: 'ruahm.swf', 
+                image: 'https://archive.org/serve/ruahm/ruahm_screenshot.gif', 
+                desc: 'Heavy metal edition!', 
+                related: ['robotunicornattack', 'happywheels', 'earntodie'] 
+            },
+            'retrounicornattack': { 
+                name: 'RETRO UNICORN ATTACK', 
+                file: 'Retro-unicorn-attack.swf', 
+                image: 'https://archive.org/serve/robot_unicorn_attack/robot_unicorn_attack_screenshot.gif', 
+                desc: 'Classic unicorn runner!', 
+                related: ['robotunicornattack', 'ruahm', 'happywheels'] 
+            },
+            'earntodie': { 
+                name: 'EARN TO DIE', 
+                file: 'EarnToDie_NotDoppler_dec.swf', 
+                image: 'https://archive.org/serve/etd_20220311/etd_20220311_screenshot.gif', 
+                desc: 'Drive through zombies!', 
+                related: ['earntodie2012', 'EarntoDie2016', 'EarntoDiePart2'] 
+            },
+            'earntodie2012': { 
+                name: 'EARN TO DIE 2012', 
+                file: 'earn-to-die-2012.swf', 
+                image: 'https://archive.org/serve/earntodie2012/earntodie2012_screenshot.gif', 
+                desc: 'Zombie roadkill 2012!', 
+                related: ['earntodie', 'EarntoDie2016', 'EarntoDiePart2'] 
+            },
+            'EarntoDie2016': { 
+                name: 'EARN TO DIE 2016', 
+                file: 'Earn to Die 2016.swf', 
+                image: 'https://archive.org/serve/earntodie2016/earntodie2016_screenshot.gif', 
+                desc: 'Apocalypse 2016!', 
+                related: ['earntodie', 'earntodie2012', 'EarntoDiePart2'] 
+            },
+            'EarntoDiePart2': { 
+                name: 'EARN TO DIE PART 2', 
+                file: 'Earn to Die Part 2.swf', 
+                image: 'https://archive.org/serve/earntodiepart2/earntodiepart2_screenshot.gif', 
+                desc: 'Ultimate sequel!', 
+                related: ['earntodie', 'earntodie2012', 'EarntoDie2016'] 
+            },
+            'bushshootout': { 
+                name: 'BUSH SHOOTOUT', 
+                file: '1452__bushshootout_game.swf', 
+                image: 'https://i.ytimg.com/vi/ykZC9y5R5TY/maxresdefault.jpg', 
+                desc: 'Retro political shooter!', 
+                related: ['gunblood', 'raftwars', 'tomandjerrybowling'] 
+            },
+            'candymachine': { 
+                name: 'CANDY MACHINE DELUXE', 
+                file: 'flash_candymachinedeluxe.swf', 
+                image: 'https://archive.org/serve/flash_candymachinedeluxe/flash_candymachinedeluxe_screenshot.png', 
+                desc: 'Sweet puzzle fun!', 
+                related: ['jawbreaker', 'gold01', 'tomandjerrybowling'] 
+            },
+            'jawbreaker': { 
+                name: 'JAWBREAKER', 
+                file: 'jawbreaker.swf', 
+                image: 'https://archive.org/serve/miniclip_jawbreaker/miniclip_jawbreaker_screenshot.gif', 
+                desc: 'Candy smashing action!', 
+                related: ['candymachine', 'gold01', 'tomandjerrybowling'] 
+            },
+            'gold01': { 
+                name: 'GOLD MINER', 
+                file: 'gold01.swf', 
+                image: 'https://img.gamepix.com/games/gold-miner/cover/gold-miner.png?width=600&height=340&fit=cover', 
+                desc: 'Grab treasures!', 
+                related: ['motherload', 'raftwars', 'candymachine'] 
+            },
+            'tomandjerrybowling': { 
+                name: 'TOM & JERRY BOWLING', 
+                file: 'tomandjerrybowling.swf', 
+                image: 'https://archive.org/serve/tom-and-jerry-bowling/00_B.png', 
+                desc: 'Cartoon bowling!', 
+                related: ['candymachine', 'gold01', 'bushshootout'] 
+            },
+            'hive-hero': { 
+                name: 'HIVE HERO', 
+                file: 'hive-hero.swf', 
+                image: 'https://archive.org/serve/miniclip_hive_hero/miniclip_hive_hero_screenshot.gif', 
+                desc: 'Become the ultimate bee!', 
+                related: ['motherload', 'gold01', 'earntodie'] 
+            },
+            'tj_trapomatic': { 
+                name: 'TJ TRAPOMATIC', 
+                file: 'tj_trapomatic.swf', 
+                image: 'https://archive.org/serve/tj_trapomatic/tj_trapomatic_screenshot.gif', 
+                desc: 'Contraption madness!', 
+                related: ['hive-hero', 'candymachine', 'tomandjerrybowling'] 
+            },
+            'rickandmorty': { 
+                name: 'RICK AND MORTY', 
+                file: 'rick-and-morty.swf', 
+                image: "https://archive.org/serve/rick-and-mortys-rushed-licensed-adventure/Rick%20and%20Morty's%20Rushed%20Licensed%20Adventure%20sceenshot.jpg", 
+                desc: 'Interdimensional adventure!', 
+                related: ['happywheels', 'robotunicornattack', 'ruahm'] 
+            }
         };
         
+        // LOAD GAME
         if (gameName && games[gameName]) {
             const currentGame = games[gameName];
             document.getElementById('game-title').textContent = currentGame.name;
             document.title = `Playing ${currentGame.name} | Diane Keaton Memorial Arcade`;
             
+            // Set embed URLs
+            const gameURL = `${siteBaseURL}/game.html?game=${gameName}`;
+            document.getElementById('game-url').value = gameURL;
+            document.getElementById('discord-command').value = `/play game:${gameName}`;
+            
+            // Initialize Ruffle
             window.RufflePlayer = window.RufflePlayer || {};
             window.RufflePlayer.config = {
                 "autoplay": "on",
@@ -377,10 +696,14 @@
             
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 2000);
             
+            // Load game
             player.load(`games/${currentGame.file}`)
                 .then(() => {
                     console.log('Game loaded!');
                     document.getElementById('loading').style.display = 'none';
+                    
+                    // Track game play (send to your backend)
+                    trackGamePlay(gameName);
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -388,6 +711,7 @@
                     document.getElementById('error-msg').style.display = 'block';
                 });
             
+            // Load recommended games
             const recommendedContainer = document.getElementById('recommended-games');
             (currentGame.related || []).forEach(gameId => {
                 const game = games[gameId];
@@ -396,7 +720,7 @@
                     card.href = `game.html?game=${gameId}`;
                     card.className = 'recommended-card';
                     card.innerHTML = `
-                        <img src="${game.image}" alt="${game.name}" class="recommended-image">
+                        <img src="${game.image}" alt="${game.name}" class="recommended-image" onerror="this.src='https://via.placeholder.com/280x180/050510/00f3ff?text=Game+Image'">
                         <div class="recommended-content">
                             <h3>${game.name}</h3>
                             <p>${game.desc}</p>
@@ -409,8 +733,281 @@
             document.getElementById('loading').innerHTML = `
                 <div style="font-family: Orbitron; font-size: 2em; color: #ff00ff;">⚠️ GAME NOT FOUND</div>
                 <a href="index.html" class="try-again-btn" style="margin-top: 30px;">← BACK TO ARCADE</a>
-            `;
+`;
+}
+    // COPY FUNCTIONS
+    function copyGameURL() {
+        const input = document.getElementById('game-url');
+        const button = event.target;
+        
+        input.select();
+        input.setSelectionRange(0, 99999); // For mobile
+        
+        navigator.clipboard.writeText(input.value).then(() => {
+            button.textContent = '✅ COPIED!';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.textContent = '📋 COPY';
+                button.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Copy failed:', err);
+            // Fallback
+            document.execCommand('copy');
+            button.textContent = '✅ COPIED!';
+        });
+    }
+    
+    function copyDiscordCommand() {
+        const input = document.getElementById('discord-command');
+        const button = event.target;
+        
+        input.select();
+        input.setSelectionRange(0, 99999);
+        
+        navigator.clipboard.writeText(input.value).then(() => {
+            button.textContent = '✅ COPIED!';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.textContent = '📋 COPY';
+                button.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Copy failed:', err);
+            document.execCommand('copy');
+            button.textContent = '✅ COPIED!';
+        });
+    }
+    
+    // TRACK GAME PLAY
+    function trackGamePlay(gameId) {
+        // Get user from localStorage
+        const userData = JSON.parse(localStorage.getItem('arcadeUser'));
+        
+        if (userData && userData.username) {
+            // Track locally
+            if (!userData.gamesPlayed) userData.gamesPlayed = 0;
+            userData.gamesPlayed++;
+            
+            // Track this specific game
+            if (!userData.gamePlays) userData.gamePlays = {};
+            if (!userData.gamePlays[gameId]) userData.gamePlays[gameId] = 0;
+            userData.gamePlays[gameId]++;
+            
+            localStorage.setItem('arcadeUser', JSON.stringify(userData));
+            
+            // Send to Discord bot API (if available)
+            sendToDiscordBot(gameId, userData.username);
+        } else {
+            // Anonymous play tracking
+            console.log(`Anonymous play: ${gameId}`);
         }
-    </script>
+    }
+    
+    // SEND TO DISCORD BOT API
+    async function sendToDiscordBot(gameId, username) {
+        try {
+            const response = await fetch('http://localhost:3000/api/games/track', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    gameId: gameId,
+                    username: username,
+                    timestamp: new Date().toISOString(),
+                    source: 'website'
+                })
+            });
+            
+            if (response.ok) {
+                console.log('✅ Game play tracked on Discord bot');
+            } else {
+                console.log('⚠️ Bot API unavailable (offline mode)');
+            }
+        } catch (error) {
+            console.log('⚠️ Bot API unavailable:', error.message);
+        }
+    }
+    
+    // AUTO-SAVE SCORE (when game ends)
+    // This would require game-specific integration
+    window.addEventListener('gameEnd', (event) => {
+        const score = event.detail.score;
+        saveScore(gameName, score);
+    });
+    
+    function saveScore(gameId, score) {
+        const userData = JSON.parse(localStorage.getItem('arcadeUser'));
+        
+        if (!userData) {
+            console.log('User not logged in - score not saved');
+            return;
+        }
+        
+        // Update high score if better
+        if (!userData.highScores) userData.highScores = {};
+        
+        if (!userData.highScores[gameId] || userData.highScores[gameId].score < score) {
+            userData.highScores[gameId] = {
+                score: score,
+                date: new Date().toISOString(),
+                rank: null // Will be calculated by leaderboard
+            };
+            
+            // Award XP for new high score
+            if (!userData.xp) userData.xp = 0;
+            userData.xp += 100;
+            
+            // Check for level up
+            const newLevel = Math.floor(userData.xp / 1000) + 1;
+            if (!userData.level) userData.level = 1;
+            if (newLevel > userData.level) {
+                userData.level = newLevel;
+                showLevelUpNotification(newLevel);
+            }
+            
+            localStorage.setItem('arcadeUser', JSON.stringify(userData));
+            
+            // Send to Discord bot
+            sendScoreToBot(gameId, score, userData.username);
+            
+            // Show notification
+            showScoreNotification(score, true);
+        } else {
+            showScoreNotification(score, false);
+        }
+    }
+    
+    async function sendScoreToBot(gameId, score, username) {
+        try {
+            await fetch('http://localhost:3000/api/scores/auto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    gameId: gameId,
+                    score: score,
+                    username: username,
+                    timestamp: new Date().toISOString(),
+                    autoTracked: true
+                })
+            });
+        } catch (error) {
+            console.log('Bot offline - score saved locally only');
+        }
+    }
+    
+    function showScoreNotification(score, isNewHighScore) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: ${isNewHighScore ? 'linear-gradient(135deg, #39ff14, #00f3ff)' : 'rgba(0, 243, 255, 0.9)'};
+            color: #000;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.2em;
+            box-shadow: 0 0 40px ${isNewHighScore ? '#39ff14' : '#00f3ff'};
+            z-index: 10000;
+            animation: slideIn 0.5s ease;
+        `;
+        
+        notification.innerHTML = isNewHighScore 
+            ? `🎉 NEW HIGH SCORE!<br><span style="font-size: 1.5em;">${score.toLocaleString()}</span>`
+            : `Score: ${score.toLocaleString()}`;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.5s ease';
+            setTimeout(() => notification.remove(), 500);
+        }, 3000);
+    }
+    
+    function showLevelUpNotification(level) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #bf00ff, #ff00ff);
+            color: white;
+            padding: 50px 80px;
+            border-radius: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 2.5em;
+            box-shadow: 0 0 80px #bf00ff;
+            z-index: 10000;
+            text-align: center;
+            animation: levelUp 1s ease;
+        `;
+        
+        notification.innerHTML = `
+            🎊 LEVEL UP! 🎊<br>
+            <span style="font-size: 2em; display: block; margin-top: 20px;">LEVEL ${level}</span>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.5s ease';
+            setTimeout(() => notification.remove(), 500);
+        }, 3000);
+    }
+    
+    // CSS Animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes levelUp {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
 </body>
 </html>
+

@@ -332,3 +332,81 @@
                                 </thead>
                                 <tbody id="${gameId}-tbody"></tbody>
                             </table>
+                            </div>
+                    </div>
+                `;
+            });
+        }
+    function loadGlobalLeaderboard() {
+        const players = getAllPlayers();
+        const sortedPlayers = players
+            .map(p => ({
+                ...p,
+                xp: p.xp || 0,
+                level: p.level || 1,
+                achievementsCount: (p.achievements || []).filter(a => a.unlocked).length
+            }))
+            .sort((a, b) => b.xp - a.xp);
+        
+        createPodium(sortedPlayers, 'global-podium', 'xp');
+        populateTable(sortedPlayers, 'global-tbody', 'global');
+    }
+    
+    function loadGameLeaderboard(gameId) {
+        const players = getAllPlayers();
+        const gamePlayers = [];
+        
+        players.forEach(player => {
+            if (player.highScores && player.highScores[gameId]) {
+                gamePlayers.push({
+                    username: player.username,
+                    avatar: player.avatar,
+                    score: player.highScores[gameId].score || 0,
+                    date: player.highScores[gameId].date || 'N/A',
+                    isBot: player.isBot || false
+                });
+            }
+        });
+        
+        const sortedPlayers = gamePlayers.sort((a, b) => b.score - a.score);
+        
+        createPodium(sortedPlayers, gameId + '-podium', 'score');
+        populateTable(sortedPlayers, gameId + '-tbody', 'game');
+    }
+    
+    async function loadDiscordScores(gameId) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/leaderboard/${gameId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.leaderboard;
+            }
+        } catch (error) {
+            console.log('Discord scores unavailable:', error.message);
+        }
+        return [];
+    }
+    
+    function initializeLeaderboards() {
+        buildLeaderboards();
+        loadGlobalLeaderboard();
+        
+        Object.keys(GAMES).forEach(gameId => {
+            loadGameLeaderboard(gameId);
+        });
+    }
+    
+    // Initialize on page load
+    initializeLeaderboards();
+    
+    // Refresh every 30 seconds
+    setInterval(() => {
+        loadGlobalLeaderboard();
+        Object.keys(GAMES).forEach(gameId => {
+            loadGameLeaderboard(gameId);
+        });
+    }, 30000);
+</script>
+</body>
+</html>

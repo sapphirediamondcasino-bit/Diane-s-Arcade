@@ -3,63 +3,553 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diane Keaton's Arcade - Play Classic Games | Level Up & Earn Achievements</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>DIANE KEATON'S ARCADE - Play Retro Games!</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-purple: #bf00ff;
-            --neon-pink: #ff00ff;
-            --dark-bg: #0a0a0f;
-            --darker: #050508;
-            --card-bg: rgba(15, 15, 25, 0.8);
-        }
-        
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background: var(--dark-bg);
-            color: white;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
             overflow-x: hidden;
-            position: relative;
         }
-        
+
         /* Animated Background */
-        body::before {
-            content: '';
+        .stars {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 243, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(191, 0, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(255, 0, 255, 0.05) 0%, transparent 50%);
-            z-index: -1;
-            animation: bgShift 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
         }
-        
-        @keyframes bgShift {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
         }
-        
-        /* Header Hero Section */
-        .hero {
-            position: relative;
-            min-height: 80vh;
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 20px;
+            z-index: 1000;
+            border-bottom: 3px solid #00ffff;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-brand {
+            font-size: 1.2em;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.6em;
+            padding: 8px 15px;
+            border: 2px solid #ff00ff;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #ff00ff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 0, 255, 0.5);
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            text-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff;
+            margin-bottom: 15px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff; }
+            50% { text-shadow: 0 0 30px #ff00ff, 0 0 60px #00ffff, 0 0 80px #ff00ff; }
+        }
+
+        .tagline {
+            font-size: 0.8em;
+            color: #ffcc00;
+            margin-top: 10px;
+        }
+
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .game-card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
             overflow: hidden;
-            border-bottom: 3px solid var(--neon-blue);
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: #ff00ff;
+            box-shadow: 0 10px 40px rgba(255, 0, 255, 0.6);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 1em;
+            color: #00ffff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .game-creator {
+            font-size: 0.5em;
+            color: #ffcc00;
+            text-align: center;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .game-desc {
+            font-size: 0.6em;
+            line-height: 1.6;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .play-button {
+            display: block;
+            width: 100%;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 25px;
+            margin-top: 15px;
+            font-size: 0.7em;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.8);
+        }
+
+        /* CTA Banner */
+        .cta-banner {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ffcc00;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .cta-title {
+            font-size: 1.5em;
+            color: #ffcc00;
+            margin-bottom: 15px;
+        }
+
+        .cta-desc {
+            font-size: 0.7em;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 0.9em;
+            border: 3px solid white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .cta-button:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 1);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            margin-top: 40px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .footer-link {
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 0.6em;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-brand {
+                font-size: 0.8em;
+            }
+
+            .nav-link {
+                font-size: 0.5em;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Stars -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-brand">🎮 DIANE'S ARCADE</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">🏠 HOME</a>
+            <a href="bot.html" class="nav-link">🤖 GET BOT</a>
+            <a href="#games" class="nav-link">🎯 GAMES</a>
+            <a href="#" class="nav-link">🏆 LEADERBOARD</a>
+            <a href="#" class="nav-link">⭐ ACHIEVEMENTS</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎮 DIANE KEATON'S ARCADE 🎮</h1>
+            <p class="tagline">PLAY • LEVEL UP • UNLOCK ACHIEVEMENTS • BECOME A LEGEND</p>
+        </header>
+
+        <!-- CTA Banner for Bot -->
+        <div class="cta-banner">
+            <div class="cta-title">🤖 MEET DIANE KEATON BOT! 🤖</div>
+            <p class="cta-desc">
+                Add Diane to your Discord server! She's a self-learning AI that helps with homework, teaches subjects, AND lets you play all these retro games directly in Discord!
+            </p>
+            <a href="bot.html" class="cta-button">
+                🚀 GET THE BOT
+            </a>
+        </div>
+
+        <!-- Games Section -->
+        <section id="games">
+            <h2 style="text-align: center; font-size: 1.8em; margin-bottom: 30px; color: #00ffff; text-shadow: 0 0 10px #00ffff;">
+                🎯 PLAY CLASSIC GAMES 🎯
+            </h2>
+
+            <div class="games-grid">
+                <!-- Motherlode -->
+                <div class="game-card" onclick="playGame('motherload')">
+                    <div class="game-icon">⛏️</div>
+                    <div class="game-title">MOTHERLODE</div>
+                    <div class="game-creator">by XGen Studios</div>
+                    <div class="game-desc">
+                        Dig deep into the Martian soil! Mine precious minerals, upgrade your drilling pod, and discover what lies beneath the surface in this addictive mining adventure!
+                    </div>
+                    <a href="game.html?game=motherload" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Happy Wheels -->
+                <div class="game-card" onclick="playGame('happywheels')">
+                    <div class="game-icon">🦽</div>
+                    <div class="game-title">HAPPY WHEELS</div>
+                    <div class="game-creator">by Jim Bonacci</div>
+                    <div class="game-desc">
+                        Ragdoll physics mayhem! Choose your vehicle and navigate through deadly obstacle courses. Warning: Hilariously brutal crashes ahead!
+                    </div>
+                    <a href="game.html?game=happywheels" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Gunblood -->
+                <div class="game-card" onclick="playGame('gunblood')">
+                    <div class="game-icon">🔫</div>
+                    <div class="game-title">GUNBLOOD</div>
+                    <div class="game-creator">by Wolf Games</div>
+                    <div class="game-desc">
+                        Quick-draw western shooter! Test your reflexes in intense duels. Be faster than your opponent or face the consequences of the Wild West!
+                    </div>
+                    <a href="game.html?game=gunblood" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Defend Your Castle -->
+                <div class="game-card" onclick="playGame('defendyourcastle')">
+                    <div class="game-icon">🏰</div>
+                    <div class="game-title">DEFEND YOUR CASTLE</div>
+                    <div class="game-creator">by XGen Studios</div>
+                    <div class="game-desc">
+                        Protect your fortress! Use your mouse to pick up and throw invaders. Aim carefully and defend against pirates, Vikings, and gangs!
+                    </div>
+                    <a href="game.html?game=defendyourcastle" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Robot Unicorn Attack Heavy Metal -->
+                <div class="game-card" onclick="playGame('ruahm')">
+                    <div class="game-icon">🦄</div>
+                    <div class="game-title">ROBOT UNICORN ATTACK</div>
+                    <div class="game-creator">by Adult Swim Games</div>
+                    <div class="game-desc">
+                        Heavy Metal Edition! Gallop through a dark fantasy world with an epic metal soundtrack. Jump, dash, and chase your dreams through rainbows and stars!
+                    </div>
+                    <a href="game.html?game=ruahm" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Earn to Die -->
+                <div class="game-card" onclick="playGame('earntodie')">
+                    <div class="game-icon">🧟</div>
+                    <div class="game-title">EARN TO DIE</div>
+                    <div class="game-creator">by Toffee Games</div>
+                    <div class="game-desc">
+                        Zombie apocalypse racing! Drive through hordes of undead, upgrade your vehicle with weapons and armor, and reach the evacuation point!
+                    </div>
+                    <a href="game.html?game=earntodie" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Bush Shootout -->
+                <div class="game-card" onclick="playGame('bushshootout')">
+                    <div class="game-icon">🎯</div>
+                    <div class="game-title">BUSH SHOOTOUT</div>
+                    <div class="game-creator">by Miniclip (Flash Archive)</div>
+                    <div class="game-desc">
+                        Political shooter from the early 2000s! A nostalgic blast from the Flash gaming past. Aim carefully and rack up points!
+                    </div>
+                    <a href="game.html?game=bushshootout" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Candy Crush -->
+                <div class="game-card" onclick="playGame('candycrush')">
+                    <div class="game-icon">🍬</div>
+                    <div class="game-title">CANDY CRUSH</div>
+                    <div class="game-creator">by King (Flash Version)</div>
+                    <div class="game-desc">
+                        Satisfy your sweet tooth! Match colorful candies in this addictive puzzle game. Create special candy combos for explosive fun!
+                    </div>
+                    <a href="game.html?game=candycrush" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Gold Miner -->
+                <div class="game-card" onclick="playGame('goldminer')">
+                    <div class="game-icon">⚒️</div>
+                    <div class="game-title">GOLD MINER</div>
+                    <div class="game-creator">by Miniclip</div>
+                    <div class="game-desc">
+                        Swing your claw and grab treasures! Snatch gold nuggets, diamonds, and bags of money before time runs out. Avoid worthless rocks!
+                    </div>
+                    <a href="game.html?game=goldminer" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Tom and Jerry Bowling -->
+                <div class="game-card" onclick="playGame='tomandjerry')">
+                    <div class="game-icon">🎳</div>
+                    <div class="game-title">TOM & JERRY BOWLING</div>
+                    <div class="game-creator">by Cartoon Network</div>
+                    <div class="game-desc">
+                        Classic cartoon bowling! Join the legendary cat and mouse duo for strikes, spares, and hilarious bowling action!
+                    </div>
+                    <a href="game.html?game=tomandjerry" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Hive Hero (NEW) -->
+                <div class="game-card" onclick="playGame('hive-hero')">
+                    <div class="game-icon">🐝</div>
+                    <div class="game-title">HIVE HERO</div>
+                    <div class="game-creator">by FlashGameStudio</div>
+                    <div class="game-desc">
+                        Become the ultimate bee! Collect pollen, defend your hive from invaders, and build the strongest bee colony in this action-packed adventure!
+                    </div>
+                    <a href="game.html?game=hive-hero" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Rick and Morty (NEW) -->
+                <div class="game-card" onclick="playGame('rickandmorty')">
+                    <div class="game-icon">🔬</div>
+                    <div class="game-title">RICK AND MORTY</div>
+                    <div class="game-creator">by Adult Swim Games</div>
+                    <div class="game-desc">
+                        Wubba lubba dub dub! Join Rick and Morty on an interdimensional adventure. Solve puzzles, fight aliens, and survive the multiverse!
+                    </div>
+                    <a href="game.html?game=rickandmorty" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Snow Line (NEW) -->
+                <div class="game-card" onclick="playGame('snowline')">
+                    <div class="game-icon">⛷️</div>
+                    <div class="game-title">SNOW LINE</div>
+                    <div class="game-creator">by Winter Games Studio</div>
+                    <div class="game-desc">
+                        Hit the slopes! Ski down treacherous mountains, perform sick tricks, and race against time in this free winter sports game!
+                    </div>
+                    <a href="game.html?game=snowline" class="play-button">▶ PLAY NOW</a>
+                </div>
+
+                <!-- Dr. Compactor (NEW) -->
+                <div class="game-card" onclick="playGame('dr-compactor')">
+                    <div class="game-icon">🏥</div>
+                    <div class="game-title">DR. COMPACTOR</div>
+                    <div class="game-creator">by Puzzle Games Inc</div>
+                    <div class="game-desc">
+                        Physics puzzle madness! Compress objects, solve complex puzzles, and test your brain power in this mind-bending compactor challenge!
+                    </div>
+                    <a href="game.html?game=dr-compactor" class="play-button">▶ PLAY NOW</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievements Teaser -->
+        <div class="cta-banner" style="border-color: #00ff00;">
+            <div class="cta-title">🏆 UNLOCK 50+ ACHIEVEMENTS 🏆</div>
+            <p class="cta-desc">
+                Inspired by Diane Keaton's legendary film career!<br>
+                <strong>Play your first game • Reach Level 10 • Score 10,000 points • Win 50 games • Complete all games</strong><br>
+                Track your progress and compete on the leaderboard!
+            </p>
+            <a href="bot.html" class="cta-button" style="background: linear-gradient(45deg, #00ff00, #00ffff);">
+                🎮 START EARNING
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p style="font-size: 0.9em; margin-bottom: 15px;">🎮 DIANE KEATON'S ARCADE 🎮</p>
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">🏠 HOME</a>
+                <a href="bot.html" class="footer-link">🤖 GET BOT</a>
+                <a href="#" class="footer-link">📜 PRIVACY</a>
+                <a href="#" class="footer-link">⚖️ TERMS</a>
+                <a href="https://github.com/sapphirediamondcasino-bit/Diane-s-Arcade" class="footer-link">💻 GITHUB</a>
+            </div>
+            <p style="font-size: 0.5em; margin-top: 15px; opacity: 0.7;">
+                © 2025 Diane Keaton's Arcade • Powered by Kurrasch Systems™<br>
+                All games are property of their respective creators and used for preservation purposes.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Generate stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        function playGame(game) {
+            window.location.href = `game.html?game=${game}`;
+        }
+    </script>
+</body>
+</html>            border-bottom: 3px solid var(--neon-blue);
             box-shadow: 0 10px 50px rgba(0, 243, 255, 0.3);
         }
         

@@ -3,116 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Play Game - DIANE KEATON'S ARCADE</title>
+    <title>Playing Game | Diane Keaton Memorial Arcade</title>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
-        body {
-            font-family: 'Press Start 2P', 'Courier New', monospace;
-            background: #000;
-            color: #fff;
-            overflow: hidden;
+        
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bf00ff;
+            --neon-pink: #ff00ff;
+            --dark-bg: #050510;
+            --darker: #020208;
         }
-
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        /* Animated Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 49%, rgba(0, 243, 255, 0.05) 50%, transparent 51%),
+                linear-gradient(0deg, transparent 49%, rgba(0, 243, 255, 0.05) 50%, transparent 51%);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
         /* Top Bar */
         .top-bar {
-            background: rgba(0, 0, 0, 0.95);
-            padding: 15px 20px;
-            border-bottom: 3px solid #00ffff;
+            background: rgba(5, 5, 16, 0.98);
+            backdrop-filter: blur(30px);
+            padding: 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 3px solid var(--neon-blue);
+            box-shadow: 0 5px 40px rgba(0, 243, 255, 0.4);
             z-index: 1000;
-            position: relative;
+            position: sticky;
+            top: 0;
         }
-
+        
         .game-title {
-            font-size: 1.2em;
-            color: #00ffff;
-            text-shadow: 0 0 10px #00ffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            font-weight: 900;
+            color: var(--neon-blue);
+            text-shadow: 0 0 30px var(--neon-blue);
+            letter-spacing: 2px;
         }
-
-        .controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            background: linear-gradient(45deg, #ff00ff, #00ffff);
+        
+        .back-btn {
+            font-family: 'Orbitron', sans-serif;
+            padding: 12px 35px;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
             color: white;
-            border: 2px solid white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 0.6em;
-            cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
+            border-radius: 30px;
+            font-weight: 900;
+            font-size: 1em;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 0 25px var(--neon-purple);
+            border: none;
+            cursor: pointer;
         }
-
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.8);
+        
+        .back-btn:hover {
+            box-shadow: 0 0 50px var(--neon-purple);
+            transform: translateX(-5px) scale(1.05);
         }
-
-        .btn-back {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-        }
-
-        .btn-fullscreen {
-            background: linear-gradient(45deg, #00ff00, #00ffff);
-        }
-
-        /* Game Container - MUCH BIGGER! */
+        
+        /* Game Container - MASSIVE SIZE! */
         .game-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: calc(100vh - 80px);
             padding: 20px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            position: relative;
         }
-
-        #game-frame {
+        
+        /* Game Player - HUGE! */
+        #game {
             width: 95vw;
-            max-width: 1600px;
-            height: 85vh;
-            border: 5px solid #00ffff;
-            border-radius: 10px;
-            box-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+            max-width: 1800px;
+            height: 90vh;
+            max-height: calc(100vh - 120px);
+            border: 4px solid var(--neon-blue);
+            border-radius: 15px;
+            box-shadow: 
+                0 0 60px rgba(0, 243, 255, 0.6),
+                inset 0 0 60px rgba(0, 243, 255, 0.1);
             background: #000;
+            overflow: hidden;
         }
-
-        /* Fullscreen Mode */
-        .fullscreen #game-frame {
-            width: 100vw;
-            height: 100vh;
-            max-width: none;
-            border: none;
-            border-radius: 0;
-        }
-
-        .fullscreen .top-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.8);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .fullscreen .top-bar:hover {
-            opacity: 1;
-        }
-
+        
         /* Loading Screen */
-        .loading {
+        #loading {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -120,79 +130,281 @@
             text-align: center;
             z-index: 100;
         }
-
-        .loading-text {
-            font-size: 1.5em;
-            color: #00ffff;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-        }
-
+        
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(0, 255, 255, 0.3);
-            border-top-color: #00ffff;
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(0, 243, 255, 0.2);
+            border-top: 6px solid var(--neon-blue);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 40px var(--neon-blue);
         }
-
+        
         @keyframes spin {
+            from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .game-title {
-                font-size: 0.7em;
+        
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            font-weight: 900;
+            color: var(--neon-blue);
+            text-shadow: 0 0 30px var(--neon-blue);
+            letter-spacing: 3px;
+            animation: pulse 2s ease infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+                text-shadow: 0 0 30px var(--neon-blue);
             }
-
-            .btn {
-                padding: 8px 15px;
-                font-size: 0.5em;
-            }
-
-            #game-frame {
-                width: 100vw;
-                height: calc(100vh - 80px);
-            }
-
-            .top-bar {
-                flex-direction: column;
-                gap: 10px;
-                padding: 10px;
+            50% { 
+                opacity: 0.6; 
+                text-shadow: 0 0 60px var(--neon-blue), 0 0 90px var(--neon-purple);
             }
         }
-
+        
         /* Error Message */
         .error-message {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            background: rgba(5, 5, 16, 0.95);
+            border: 3px solid var(--neon-pink);
+            border-radius: 25px;
+            padding: 50px;
             text-align: center;
-            max-width: 600px;
+            max-width: 700px;
+            box-shadow: 0 0 60px var(--neon-pink);
+            display: none;
+            z-index: 200;
+        }
+        
+        .error-message h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-pink);
+            font-size: 2.5em;
+            margin-bottom: 25px;
+            text-shadow: 0 0 30px var(--neon-pink);
+        }
+        
+        .error-message p {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin: 20px 0;
+            opacity: 0.9;
+        }
+        
+        .error-message strong {
+            color: var(--neon-blue);
+        }
+        
+        .try-again-btn {
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 900;
+            font-size: 1.1em;
+            cursor: pointer;
+            letter-spacing: 2px;
+            box-shadow: 0 0 30px var(--neon-blue);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .try-again-btn:hover {
+            box-shadow: 0 0 50px var(--neon-blue);
+            transform: scale(1.05);
+        }
+        
+        /* Controls Hint */
+        .controls-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(5, 5, 16, 0.9);
+            border: 2px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9em;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            opacity: 0.8;
+            transition: all 0.3s;
+        }
+        
+        .controls-hint:hover {
+            opacity: 1;
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+        
+        /* Recommended Games Section */
+        .recommended-section {
+            max-width: 1600px;
+            margin: 80px auto;
             padding: 40px;
-            background: rgba(255, 0, 0, 0.2);
-            border: 3px solid #ff0000;
-            border-radius: 15px;
         }
-
-        .error-title {
-            font-size: 2em;
-            color: #ff0000;
-            margin-bottom: 20px;
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 50px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
         }
-
-        .error-desc {
-            font-size: 0.7em;
-            line-height: 1.6;
-            margin-bottom: 20px;
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 150px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+        
+        .recommended-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 35px;
+        }
+        
+        .recommended-card {
+            background: rgba(5, 5, 16, 0.85);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .recommended-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-pink), var(--neon-blue));
+            background-size: 400%;
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s;
+            animation: borderRotate 3s linear infinite;
+        }
+        
+        @keyframes borderRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .recommended-card:hover::before {
+            opacity: 1;
+        }
+        
+        .recommended-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 60px rgba(0, 243, 255, 0.4);
+        }
+        
+        .recommended-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 2px solid var(--neon-blue);
+        }
+        
+        .recommended-content {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .recommended-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3em;
+            font-weight: 900;
+            color: var(--neon-blue);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .recommended-card p {
+            font-size: 0.9em;
+            line-height: 1.5;
+            opacity: 0.85;
+        }
+        
+        .play-mini-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 30px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: white;
+            border-radius: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.9em;
+            letter-spacing: 2px;
+            box-shadow: 0 5px 20px rgba(0, 243, 255, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .recommended-card:hover .play-mini-btn {
+            box-shadow: 0 10px 40px rgba(0, 243, 255, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 20px;
+            }
+            
+            .game-title {
+                font-size: 1.3em;
+            }
+            
+            #game {
+                width: 98vw;
+                height: calc(100vh - 200px);
+            }
+            
+            .controls-hint {
+                font-size: 0.7em;
+                padding: 10px 20px;
+            }
+            
+            .recommended-section {
+                padding: 20px;
+            }
+            
+            .recommended-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -200,14 +412,242 @@
     <!-- Top Bar -->
     <div class="top-bar">
         <div class="game-title" id="game-title">LOADING GAME...</div>
-        <div class="controls">
-            <a href="index.html" class="btn btn-back">◀ BACK TO ARCADE</a>
-            <button onclick="toggleFullscreen()" class="btn btn-fullscreen">⛶ FULLSCREEN</button>
-        </div>
+        <a href="index.html" class="back-btn">← BACK TO ARCADE</a>
     </div>
-
+    
     <!-- Game Container -->
     <div class="game-container">
-        <div class="loading" id="loading">
+        <!-- Loading Screen -->
+        <div id="loading">
             <div class="loading-spinner"></div>
-            <div class="loading-text">LOADING...</div>
+            <div class="loading-text">LOADING GAME...</div>
+        </div>
+        
+        <!-- Game Player (HUGE SIZE!) -->
+        <div id="game"></div>
+        
+        <!-- Error Message -->
+        <div class="error-message" id="error-msg">
+            <h2>⚠️ GAME ERROR</h2>
+            <p>The game file couldn't be loaded. This might happen if:</p>
+            <p>
+                <strong>• The .swf file is missing from /games/ folder</strong><br>
+                <strong>• The filename doesn't match exactly</strong><br>
+                <strong>• The file is corrupted</strong>
+            </p>
+            <p>Check the console for details, or try another game!</p>
+            <button class="try-again-btn" onclick="location.reload()">TRY AGAIN</button>
+            <a href="index.html" class="try-again-btn" style="margin-left: 15px;">BACK TO ARCADE</a>
+        </div>
+        
+        <!-- Controls Hint -->
+        <div class="controls-hint">
+            🎮 CONTROLS: Arrow Keys / WASD • Space • Mouse Click
+        </div>
+    </div>
+    
+    <!-- Recommended Games Section -->
+    <div class="recommended-section">
+        <h2 class="section-title">🎮 PLAY NEXT</h2>
+        <div class="recommended-grid" id="recommended-games">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+    
+    <script>
+        // Get game name from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameName = urlParams.get('game');
+        
+        // Complete game database
+        const games = {
+            'motherload': {
+                name: 'MOTHERLOAD',
+                file: '1269 - MotherLoad.swf',
+                image: 'https://images.crazygames.com/motherload/20210728141606/motherload-cover?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
+                desc: 'Dig deep for Martian minerals!',
+                related: ['earntodie', 'gold01', 'raftwars']
+            },
+            'happywheels': {
+                name: 'HAPPY WHEELS',
+                file: 'HappyWheels.swf',
+                image: 'https://www.totaljerkface.com/happy_wheels.tjf/screen_1.png',
+                desc: 'Ragdoll physics mayhem!',
+                related: ['earntodie', 'robotunicornattack', 'ruahm']
+            },
+            'gunblood': {
+                name: 'GUN BLOOD',
+                file: 'gunblood.swf',
+                image: 'https://img.gamepix.com/games/gun-blood/cover/gun-blood.png?width=600&height=340&fit=cover',
+                desc: 'Quick-draw western duels!',
+                related: ['bushshootout', 'raftwars', 'raftwars2']
+            },
+            'raftwars': {
+                name: 'RAFT WARS',
+                file: 'raftwars.swf',
+                image: 'https://images.crazygames.com/games/raft-wars/cover-1584712617223.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
+                desc: 'Defend your treasure!',
+                related: ['raftwars2', 'gunblood', 'gold01']
+            },
+            'raftwars2': {
+                name: 'RAFT WARS 2',
+                file: 'raftwars2.swf',
+                image: 'https://images.crazygames.com/games/raft-wars-2/cover-1584712799307.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
+                desc: 'More raft battles!',
+                related: ['raftwars', 'gunblood', 'motherload']
+            },
+            'robotunicornattack': {
+                name: 'ROBOT UNICORN ATTACK',
+                file: 'robotunicornattack_flash.swf',
+                image: 'https://images.crazygames.com/games/robot-unicorn-attack/cover-1594986973330.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
+                desc: 'Chase your dreams!',
+                related: ['ruahm', 'happywheels', 'earntodie']
+            },
+            'ruahm': {
+                name: 'ROBOT UNICORN ATTACK: HEAVY METAL',
+                file: 'ruahm.swf',
+                image: 'https://www.gameflare.com/online-game/robot-unicorn-attack-heavy-metal/1-250.jpg',
+                desc: 'Heavy metal edition!',
+                related: ['robotunicornattack', 'happywheels', 'earntodie']
+            },
+            'earntodie': {
+                name: 'EARN TO DIE',
+                file: 'EarnToDie_NotDoppler_dec.swf',
+                image: 'https://images.crazygames.com/games/earn-to-die/cover-1633704513517.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
+                desc: 'Drive through zombies!',
+                related: ['happywheels', 'motherload', 'robotunicornattack']
+            },
+            'bushshootout': {
+                name: 'BUSH SHOOTOUT',
+                file: '1452__bushshootout_game.swf',
+                image: 'https://i.ytimg.com/vi/ykZC9y5R5TY/maxresdefault.jpg',
+                desc: 'Retro political shooter!',
+                related: ['gunblood', 'raftwars', 'tomandjerrybowling']
+            },
+            'candymachine': {
+                name: 'CANDY MACHINE DELUXE',
+                file: 'flash_candymachinedeluxe.swf',
+                image: 'https://www.addictinggames.com/sites/default/files/styles/front_page_banner/public/candymachinedeluxe.jpg',
+                desc: 'Sweet puzzle fun!',
+                related: ['gold01', 'tomandjerrybowling', 'motherload']
+            },
+            'gold01': {
+                name: 'GOLD MINER',
+                file: 'gold01.swf',
+                image: 'https://img.gamepix.com/games/gold-miner/cover/gold-miner.png?width=600&height=340&fit=cover',
+                desc: 'Grab treasures!',
+                related: ['motherload', 'raftwars', 'candymachine']
+            },
+            'tomandjerrybowling': {
+                name: 'TOM & JERRY BOWLING',
+                file: 'tomandjerrybowling.swf',
+                image: 'https://www.gameslol.net/data/image/tom-and-jerry-games/tom-and-jerry-bowling.jpg',
+                desc: 'Cartoon bowling!',
+                related: ['candymachine', 'gold01', 'bushshootout']
+            },
+            'hive-hero': {
+                name: 'HIVE HERO',
+                file: 'hive-hero.swf',
+                image: 'https://i.ytimg.com/vi/XJ7HZATMKZ8/maxresdefault.jpg',
+                desc: 'Become the ultimate bee!',
+                related: ['motherload', 'gold01', 'earntodie']
+            },
+            'rickandmorty': {
+                name: 'RICK AND MORTY',
+                file: 'rick-and-morty.swf',
+                image: 'https://i.ytimg.com/vi/9YZRlN5uv5Y/maxresdefault.jpg',
+                desc: 'Interdimensional adventure!',
+                related: ['happywheels', 'robotunicornattack', 'ruahm']
+            }
+        };
+        
+        if (gameName && games[gameName]) {
+            const currentGame = games[gameName];
+            
+            // Set display name
+            document.getElementById('game-title').textContent = currentGame.name;
+            document.title = `Playing ${currentGame.name} | Diane Keaton Memorial Arcade`;
+            
+            // Configure Ruffle
+            window.RufflePlayer = window.RufflePlayer || {};
+            window.RufflePlayer.config = {
+                "autoplay": "on",
+                "unmuteOverlay": "hidden",
+                "backgroundColor": "#000000",
+                "letterbox": "on",
+                "warnOnUnsupportedContent": false,
+                "contextMenu": false,
+                "preloader": true,
+                "splashScreen": false,
+                "quality": "high",
+                "scale": "showAll"
+            };
+            
+            // Create Ruffle player
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById('game');
+            
+            // Add player to container
+            container.appendChild(player);
+            
+            // Hide loading after 2 seconds
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 2000);
+            
+            // Load the game
+            console.log(`Loading game: games/${currentGame.file}`);
+            
+            player.load(`games/${currentGame.file}`)
+                .then(() => {
+                    console.log('Game loaded successfully!');
+                    document.getElementById('loading').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Failed to load game:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error-msg').style.display = 'block';
+                });
+            
+            // Populate Recommended Games
+            const recommendedContainer = document.getElementById('recommended-games');
+            const relatedGames = currentGame.related || [];
+            
+            relatedGames.forEach(gameId => {
+                const game = games[gameId];
+                if (game) {
+                    const card = document.createElement('a');
+                    card.href = `game.html?game=${gameId}`;
+                    card.className = 'recommended-card';
+                    card.innerHTML = `
+                        <img src="${game.image}" alt="${game.name}" class="recommended-image" onerror="this.src='https://via.placeholder.com/300x180/050510/00f3ff?text=${encodeURIComponent(game.name)}'">
+                        <div class="recommended-content">
+                            <h3>${game.name}</h3>
+                            <p>${game.desc}</p>
+                            <div class="play-mini-btn">PLAY NOW ▶</div>
+                        </div>
+                    `;
+                    recommendedContainer.appendChild(card);
+                }
+            });
+            
+        } else {
+            // Game not found
+            document.getElementById('game-title').textContent = 'GAME NOT FOUND';
+            document.getElementById('loading').innerHTML = `
+                <div style="font-family: Orbitron; font-size: 2em; color: #ff00ff; text-shadow: 0 0 30px #ff00ff;">
+                    ⚠️ GAME NOT FOUND
+                </div>
+                <p style="margin-top: 30px; font-size: 1.1em;">
+                    The game "${gameName}" doesn't exist.<br>
+                    Please return to the arcade and select a game.
+                </p>
+                <a href="index.html" class="try-again-btn" style="margin-top: 30px;">
+                    ← BACK TO ARCADE
+                </a>
+            `;
+        }
+    </script>
+</body>
+</html>

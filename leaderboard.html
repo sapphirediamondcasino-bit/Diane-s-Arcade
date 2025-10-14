@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboards - Diane Keaton Memorial Arcade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bf00ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #39ff14;
+            --neon-gold: #ffd700;
+            --dark-bg: #050510;
+            --darker: #020208;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 49%, rgba(0, 243, 255, 0.1) 50%, transparent 51%),
+                linear-gradient(0deg, transparent 49%, rgba(0, 243, 255, 0.1) 50%, transparent 51%);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            background: rgba(5, 5, 16, 0.98);
+            backdrop-filter: blur(30px);
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--neon-blue);
+            box-shadow: 0 5px 40px rgba(0, 243, 255, 0.4);
+            z-index: 2000;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .nav-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            font-weight: 900;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+            letter-spacing: 2px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            text-decoration: none;
+            padding: 12px 28px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+        
+        .nav-link:hover {
+            background: var(--neon-blue);
+            color: var(--darker);
+            box-shadow: 0 0 30px var(--neon-blue);
+            transform: translateY(-3px);
+        }
+        
+        .profile-btn {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+            border: none;
+            box-shadow: 0 0 25px var(--neon-purple);
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 60px auto;
+            padding: 0 40px;
+        }
+        
+        .page-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4em;
+            font-weight: 900;
+            text-align: center;
+            margin: 40px 0 60px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .category-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .category-tab {
+            padding: 15px 35px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 2px solid var(--neon-blue);
+            border-radius: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+            letter-spacing: 1px;
+        }
+        
+        .category-tab:hover {
+            background: rgba(0, 243, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 243, 255, 0.3);
+        }
+        
+        .category-tab.active {
+            background: var(--neon-blue);
+            color: var(--darker);
+            box-shadow: 0 0 40px var(--neon-blue);
+        }
+        
+        .leaderboard-section {
+            display: none;
+        }
+        
+        .leaderboard-section.active {
+            display: block;
+        }
+        
+        .leaderboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .leaderboard-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+        }
+        
+        .leaderboard-subtitle {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+        
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 30px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+        
+        .podium-place {
+            background: rgba(5, 5, 16, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .podium-place:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0, 243, 255, 0.5);
+        }
+        
+        .podium-1 {
+            order: 2;
+            border: 4px solid var(--neon-gold);
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.6);
+            width: 280px;
+        }
+        
+        .podium-2 {
+            order: 1;
+            border: 4px solid #c0c0c0;
+            box-shadow: 0 0 40px rgba(192, 192, 192, 0.4);
+            width: 260px;
+        }
+        
+        .podium-3 {
+            order: 3;
+            border: 4px solid #cd7f32;
+            box-shadow: 0 0 40px rgba(205, 127, 50, 0.4);
+            width: 260px;
+        }
+        
+        .podium-rank {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        
+        .podium-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 4px solid var(--neon-blue);
+            box-shadow: 0 0 40px var(--neon-blue);
+        }
+        
+        .podium-username {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            font-weight: 900;
+            margin-bottom: 10px;
+            color: var(--neon-blue);
+        }
+        
+        .podium-score {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--neon-green);
+            text-shadow: 0 0 20px var(--neon-green);
+        }
+        
+        .bot-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.7em;
+            margin-top: 10px;
+            box-shadow: 0 0 20px var(--neon-purple);
+        }
+        
+        .leaderboard-table {
+            background: rgba(5, 5, 16, 0.85);
+            border: 3px solid var(--neon-blue);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: rgba(0, 243, 255, 0.2);
+        }
+        
+        th {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            padding: 25px 20px;
+            text-align: left;
+            color: var(--neon-blue);
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--neon-blue);
+        }
+        
+        td {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            font-size: 1.05em;
+        }
+        
+        tbody tr {
+            transition: all 0.3s;
+        }
+        
+        tbody tr:hover {
+            background: rgba(0, 243, 255, 0.05);
+            transform: translateX(5px);
+        }
+        
+        .rank-cell {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.5em;
+        }
+        
+        .rank-top3 {
+            color: var(--neon-gold);
+            text-shadow: 0 0 20px var(--neon-gold);
+        }
+        
+        .player-cell {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .player-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-blue);
+        }
+        
+        .player-name {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--neon-blue);
+        }
+        
+        .player-level {
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+        
+        .score-cell {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--neon-green);
+            text-shadow: 0 0 15px var(--neon-green);
+        }
+        
+        .view-profile-btn {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .view-profile-btn:hover {
+            box-shadow: 0 0 30px var(--neon-purple);
+            transform: scale(1.05);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 80px;
+            font-size: 1.3em;
+            opacity: 0.6;
+        }
+        
+        .no-data-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px;
+            margin-top: 80px;
+            border-top: 2px solid rgba(0, 243, 255, 0.2);
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            .page-title { font-size: 2.5em; }
+            .podium { flex-direction: column; align-items: center; }
+            .podium-place { width: 100% !important; max-width: 300px; }
+            table { font-size: 0.85em; }
+            th, td { padding: 15px 10px; }
+            .player-cell { flex-direction: column; text-align: center; }
+            .category-tabs { flex-direction: column; }
+            .category-tab { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-brand">🏆 LEADERBOARDS</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HOME</a>
+            <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1 class="page-title">🏆 LEADERBOARDS 🏆</h1>
+        
+        <div class="category-tabs">
+            <button class="category-tab active" onclick="showCategory('global')">🌍 GLOBAL</button>
+            <button class="category-tab" onclick="showCategory('motherload')">⛏️ MOTHERLOAD</button>
+            <button class="category-tab" onclick="showCategory('happywheels')">🎡 HAPPY WHEELS</button>
+            <button class="category-tab" onclick="showCategory('gunblood')">🔫 GUN BLOOD</button>
+            <button class="category-tab" onclick="showCategory('raftwars')">🚣 RAFT WARS</button>
+            <button class="category-tab" onclick="showCategory('robotunicorn')">🦄 ROBOT UNICORN</button>
+            <button class="category-tab" onclick="showCategory('achievements')">🏅 ACHIEVEMENTS</button>
+        </div>
+        
+        <!-- Global Leaderboard -->
+        <div class="leaderboard-section active" id="global-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">🌍 GLOBAL RANKINGS</h2>
+                <p class="leaderboard-subtitle">Top players by total XP across all games</p>
+            </div>
+            
+            <div class="podium" id="global-podium"></div>
+            
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>PLAYER</th>
+                            <th>LEVEL</th>
+                            <th>TOTAL XP</th>
+                            <th>ACHIEVEMENTS</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="global-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Game Leaderboards -->
+        <div class="leaderboard-section" id="motherload-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">⛏️ MOTHERLOAD HIGH SCORES</h2>
+                <p class="leaderboard-subtitle">Top miners in the galaxy!</p>
+            </div>
+            <div class="podium" id="motherload-podium"></div>
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>PLAYER</th>
+                            <th>HIGH SCORE</th>
+                            <th>DATE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="motherload-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="leaderboard-section" id="happywheels-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">🎡 HAPPY WHEELS HIGH SCORES</h2>
+                <p class="leaderboard-subtitle">Masters of ragdoll mayhem!</p>
+            </div>
+            <div class="podium" id="happywheels-podium"></div>
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>PLAYER</th>
+                            <th>HIGH SCORE</th>
+                            <th>DATE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="happywheels-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="leaderboard-section" id="gunblood-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">🔫 GUN BLOOD HIGH SCORES</h2>
+                <p class="leaderboard-subtitle">Fastest guns in the West!</p>
+            </div>
+            <div class="podium" id="gunblood-podium"></div>
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>PLAYER</th>
+                            <th>HIGH SCORE</th>
+                            <th>DATE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gunblood-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="leaderboard-section" id="raftwars-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">🚣 RAFT WARS HIGH SCORES</h2>
+                <p class="leaderboard-subtitle">Treasure defenders supreme!</p>
+            </div>
+            <div class="podium" id="raftwars-podium"></div>
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>PLAYER</th>
+                            <th>HIGH SCORE</th>
+                            <th>DATE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="raftwars-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="leaderboard-section" id="robotunicorn-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">🦄 ROBOT UNICORN ATTACK HIGH SCORES</h2>
+                <p class="leaderboard-subtitle">Always believe in your dreams!</p>
+            </div>
+            <div class="podium" id="robotunicorn-podium"></div>
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>PLAYER</th>
+                            <th>HIGH SCORE</th>
+                            <th>DATE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="robotunicorn-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Achievements Leaderboard -->
+        <div class="leaderboard-section" id="achievements-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">🏅 ACHIEVEMENT HUNTERS</h2>
+                <p class="leaderboard-subtitle">Most achievements unlocked</p>
+            </div>
+            <div class="podium" id="achievements-podium"></div>
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>PLAYER</th>
+                            <th>ACHIEVEMENTS</th>
+                            <th>COMPLETION</th>
+                            <th>LATEST ACHIEVEMENT</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="achievements-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>💜 Diane Keaton Memorial Arcade © 2025</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Keep playing, keep climbing! ☕</p>
+        </div>
+    </div>
+    
+    <script>
+        const GAMES = {
+            motherload: { name: 'MotherLoad', icon: '⛏️' },
+            happywheels: { name: 'Happy Wheels', icon: '🎡' },
+            gunblood: { name: 'Gun Blood', icon: '🔫' },
+            raftwars: { name: 'Raft Wars', icon: '🚣' },
+            robotunicornattack: { name: 'Robot Unicorn Attack', icon: '🦄' }
+        };
+        
+        function getAllPlayers() {
+            const players = [];
+            const allKeys = Object.keys(localStorage);
+            
+            allKeys.forEach(key => {
+                if (key.startsWith('user_')) {
+                    try {
+                        const userData = JSON.parse(localStorage.getItem(key));
+                        if (userData && userData.username) {
+                            players.push(userData);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing user data:', e);
+                    }
+                }
+            });
+            
+            return players;
+        }
+        
+        function showCategory(category) {
+            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.leaderboard-section').forEach(section => section.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(category + '-section').classList.add('active');
+        }
+        
+        function createPodium(players, containerId, scoreType = 'xp') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (players.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">🏆</div>
+                        <div>No players yet! Be the first to play!</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const medals = ['🥇', '🥈', '🥉'];
+            const classes = ['podium-1', 'podium-2', 'podium-3'];
+            
+            for (let i = 0; i < 3 && i < players.length; i++) {
+                const player = players[i];
+                const div = document.createElement('div');
+                div.className = `podium-place ${classes[i]}`;
+                
+                let scoreValue = scoreType === 'xp' ? (player.xp || 0).toLocaleString() + ' XP' :
+                                scoreType === 'achievements' ? (player.achievementsCount || 0) + '/16' :
+                                (player.score || 0).toLocaleString();
+                
+                const botBadge = player.isBot ? '<div class="bot-badge">🤖 BOT</div>' : '';
+                
+                div.innerHTML = `
+                    <div class="podium-rank">${medals[i]}</div>
+                    <img src="${player.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + player.username}" alt="${player.username}" class="podium-avatar">
+                    <div class="podium-username">${player.username}</div>
+                    ${botBadge}
+                    <div class="podium-score">${scoreValue}</div>
+                `;
+                container.appendChild(div);
+            }
+        }
+        
+        function populateTable(players, tbodyId, type = 'global') {
+            const tbody = document.getElementById(tbodyId);
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (players.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-data">
+                            <div class="no-data-icon">🎮</div>
+                            <div>No players yet!</div>
+                            <div style="font-size: 0.9em; margin-top: 10px;">Play games to appear on the leaderboard!</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            players.forEach((player, index) => {
+                const rank = index + 1;
+                const row = document.createElement('tr');
+                
+                const rankClass = rank <= 3 ? 'rank-top3' : '';
+                const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+                const botBadge = player.isBot ? '<span class="bot-badge">🤖 BOT</span>' : '';
+                
+                if (type === 'global') {
+                    row.innerHTML = `
+                        <td class="rank-cell ${rankClass}">${rankEmoji} #${rank}</td>
+                        <td>
+                            <div class="player-cell">
+                                <img src="${player.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + player.username}" alt="${player.username}" class="player-avatar">
+                                <div>
+                                    <div class="player-name">${player.username} ${botBadge}</div>
+                                    <div class="player-level">Level ${player.level || 1}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span style="font-family: Orbitron; font-weight: 700;">${player.level || 1}</span></td>
+                        <td class="score-cell">${(player.xp || 0).toLocaleString()}</td>
+                        <td><span style="font-family: Orbitron; font-weight: 700;">${player.achievementsCount || 0}/16</span></td>
+                        <td><a href="profile.html?user=${player.username}" class="view-profile-btn">VIEW</a></td>
+                    `;
+                } else if (type === 'achievements') {
+                    const completion = Math.round(((player.achievementsCount || 0) / 16) * 100);
+                    const latestAch = player.latestAchievement || 'None yet';
+                    row.innerHTML = `
+                        <td class="rank-cell ${rankClass}">${rankEmoji} #${rank}</td>
+                        <td>
+                            <div class="player-cell">
+                                <img src="${player.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + player.username}" alt="${player.username}" class="player-avatar">
+                                <div>
+                                    <div class="player-name">${player.username} ${botBadge}</div>
+                                    <div class="player-level">Level ${player.level || 1}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="score-cell">${player.achievementsCount || 0}/16</td>
+                        <td><span style="font-family: Orbitron; font-weight: 700;">${completion}%</span></td>
+                        <td style="opacity: 0.8;">${latestAch}</td>
+                        <td><a href="profile.html?user=${player.username}" class="view-profile-btn">VIEW</a></td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td class="rank-cell ${rankClass}">${rankEmoji} #${rank}</td>
+                        <td>
+                            <div class="player-cell">
+                                <img src="${player.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + player.username}" alt="${player.username}" class="player-avatar">
+                                <div class="player-name">${player.username} ${botBadge}</div>
+                            </div>
+                        </td>
+                        <td class="score-cell">${(player.score || 0).toLocaleString()}</td>
+                        <td>${player.date || 'N/A'}</td>
+                        <td><a href="profile.html?user=${player.username}" class="view-profile-btn">VIEW</a></td>
+                    `;
+                }
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function loadGlobalLeaderboard() {
+            const players = getAllPlayers();
+            const sortedPlayers = players
+                .map(p => ({
+                    ...p,
+                    xp: p.xp || 0,
+                    level: p.level || 1,
+                    achievementsCount: (p.achievements || []).filter(a => a.unlocked).length
+                }))
+                .sort((a, b) => b.xp - a.xp);
+            
+            createPodium(sortedPlayers,
+                         'global-podium', 'xp');
+populateTable(sortedPlayers, 'global-tbody', 'global');
+}
+    function loadGameLeaderboard(gameId) {
+        const players = getAllPlayers();
+        const gamePlayers = [];
+        
+        players.forEach(player => {
+            if (player.highScores && player.highScores[gameId]) {
+                gamePlayers.push({
+                    username: player.username,
+                    avatar: player.avatar,
+                    score: player.highScores[gameId].score || 0,
+                    date: player.highScores[gameId].date || 'N/A',
+                    isBot: player.isBot || false
+                });
+            }
+        });
+        
+        const sortedPlayers = gamePlayers.sort((a, b) => b.score - a.score);
+        
+        createPodium(sortedPlayers, gameId + '-podium', 'score');
+        populateTable(sortedPlayers, gameId + '-tbody', 'game');
+    }
+    
+    function loadAchievementsLeaderboard() {
+        const players = getAllPlayers();
+        const sortedPlayers = players
+            .map(p => {
+                const achievements = p.achievements || [];
+                const unlockedAchievements = achievements.filter(a => a.unlocked);
+                const latestAchievement = unlockedAchievements.length > 0 
+                    ? unlockedAchievements[unlockedAchievements.length - 1].name 
+                    : 'None yet';
+                
+                return {
+                    ...p,
+                    achievementsCount: unlockedAchievements.length,
+                    latestAchievement: latestAchievement
+                };
+            })
+            .sort((a, b) => b.achievementsCount - a.achievementsCount);
+        
+        createPodium(sortedPlayers, 'achievements-podium', 'achievements');
+        populateTable(sortedPlayers, 'achievements-tbody', 'achievements');
+    }
+    
+    // Initialize all leaderboards
+    function initializeLeaderboards() {
+        loadGlobalLeaderboard();
+        loadGameLeaderboard('motherload');
+        loadGameLeaderboard('happywheels');
+        loadGameLeaderboard('gunblood');
+        loadGameLeaderboard('raftwars');
+        loadGameLeaderboard('robotunicornattack');
+        loadAchievementsLeaderboard();
+    }
+    
+    // Load leaderboards on page load
+    initializeLeaderboards();
+    
+    // Refresh leaderboards every 30 seconds
+    setInterval(initializeLeaderboards, 30000);
+</script>

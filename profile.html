@@ -237,11 +237,73 @@
             margin-bottom: 15px;
         }
         
-        .profile-email {
+        .profile-bio {
             font-size: 1.1em;
             color: var(--neon-blue);
             margin-bottom: 20px;
             opacity: 0.8;
+            position: relative;
+            padding: 15px;
+            background: rgba(0, 243, 255, 0.05);
+            border-radius: 15px;
+            border: 2px solid rgba(0, 243, 255, 0.2);
+        }
+        
+        .edit-bio-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 243, 255, 0.2);
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .edit-bio-btn:hover {
+            background: var(--neon-blue);
+            color: var(--darker);
+        }
+        
+        .bio-reactions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .reaction-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 5px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .reaction-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .reaction-btn.active {
+            background: var(--neon-pink);
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+        
+        .reaction-count {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8em;
+            font-weight: 700;
         }
         
         .profile-level {
@@ -434,47 +496,56 @@
             font-size: 1.5em;
         }
         
-        .like-btn {
+        .achievement-reactions {
             position: absolute;
             bottom: 15px;
+            left: 15px;
             right: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .achievement-reaction-btn {
             background: rgba(255, 0, 100, 0.2);
             border: 2px solid var(--neon-pink);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 1.2em;
+            font-size: 1.1em;
+            position: relative;
         }
         
-        .like-btn:hover {
+        .achievement-reaction-btn:hover {
             background: var(--neon-pink);
             transform: scale(1.15);
             box-shadow: 0 0 30px var(--neon-pink);
         }
         
-        .like-btn.liked {
+        .achievement-reaction-btn.active {
             background: var(--neon-pink);
             box-shadow: 0 0 20px var(--neon-pink);
         }
         
-        .like-count {
+        .reaction-badge {
             position: absolute;
-            top: -10px;
-            right: -10px;
+            top: -8px;
+            right: -8px;
             background: var(--neon-pink);
             color: var(--darker);
             border-radius: 50%;
-            width: 25px;
-            height: 25px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.7em;
+            font-size: 0.6em;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
         }
@@ -500,7 +571,7 @@
         th {
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            padding: 20px;
+            padding: 25px 20px;
             text-align: left;
             color: var(--neon-blue);
             font-size: 1.1em;
@@ -509,8 +580,9 @@
         }
         
         td {
-            padding: 20px;
+            padding: 25px 20px;
             border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            font-size: 1.05em;
         }
         
         tbody tr {
@@ -535,27 +607,34 @@
             text-shadow: 0 0 20px var(--neon-green);
         }
         
-        .score-like-btn {
+        .score-reactions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .score-reaction-btn {
             background: rgba(255, 0, 100, 0.2);
             border: 2px solid var(--neon-pink);
             border-radius: 20px;
-            padding: 8px 20px;
+            padding: 5px 12px;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 5px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
+            font-size: 0.9em;
         }
         
-        .score-like-btn:hover {
+        .score-reaction-btn:hover {
             background: var(--neon-pink);
             transform: scale(1.05);
             box-shadow: 0 0 20px var(--neon-pink);
         }
         
-        .score-like-btn.liked {
+        .score-reaction-btn.active {
             background: var(--neon-pink);
         }
         
@@ -656,6 +735,25 @@
             box-shadow: 0 0 30px var(--neon-pink);
         }
         
+        .bio-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 243, 255, 0.05);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            color: white;
+            font-size: 1em;
+            font-family: 'Roboto', sans-serif;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .bio-input:focus {
+            outline: none;
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+        }
+        
         .avatar-options, .banner-options {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -749,7 +847,6 @@
             table { font-size: 0.85em; }
             th, td { padding: 12px 8px; }
             .nav-bar { padding: 15px 20px; }
-            .nav-brand { font-size: 1.2em; }
             .modal-content { padding: 30px; }
             .avatar-options, .banner-options {
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -781,95 +878,131 @@
             </div>
             <div class="profile-info">
                 <h1 class="profile-username" id="username">Loading...</h1>
-                <div class="profile-email" id="email">email@example.com</div>
-                <div class="profile-level">
-                    <span>⚡ LEVEL <span id="user-level">1</span></span>
-                </div>
-                <div class="xp-bar-container">
-                    <div class="xp-bar" id="xp-bar" style="width: 0%">
-                        <span id="xp-text">0 / 100 XP</span>
-                    </div>
-                </div>
                 
-                <div class="social-actions">
-                    <button class="social-btn" id="friend-btn" onclick="toggleFriend()">
-                        <span>👥</span>
-                        <span id="friend-text">ADD FRIEND</span>
-                    </button>
-                    <button class="social-btn">
-                        <span>📊</span>
-                        <span>COMPARE STATS</span>
-                    </button>
+                <div class="profile-bio">
+                    <button class="edit-bio-btn" onclick="openBioModal()">✏️ EDIT</button>
+                    <div id="bio-text">No bio yet! Click edit to add one.</div>
+                    <div class="bio-reactions">
+                        <button class="reaction-btn" onclick="reactToBio('❤️', this)">
+                            ❤️ <span class="reaction-count">0</span>
+</button>
+<button class="reaction-btn" onclick="reactToBio('🔥', this)">
+🔥 <span class="reaction-count">0</span>
+</button>
+<button class="reaction-btn" onclick="reactToBio('😎', this)">
+😎 <span class="reaction-count">0</span>
+</button>
+<button class="reaction-btn" onclick="reactToBio('💯', this)">
+💯 <span class="reaction-count">0</span>
+</button>
+<button class="reaction-btn" onclick="reactToBio('👏', this)">
+👏 <span class="reaction-count">0</span>
+</button>
+</div>
+</div>
+            <div class="profile-level">
+                <span>⚡ LEVEL <span id="user-level">1</span></span>
+            </div>
+            <div class="xp-bar-container">
+                <div class="xp-bar" id="xp-bar" style="width: 0%">
+                    <span id="xp-text">0 / 100 XP</span>
                 </div>
-                
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-value" id="stat-achievements">0</span>
-                        <div class="stat-label">🏆 Achievements</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="stat-games">0</span>
-                        <div class="stat-label">🎮 Games Played</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="stat-coins">100</span>
-                        <div class="stat-label">💰 Coins</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="stat-friends">0</span>
-                        <div class="stat-label">👥 Friends</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="stat-joined">...</span>
-                        <div class="stat-label">📅 Member Since</div>
-                    </div>
+            </div>
+            
+            <div class="social-actions">
+                <button class="social-btn" id="friend-btn" onclick="toggleFriend()">
+                    <span>👥</span>
+                    <span id="friend-text">ADD FRIEND</span>
+                </button>
+                <button class="social-btn">
+                    <span>📊</span>
+                    <span>COMPARE STATS</span>
+                </button>
+            </div>
+            
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-achievements">0</span>
+                    <div class="stat-label">🏆 Achievements</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-games">0</span>
+                    <div class="stat-label">🎮 Games Played</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-coins">100</span>
+                    <div class="stat-label">💰 Coins</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-friends">0</span>
+                    <div class="stat-label">👥 Friends</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-joined">...</span>
+                    <div class="stat-label">📅 Member Since</div>
                 </div>
             </div>
         </div>
-        
-        <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
-        <div class="achievements-grid" id="achievements-container"></div>
-        
-        <h2 class="section-title">🎮 MY HIGH SCORES</h2>
-        <div class="scores-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>GAME</th>
-                        <th>HIGH SCORE</th>
-                        <th>RANK</th>
-                        <th>LIKES</th>
-                        <th>DATE</th>
-                    </tr>
-                </thead>
-                <tbody id="scores-tbody"></tbody>
-            </table>
-        </div>
-        
-        <div class="footer">
-            <p>💜 Diane Keaton Memorial Arcade © 2025</p>
-            <p style="font-size: 0.9em; margin-top: 10px;">Keep playing, keep achieving! ☕</p>
-        </div>
     </div>
     
-    <div class="modal" id="avatar-modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('avatar-modal')">×</button>
-            <h2 class="modal-title">CHOOSE YOUR AVATAR</h2>
-            <div class="avatar-options" id="avatar-options"></div>
-            <button class="save-btn" onclick="saveAvatar()">SAVE AVATAR</button>
-        </div>
+    <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
+    <div class="achievements-grid" id="achievements-container"></div>
+    
+    <h2 class="section-title">🎮 MY HIGH SCORES</h2>
+    <div class="scores-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>GAME</th>
+                    <th>HIGH SCORE</th>
+                    <th>RANK</th>
+                    <th>REACTIONS</th>
+                    <th>DATE</th>
+                </tr>
+            </thead>
+            <tbody id="scores-tbody"></tbody>
+        </table>
     </div>
     
-    <div class="modal" id="banner-modal">
-        <div class="modal-content">
-            <button class="close-
-              modal" onclick="closeModal('banner-modal')">×</button>
-<h2 class="modal-title">CHOOSE YOUR BANNER</h2>
-<div class="banner-options" id="banner-options"></div>
-<button class="save-btn" onclick="saveBanner()">SAVE BANNER</button>
+    <div class="footer">
+        <p>💜 Diane Keaton Memorial Arcade © 2025</p>
+        <p style="font-size: 0.9em; margin-top: 10px;">Keep playing, keep achieving! ☕</p>
+    </div>
 </div>
+
+<!-- Avatar Modal -->
+<div class="modal" id="avatar-modal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeModal('avatar-modal')">×</button>
+        <h2 class="modal-title">CHOOSE YOUR AVATAR</h2>
+        <div class="avatar-options" id="avatar-options"></div>
+        <button class="save-btn" onclick="saveAvatar()">SAVE AVATAR</button>
+    </div>
 </div>
+
+<!-- Banner Modal -->
+<div class="modal" id="banner-modal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeModal('banner-modal')">×</button>
+        <h2 class="modal-title">CHOOSE YOUR BANNER</h2>
+        <div class="banner-options" id="banner-options"></div>
+        <button class="save-btn" onclick="saveBanner()">SAVE BANNER</button>
+    </div>
+</div>
+
+<!-- Bio Modal -->
+<div class="modal" id="bio-modal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeModal('bio-modal')">×</button>
+        <h2 class="modal-title">EDIT YOUR BIO</h2>
+        <textarea class="bio-input" id="bio-input" maxlength="200" placeholder="Tell everyone about yourself... (200 characters max)"></textarea>
+        <p style="text-align: right; margin-top: 10px; opacity: 0.7;">
+            <span id="char-count">0</span>/200 characters
+        </p>
+        <button class="save-btn" onclick="saveBio()">SAVE BIO</button>
+    </div>
+</div>
+
 <script>
     const allAchievements = [
         { id: 'annie_hall', name: 'Annie Hall', description: 'Play your first game', icon: '🎬', xp: 10 },
@@ -896,13 +1029,7 @@
         { id: 'gunblood', name: 'Gun Blood', icon: '🔫' },
         { id: 'raftwars', name: 'Raft Wars', icon: '🚣' },
         { id: 'raftwars2', name: 'Raft Wars 2', icon: '🚣' },
-        { id: 'robotunicornattack', name: 'Robot Unicorn Attack', icon: '🦄' },
-        { id: 'earntodie', name: 'Earn to Die', icon: '🧟' },
-        { id: 'bushshootout', name: 'Bush Shootout', icon: '🎯' },
-        { id: 'candymachine', name: 'Candy Machine', icon: '🍬' },
-        { id: 'gold01', name: 'Gold Miner', icon: '⚔️' },
-        { id: 'tomandjerrybowling', name: 'Tom & Jerry Bowling', icon: '🎳' },
-        { id: 'ruahm', name: 'Robot Unicorn Attack: Heavy Metal', icon: '🦄' }
+        { id: 'robotunicornattack', name: 'Robot Unicorn Attack', icon: '🦄' }
     ];
     
     const avatarOptions = [
@@ -943,12 +1070,13 @@
     if (userData) {
         if (!userData.avatar) userData.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`;
         if (!userData.banner) userData.banner = bannerOptions[0];
+        if (!userData.bio) userData.bio = 'No bio yet! Click edit to add one.';
+        if (!userData.bioReactions) userData.bioReactions = { '❤️': 0, '🔥': 0, '😎': 0, '💯': 0, '👏': 0 };
         if (!userData.friends) userData.friends = [];
-        if (!userData.likedAchievements) userData.likedAchievements = {};
-        if (!userData.likedScores) userData.likedScores = {};
+        if (!userData.achievementReactions) userData.achievementReactions = {};
+        if (!userData.scoreReactions) userData.scoreReactions = {};
         
         document.getElementById('username').textContent = userData.username.toUpperCase();
-        document.getElementById('email').textContent = userData.email;
         document.getElementById('user-level').textContent = userData.level || 1;
         document.getElementById('stat-achievements').textContent = (userData.achievements || []).filter(a => a.unlocked).length;
         document.getElementById('stat-games').textContent = userData.gamesPlayed || 0;
@@ -961,6 +1089,15 @@
         
         document.getElementById('user-avatar').src = userData.avatar;
         document.getElementById('profile-banner').src = userData.banner;
+        document.getElementById('bio-text').textContent = userData.bio;
+        
+        // Load bio reactions
+        Object.keys(userData.bioReactions).forEach((emoji, index) => {
+            const buttons = document.querySelectorAll('.bio-reactions .reaction-btn');
+            if (buttons[index]) {
+                buttons[index].querySelector('.reaction-count').textContent = userData.bioReactions[emoji];
+            }
+        });
         
         const currentXP = userData.xp || 0;
         const xpForNextLevel = userData.level * 100;
@@ -990,8 +1127,7 @@
                 dateText = `<div class="achievement-date">Unlocked ${date.toLocaleDateString()}</div>`;
             }
             
-            const likes = userData.likedAchievements[achievement.id] || 0;
-            const isLiked = false;
+            const reactions = userData.achievementReactions[achievement.id] || { '❤️': 0, '🔥': 0, '⭐': 0 };
             
             card.innerHTML = `
                 ${!isUnlocked ? '<div class="lock-icon">🔒</div>' : ''}
@@ -1001,10 +1137,20 @@
                 ${dateText}
                 <div class="achievement-xp">+${achievement.xp} XP</div>
                 ${isUnlocked ? `
-                    <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="likeAchievement('${achievement.id}', this)">
-                        ${isLiked ? '❤️' : '🤍'}
-                        ${likes > 0 ? `<span class="like-count">${likes}</span>` : ''}
-                    </button>
+                    <div class="achievement-reactions">
+                        <button class="achievement-reaction-btn" onclick="reactToAchievement('${achievement.id}', '❤️', this)">
+                            ❤️
+                            ${reactions['❤️'] > 0 ? `<span class="reaction-badge">${reactions['❤️']}</span>` : ''}
+                        </button>
+                        <button class="achievement-reaction-btn" onclick="reactToAchievement('${achievement.id}', '🔥', this)">
+                            🔥
+                            ${reactions['🔥'] > 0 ? `<span class="reaction-badge">${reactions['🔥']}</span>` : ''}
+                        </button>
+                        <button class="achievement-reaction-btn" onclick="reactToAchievement('${achievement.id}', '⭐', this)">
+                            ⭐
+                            ${reactions['⭐'] > 0 ? `<span class="reaction-badge">${reactions['⭐']}</span>` : ''}
+                        </button>
+                    </div>
                 ` : ''}
             `;
             container.appendChild(card);
@@ -1037,8 +1183,7 @@
                 gameIcon: game ? game.icon : '🎮',
                 score: data.score,
                 rank: data.rank || Math.floor(Math.random() * 100) + 1,
-                date: data.date || new Date().toISOString(),
-                likes: data.likes || 0
+                date: data.date || new Date().toISOString()
             };
         }).sort((a, b) => b.score - a.score);
         
@@ -1051,7 +1196,7 @@
             else if (score.rank === 2) rankHTML = '<span class="rank-badge rank-2">🥈 #2</span>';
             else if (score.rank === 3) rankHTML = '<span class="rank-badge rank-3">🥉 #3</span>';
             
-            const isLiked = false;
+            const reactions = userData.scoreReactions[score.gameId] || { '❤️': 0, '🔥': 0, '💯': 0 };
             
             row.innerHTML = `
                 <td>
@@ -1061,15 +1206,94 @@
                 <td><span class="score-value">${score.score.toLocaleString()}</span></td>
                 <td>${rankHTML}</td>
                 <td>
-                    <button class="score-like-btn ${isLiked ? 'liked' : ''}" onclick="likeScore('${score.gameId}', this)">
-                        ${isLiked ? '❤️' : '🤍'} ${score.likes}
-                    </button>
+                    <div class="score-reactions">
+                        <button class="score-reaction-btn" onclick="reactToScore('${score.gameId}', '❤️', this)">
+                            ❤️ ${reactions['❤️']}
+                        </button>
+                        <button class="score-reaction-btn" onclick="reactToScore('${score.gameId}', '🔥', this)">
+                            🔥 ${reactions['🔥']}
+                        </button>
+                        <button class="score-reaction-btn" onclick="reactToScore('${score.gameId}', '💯', this)">
+                            💯 ${reactions['💯']}
+                        </button>
+                    </div>
                 </td>
                 <td>${date}</td>
             `;
             tbody.appendChild(row);
         });
     }
+    
+    function reactToBio(emoji, button) {
+        if (!userData.bioReactions[emoji]) userData.bioReactions[emoji] = 0;
+        
+        if (button.classList.contains('active')) {
+            button.classList.remove('active');
+            userData.bioReactions[emoji]--;
+        } else {
+            button.classList.add('active');
+            userData.bioReactions[emoji]++;
+        }
+        
+        button.querySelector('.reaction-count').textContent = userData.bioReactions[emoji];
+        localStorage.setItem('arcadeUser', JSON.stringify(userData));
+    }
+    
+    function reactToAchievement(achievementId, emoji, button) {
+        if (!userData.achievementReactions[achievementId]) {
+            userData.achievementReactions[achievementId] = { '❤️': 0, '🔥': 0, '⭐': 0 };
+        }
+        
+        if (button.classList.contains('active')) {
+            button.classList.remove('active');
+            userData.achievementReactions[achievementId][emoji]--;
+        } else {
+            button.classList.add('active');
+            userData.achievementReactions[achievementId][emoji]++;
+        }
+        
+        localStorage.setItem('arcadeUser', JSON.stringify(userData));
+        loadAchievements(userData);
+    }
+    
+    function reactToScore(gameId, emoji, button) {
+        if (!userData.scoreReactions[gameId]) {
+            userData.scoreReactions[gameId] = { '❤️': 0, '🔥': 0, '💯': 0 };
+        }
+        
+        if (button.classList.contains('active')) {
+            button.classList.remove('active');
+            userData.scoreReactions[gameId][emoji]--;
+        } else {
+            button.classList.add('active');
+            userData.scoreReactions[gameId][emoji]++;
+        }
+        
+        button.textContent = `${emoji} ${userData.scoreReactions[gameId][emoji]}`;
+        localStorage.setItem('arcadeUser', JSON.stringify(userData));
+    }
+    
+    function openBioModal() {
+        document.getElementById('bio-modal').classList.add('active');
+        document.getElementById('bio-input').value = userData.bio || '';
+        updateCharCount();
+    }
+    
+    function saveBio() {
+        const bioText = document.getElementById('bio-input').value.trim();
+        userData.bio = bioText || 'No bio yet! Click edit to add one.';
+        document.getElementById('bio-text').textContent = userData.bio;
+        localStorage.setItem('arcadeUser', JSON.stringify(userData));
+        closeModal('bio-modal');
+    }
+    
+    function updateCharCount() {
+        const input = document.getElementById('bio-input');
+        const count = document.getElementById('char-count');
+        count.textContent = input.value.length;
+    }
+    
+    document.getElementById('bio-input')?.addEventListener('input', updateCharCount);
     
     function openAvatarModal() {
         const modal = document.getElementById('avatar-modal');
@@ -1099,7 +1323,7 @@
             document.getElementById('user-avatar').src = selectedAvatar;
             localStorage.setItem('arcadeUser', JSON.stringify(userData));
             closeModal('avatar-modal');
-            alert('✅ Avatar updated successfully!');
+            alert('✅ Avatar updated!');
         }
     }
     
@@ -1131,7 +1355,7 @@
             document.getElementById('profile-banner').src = selectedBanner;
             localStorage.setItem('arcadeUser', JSON.stringify(userData));
             closeModal('banner-modal');
-            alert('✅ Banner updated successfully!');
+            alert('✅ Banner updated!');
         }
     }
     
@@ -1159,38 +1383,6 @@
         localStorage.setItem('arcadeUser', JSON.stringify(userData));
     }
     
-    function likeAchievement(achievementId, button) {
-        if (!userData.likedAchievements[achievementId]) {
-            userData.likedAchievements[achievementId] = 0;
-        }
-        
-        const isLiked = button.classList.contains('liked');
-        
-        if (isLiked) {
-            button.classList.remove('liked');
-            button.innerHTML = '🤍';
-            userData.likedAchievements[achievementId]--;
-        } else {
-            button.classList.add('liked');
-            userData.likedAchievements[achievementId]++;
-            button.innerHTML = `❤️ <span class="like-count">${userData.likedAchievements[achievementId]}</span>`;
-        }
-        localStorage.setItem('arcadeUser', JSON.stringify(userData));
-    }
-    
-    function likeScore(gameId, button) {
-        const isLiked = button.classList.contains('liked');
-        const currentLikes = parseInt(button.textContent.match(/\d+/)?.[0] || 0);
-        
-        if (isLiked) {
-            button.classList.remove('liked');
-            button.innerHTML = `🤍 ${currentLikes - 1}`;
-        } else {
-            button.classList.add('liked');
-            button.innerHTML = `❤️ ${currentLikes + 1}`;
-        }
-    }
-    
     function logout() {
         if (confirm('Are you sure you want to logout?')) {
             localStorage.removeItem('isLoggedIn');
@@ -1205,3 +1397,5 @@
         }
     }
 </script>
+</body>
+</html>

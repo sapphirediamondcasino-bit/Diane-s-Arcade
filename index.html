@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diane's Retro Arcade ☕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #F5E6D3;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(245, 230, 211, 0.1);
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #F5E6D3;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .game-card {
+            background: rgba(245, 230, 211, 0.1);
+            border: 2px solid #F5E6D3;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(245, 230, 211, 0.3);
+        }
+        
+        .game-card h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+        
+        .game-card p {
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        
+        .play-button {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .play-button:hover {
+            background: #45a049;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 Diane's Retro Arcade</h1>
+        <p>Classic Flash Games, Preserved Forever ☕</p>
+    </div>
+    
+    <div class="games-grid">
+        <div class="game-card">
+            <h2>⛏️ MotherLoad</h2>
+            <p>Dig deep for minerals and upgrade your pod!</p>
+            <a href="game.html?game=motherload" class="play-button">PLAY NOW</a>
+        </div>
+        
+        <div class="game-card">
+            <h2>🎡 Happy Wheels</h2>
+            <p>Ragdoll physics mayhem! Try not to die!</p>
+            <a href="game.html?game=happywheels" class="play-button">PLAY NOW</a>
+        </div>
+        
+        <div class="game-card">
+            <h2>🔫 Gun Blood</h2>
+            <p>Quick-draw western duels!</p>
+            <a href="game.html?game=gunblood" class="play-button">PLAY NOW</a>
+        </div>
+        
+        <div class="game-card">
+            <h2>🚣 Raft Wars</h2>
+            <p>Defend your treasure with tennis balls!</p>
+            <a href="game.html?game=raftwars" class="play-button">PLAY NOW</a>
+        </div>
+        
+        <div class="game-card">
+            <h2>🚣 Raft Wars 2</h2>
+            <p>More raft battles and treasure!</p>
+            <a href="game.html?game=raftwars2" class="play-button">PLAY NOW</a>
+        </div>
+        
+        <div class="game-card">
+            <h2>🦄 Robot Unicorn Attack</h2>
+            <p>Endless runner with rainbows!</p>
+            <a href="game.html?game=robotunicornattack" class="play-button">PLAY NOW</a>
+        </div>
+        
+        <div class="game-card">
+            <h2>🧟 Earn to Die</h2>
+            <p>Drive through zombie hordes!</p>
+            <a href="game.html?game=earntodie" class="play-button">PLAY NOW</a>
+        </div>
+        
+        <div class="game-card">
+            <h2>🎯 Bush Shootout</h2>
+            <p>Political shooter action!</p>
+            <a href="game.html?game=bushshootout" class="play-button">PLAY NOW</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Powered by Diane Keaton Bot ☕</p>
+        <p>Games preserved with Ruffle Flash Emulator</p>
+    </div>
+</body>
+</html>

@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diane's Retro Arcade ☕</title>
+    <title>Diane Keaton Memorial Arcade ☕</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,29 +15,411 @@
         }
         
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             color: #F5E6D3;
             min-height: 100vh;
-            padding: 20px;
         }
         
-        .header {
+        /* Memorial Header */
+        .memorial-banner {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.3), rgba(184, 134, 11, 0.3));
+            border-bottom: 3px solid #DAA520;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(218, 165, 32, 0.3);
+        }
+        
+        .memorial-banner h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            color: #FFD700;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+            letter-spacing: 2px;
+        }
+        
+        .memorial-banner .subtitle {
+            font-size: 1.3em;
+            font-style: italic;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .memorial-banner .tribute {
+            font-size: 1.1em;
+            max-width: 800px;
+            margin: 20px auto 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            border-left: 4px solid #DAA520;
+        }
+        
+        .memorial-banner .tribute strong {
+            color: #FFD700;
+        }
+        
+        /* Navigation */
+        .nav-section {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(218, 165, 32, 0.3);
+        }
+        
+        .nav-section a {
+            color: #FFD700;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        
+        .nav-section a:hover {
+            background: rgba(218, 165, 32, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #FFD700;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #DAA520, transparent);
+            margin: 15px auto 0;
+        }
+        
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .game-card {
+            background: linear-gradient(145deg, rgba(30, 30, 50, 0.8), rgba(20, 20, 40, 0.9));
+            border: 2px solid rgba(218, 165, 32, 0.4);
+            border-radius: 15px;
+            padding: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(218, 165, 32, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+        
+        .game-card:hover::before {
+            opacity: 1;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(218, 165, 32, 0.4);
+            border-color: #FFD700;
+        }
+        
+        .game-icon {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 30px;
+            text-align: center;
+            font-size: 4em;
+            border-bottom: 2px solid rgba(218, 165, 32, 0.3);
+        }
+        
+        .game-info {
+            padding: 25px;
+        }
+        
+        .game-info h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            margin-bottom: 12px;
+            color: #FFD700;
+        }
+        
+        .game-info p {
+            color: #C0C0C0;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        
+        .play-button {
+            display: block;
+            background: linear-gradient(135deg, #DAA520, #B8860B);
+            color: #000;
+            padding: 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .play-button:hover {
+            background: linear-gradient(135deg, #FFD700, #DAA520);
+            box-shadow: 0 5px 20px rgba(218, 165, 32, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.6);
             text-align: center;
             padding: 40px 20px;
-            background: rgba(245, 230, 211, 0.1);
-            border-radius: 20px;
-            margin-bottom: 40px;
+            margin-top: 60px;
+            border-top: 2px solid rgba(218, 165, 32, 0.3);
         }
         
-        .header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            color: #F5E6D3;
+        .footer p {
+            margin: 10px 0;
+            opacity: 0.8;
         }
         
-        .header p {
-            font-size: 1.2em;
+        .footer .heart {
+            color: #FF6B9D;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .memorial-banner h1 {
+                font-size: 2.2em;
+            }
+            
+            .memorial-banner .subtitle {
+                font-size: 1em;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .section-title {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Memorial Banner -->
+    <div class="memorial-banner">
+        <h1>🎮 Diane Keaton Memorial Arcade</h1>
+        <p class="subtitle">Preserving Classic Games, Honoring a Beautiful Soul ☕</p>
+        <div class="tribute">
+            <strong>In Loving Memory of Diane Keaton</strong><br>
+            This arcade is dedicated to the memory of Diane Keaton, whose love for gaming, 
+            laughter, and bringing joy to others inspired this collection of classic Flash games. 
+            May her spirit live on through every game played here. 💜
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="nav-section">
+        <a href="#games">🎮 Play Games</a>
+        <a href="#about">💖 About Diane</a>
+        <a href="https://discord.gg/yourserver" target="_blank">💬 Join Discord</a>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <h2 class="section-title" id="games">Classic Game Collection</h2>
+        
+        <div class="games-grid">
+            <!-- MotherLoad -->
+            <div class="game-card">
+                <div class="game-icon">⛏️</div>
+                <div class="game-info">
+                    <h2>MotherLoad</h2>
+                    <p>Dig deep into the Martian soil for precious minerals! Upgrade your pod and discover the secrets below.</p>
+                    <a href="game.html?game=motherload" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Happy Wheels -->
+            <div class="game-card">
+                <div class="game-icon">🎡</div>
+                <div class="game-info">
+                    <h2>Happy Wheels</h2>
+                    <p>Ragdoll physics mayhem! Navigate deadly obstacle courses in this hilariously brutal game.</p>
+                    <a href="game.html?game=happywheels" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Gun Blood -->
+            <div class="game-card">
+                <div class="game-icon">🔫</div>
+                <div class="game-info">
+                    <h2>Gun Blood</h2>
+                    <p>Test your reflexes in quick-draw western duels! Be faster than your opponent or bite the dust.</p>
+                    <a href="game.html?game=gunblood" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Raft Wars -->
+            <div class="game-card">
+                <div class="game-icon">🚣</div>
+                <div class="game-info">
+                    <h2>Raft Wars</h2>
+                    <p>Defend your treasure with tennis balls! Strategic shooting action on the high seas.</p>
+                    <a href="game.html?game=raftwars" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Raft Wars 2 -->
+            <div class="game-card">
+                <div class="game-icon">🏴‍☠️</div>
+                <div class="game-info">
+                    <h2>Raft Wars 2</h2>
+                    <p>The treasure hunters return! More levels, more enemies, more raft battles!</p>
+                    <a href="game.html?game=raftwars2" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Robot Unicorn Attack -->
+            <div class="game-card">
+                <div class="game-icon">🦄</div>
+                <div class="game-info">
+                    <h2>Robot Unicorn Attack</h2>
+                    <p>Endless runner with rainbows and heavy metal! Always believe in your dreams!</p>
+                    <a href="game.html?game=robotunicornattack" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Earn to Die -->
+            <div class="game-card">
+                <div class="game-icon">🧟</div>
+                <div class="game-info">
+                    <h2>Earn to Die</h2>
+                    <p>Drive through zombie hordes! Upgrade your vehicle and reach the evacuation point.</p>
+                    <a href="game.html?game=earntodie" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Bush Shootout -->
+            <div class="game-card">
+                <div class="game-icon">🎯</div>
+                <div class="game-info">
+                    <h2>Bush Shootout</h2>
+                    <p>Political shooter action from the early 2000s! A piece of internet history.</p>
+                    <a href="game.html?game=bushshootout" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Candy Machine -->
+            <div class="game-card">
+                <div class="game-icon">🍬</div>
+                <div class="game-info">
+                    <h2>Candy Machine Deluxe</h2>
+                    <p>Match candies and satisfy your sweet tooth in this puzzle classic!</p>
+                    <a href="game.html?game=candymachine" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Gold Miner -->
+            <div class="game-card">
+                <div class="game-icon">⚒️</div>
+                <div class="game-info">
+                    <h2>Gold Miner</h2>
+                    <p>Hook gold and precious gems! Test your timing in this addictive classic.</p>
+                    <a href="game.html?game=gold01" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Tom and Jerry Bowling -->
+            <div class="game-card">
+                <div class="game-icon">🎳</div>
+                <div class="game-info">
+                    <h2>Tom and Jerry Bowling</h2>
+                    <p>Classic cartoon bowling! Help Jerry get strikes while Tom tries to stop you.</p>
+                    <a href="game.html?game=tomandjerrybowling" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Britney Brawl -->
+            <div class="game-card">
+                <div class="game-icon">👊</div>
+                <div class="game-info">
+                    <h2>Britney Brawl</h2>
+                    <p>Bill vs Britney in an epic showdown! Early internet humor preserved.</p>
+                    <a href="game.html?game=britneybrawl" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Bush vs Kerry -->
+            <div class="game-card">
+                <div class="game-icon">🗳️</div>
+                <div class="game-info">
+                    <h2>Bush vs Kerry</h2>
+                    <p>Political battle game from the 2004 election! A time capsule of internet gaming.</p>
+                    <a href="game.html?game=bushvskerry" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+            
+            <!-- Run Around -->
+            <div class="game-card">
+                <div class="game-icon">🏃</div>
+                <div class="game-info">
+                    <h2>Run Around</h2>
+                    <p>Fast-paced running action! Test your reflexes and see how far you can go.</p>
+                    <a href="game.html?game=ruahm" class="play-button">⚡ Play Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>In Loving Memory of Diane Keaton</strong></p>
+        <p>May her love for gaming and joy live on forever <span class="heart">💜</span></p>
+        <p style="margin-top: 20px; opacity: 0.6;">
+            Games preserved with Ruffle Flash Emulator<br>
+            Powered by Diane Keaton Bot ☕
+        </p>
+    </div>
+</body>
+</html>            font-size: 1.2em;
             opacity: 0.8;
         }
         

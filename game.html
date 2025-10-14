@@ -29,7 +29,6 @@
             overflow-y: auto;
         }
         
-        /* Animated Grid Background */
         body::before {
             content: '';
             position: fixed;
@@ -50,7 +49,6 @@
             100% { transform: translate(50px, 50px); }
         }
         
-        /* Top Bar */
         .top-bar {
             background: rgba(5, 5, 16, 0.98);
             backdrop-filter: blur(30px);
@@ -95,7 +93,6 @@
             transform: translateX(-5px) scale(1.05);
         }
         
-        /* Game Container - MASSIVE SIZE! */
         .game-container {
             width: 100%;
             min-height: calc(100vh - 80px);
@@ -106,7 +103,6 @@
             position: relative;
         }
         
-        /* Game Player - HUGE! */
         #game {
             width: 95vw;
             max-width: 1800px;
@@ -121,7 +117,6 @@
             overflow: hidden;
         }
         
-        /* Loading Screen */
         #loading {
             position: absolute;
             top: 50%;
@@ -168,7 +163,6 @@
             }
         }
         
-        /* Error Message */
         .error-message {
             position: absolute;
             top: 50%;
@@ -200,10 +194,6 @@
             opacity: 0.9;
         }
         
-        .error-message strong {
-            color: var(--neon-blue);
-        }
-        
         .try-again-btn {
             font-family: 'Orbitron', sans-serif;
             margin-top: 30px;
@@ -222,12 +212,6 @@
             display: inline-block;
         }
         
-        .try-again-btn:hover {
-            box-shadow: 0 0 50px var(--neon-blue);
-            transform: scale(1.05);
-        }
-        
-        /* Controls Hint */
         .controls-hint {
             position: absolute;
             bottom: 30px;
@@ -242,15 +226,8 @@
             color: var(--neon-blue);
             text-shadow: 0 0 10px var(--neon-blue);
             opacity: 0.8;
-            transition: all 0.3s;
         }
         
-        .controls-hint:hover {
-            opacity: 1;
-            box-shadow: 0 0 30px var(--neon-blue);
-        }
-        
-        /* Recommended Games Section */
         .recommended-section {
             max-width: 1600px;
             margin: 80px auto;
@@ -267,18 +244,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            position: relative;
-        }
-        
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 150px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
-            margin: 20px auto;
-            border-radius: 10px;
-            box-shadow: 0 0 20px var(--neon-blue);
         }
         
         .recommended-grid {
@@ -289,43 +254,18 @@
         
         .recommended-card {
             background: rgba(5, 5, 16, 0.85);
-            border: 2px solid transparent;
+            border: 2px solid var(--neon-blue);
             border-radius: 20px;
             overflow: hidden;
             transition: all 0.4s;
             cursor: pointer;
             text-decoration: none;
             color: white;
-        }
-        
-        .recommended-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-pink), var(--neon-blue));
-            background-size: 400%;
-            border-radius: 20px;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.4s;
-            animation: borderRotate 3s linear infinite;
-        }
-        
-        @keyframes borderRotate {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .recommended-card:hover::before {
-            opacity: 1;
+            position: relative;
         }
         
         .recommended-card:hover {
-            transform: translateY(-10px) scale(1.03);
+            transform: translateY(-10px);
             box-shadow: 0 20px 60px rgba(0, 243, 255, 0.4);
         }
         
@@ -347,270 +287,77 @@
             font-weight: 900;
             color: var(--neon-blue);
             margin-bottom: 10px;
-            letter-spacing: 1px;
         }
         
-        .recommended-card p {
-            font-size: 0.9em;
-            line-height: 1.5;
-            opacity: 0.85;
-        }
-        
-        .play-mini-btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 30px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            color: white;
-            border-radius: 25px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 0.9em;
-            letter-spacing: 2px;
-            box-shadow: 0 5px 20px rgba(0, 243, 255, 0.4);
-            transition: all 0.3s;
-        }
-        
-        .recommended-card:hover .play-mini-btn {
-            box-shadow: 0 10px 40px rgba(0, 243, 255, 0.6);
-            transform: translateY(-2px);
-        }
-        
-        /* Responsive */
         @media (max-width: 768px) {
-            .top-bar {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px 20px;
-            }
-            
-            .game-title {
-                font-size: 1.3em;
-            }
-            
-            #game {
-                width: 98vw;
-                height: calc(100vh - 200px);
-            }
-            
-            .controls-hint {
-                font-size: 0.7em;
-                padding: 10px 20px;
-            }
-            
-            .recommended-section {
-                padding: 20px;
-            }
-            
-            .recommended-grid {
-                grid-template-columns: 1fr;
-            }
+            .top-bar { flex-direction: column; gap: 15px; }
+            #game { width: 98vw; height: calc(100vh - 200px); }
         }
     </style>
 </head>
 <body>
-    <!-- Top Bar -->
     <div class="top-bar">
         <div class="game-title" id="game-title">LOADING GAME...</div>
         <a href="index.html" class="back-btn">← BACK TO ARCADE</a>
     </div>
     
-    <!-- Game Container -->
     <div class="game-container">
-        <!-- Loading Screen -->
         <div id="loading">
             <div class="loading-spinner"></div>
             <div class="loading-text">LOADING GAME...</div>
         </div>
         
-        <!-- Game Player (HUGE SIZE!) -->
         <div id="game"></div>
         
-        <!-- Error Message -->
         <div class="error-message" id="error-msg">
             <h2>⚠️ GAME ERROR</h2>
-            <p>The game file couldn't be loaded. This might happen if:</p>
-            <p>
-                <strong>• The .swf file is missing from /games/ folder</strong><br>
-                <strong>• The filename doesn't match exactly</strong><br>
-                <strong>• The file is corrupted</strong>
-            </p>
-            <p>Check the console for details, or try another game!</p>
+            <p>The game file couldn't be loaded.</p>
             <button class="try-again-btn" onclick="location.reload()">TRY AGAIN</button>
-            <a href="index.html" class="try-again-btn" style="margin-left: 15px;">BACK TO ARCADE</a>
+            <a href="index.html" class="try-again-btn">BACK TO ARCADE</a>
         </div>
         
-        <!-- Controls Hint -->
         <div class="controls-hint">
-            🎮 CONTROLS: Arrow Keys / WASD • Space • Mouse Click
+            🎮 CONTROLS: Arrow Keys / WASD • Space • Mouse
         </div>
     </div>
     
-    <!-- Recommended Games Section -->
     <div class="recommended-section">
         <h2 class="section-title">🎮 PLAY NEXT</h2>
-        <div class="recommended-grid" id="recommended-games">
-            <!-- Will be populated by JavaScript -->
-        </div>
+        <div class="recommended-grid" id="recommended-games"></div>
     </div>
     
     <script>
-        // Get game name from URL
         const urlParams = new URLSearchParams(window.location.search);
         const gameName = urlParams.get('game');
         
-        // Complete game database
         const games = {
-            'motherload': {
-                name: 'MOTHERLOAD',
-                file: '1269 - MotherLoad.swf',
-                image: 'https://images.crazygames.com/motherload/20210728141606/motherload-cover?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
-                desc: 'Dig deep for Martian minerals!',
-                related: ['earntodie', 'gold01', 'raftwars']
-            },
-            'happywheels': {
-                name: 'HAPPY WHEELS',
-                file: 'HappyWheels.swf',
-                image: 'https://www.totaljerkface.com/happy_wheels.tjf/screen_1.png',
-                desc: 'Ragdoll physics mayhem!',
-                related: ['earntodie', 'robotunicornattack', 'ruahm']
-            },
-            'gunblood': {
-                name: 'GUN BLOOD',
-                file: 'gunblood.swf',
-                image: 'https://img.gamepix.com/games/gun-blood/cover/gun-blood.png?width=600&height=340&fit=cover',
-                desc: 'Quick-draw western duels!',
-                related: ['bushshootout', 'raftwars', 'raftwars2']
-            },
-            'raftwars': {
-                name: 'RAFT WARS',
-                file: 'raftwars.swf',
-                image: 'https://images.crazygames.com/games/raft-wars/cover-1584712617223.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
-                desc: 'Defend your treasure!',
-                related: ['raftwars2', 'gunblood', 'gold01']
-            },
-            'raftwars2': {
-                name: 'RAFT WARS 2',
-                file: 'raftwars2.swf',
-                image: 'https://images.crazygames.com/games/raft-wars-2/cover-1584712799307.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
-                desc: 'More raft battles!',
-                related: ['raftwars', 'gunblood', 'motherload']
-            },
-            'robotunicornattack': {
-                name: 'ROBOT UNICORN ATTACK',
-                file: 'robotunicornattack_flash.swf',
-                image: 'https://images.crazygames.com/games/robot-unicorn-attack/cover-1594986973330.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
-                desc: 'Chase your dreams!',
-                related: ['robotunicornattack', 'happywheels', 'earntodie']
-            },
-            'ruahm': {
-                name: 'ROBOT UNICORN ATTACK: HEAVY METAL',
-                file: 'ruahm.swf',
-                image: 'https://www.gameflare.com/online-game/robot-unicorn-attack-heavy-metal/1-250.jpg',
-                desc: 'Heavy metal edition!',
-                related: ['robotunicornattack', 'happywheels', 'earntodie']
-            },
-            'retrounicornattack': {
-                name: 'retro unicorn attack',
-                file: 'Eetro-unicorn-attack.swf',
-                image: 'https://i.ytimg.com/vi/9YZRlN5uv5Y/maxresdefault.jpg',
-                desc: 'Interdimensional adventure!',
-                related: ['robotunicornattack', 'happywheels', 'earntodie']
-            },
-            'earntodie': {
-                name: 'EARN TO DIE',
-                file: 'EarnToDie_NotDoppler_dec.swf',
-                image: 'https://images.crazygames.com/games/earn-to-die/cover-1633704513517.png?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=600',
-                desc: 'Drive through zombies!',
-                related: ['happywheels', 'motherload', 'robotunicornattack']
-            },
-            'bushshootout': {
-                name: 'BUSH SHOOTOUT',
-                file: '1452__bushshootout_game.swf',
-                image: 'https://i.ytimg.com/vi/ykZC9y5R5TY/maxresdefault.jpg',
-                desc: 'Retro political shooter!',
-                related: ['gunblood', 'raftwars', 'tomandjerrybowling']
-            },
-            'candymachine': {
-                name: 'CANDY MACHINE DELUXE',
-                file: 'flash_candymachinedeluxe.swf',
-                image: 'https://www.addictinggames.com/sites/default/files/styles/front_page_banner/public/candymachinedeluxe.jpg',
-                desc: 'Sweet puzzle fun!',
-                related: ['gold01', 'tomandjerrybowling', 'motherload']
-            },
-            'gold01': {
-                name: 'GOLD MINER',
-                file: 'gold01.swf',
-                image: 'https://img.gamepix.com/games/gold-miner/cover/gold-miner.png?width=600&height=340&fit=cover',
-                desc: 'Grab treasures!',
-                related: ['motherload', 'raftwars', 'candymachine']
-            },
-            'tomandjerrybowling': {
-                name: 'TOM & JERRY BOWLING',
-                file: 'tomandjerrybowling.swf',
-                image: 'https://www.gameslol.net/data/image/tom-and-jerry-games/tom-and-jerry-bowling.jpg',
-                desc: 'Cartoon bowling!',
-                related: ['candymachine', 'gold01', 'bushshootout']
-            },
-            'hive-hero': {
-                name: 'HIVE HERO',
-                file: 'hive-hero.swf',
-                image: 'https://i.ytimg.com/vi/XJ7HZATMKZ8/maxresdefault.jpg',
-                desc: 'Become the ultimate bee!',
-                related: ['motherload', 'gold01', 'earntodie']
-            },
-            'rickandmorty': {
-                name: 'RICK AND MORTY',
-                file: 'rick-and-morty.swf',
-                image: 'https://i.ytimg.com/vi/9YZRlN5uv5Y/maxresdefault.jpg',
-                desc: 'Interdimensional adventure!',
-                related: ['happywheels', 'robotunicornattack', 'ruahm']
-            },
-            'jawbreaker': {
-                name: 'Jawbreaker',
-                file: 'jawbreaker.swf',
-                image: 'https://i.ytimg.com/vi/9YZRlN5uv5Y/maxresdefault.jpg',
-                desc: 'Interdimensional adventure!',
-                related: ['happywheels', 'robotunicornattack', 'ruahm']
-            },
-            'earntodie2012': {
-                name: 'Earn To Die 2012',
-                file: 'earn-to-die-2012.swf',
-                image: 'https://i.ytimg.com/vi/9YZRlN5uv5Y/maxresdefault.jpg',
-                desc: 'Interdimensional adventure!',
-                related: ['happywheels', 'robotunicornattack', 'ruahm']
-            },
-            'EarntoDie2016': {
-                name: 'Earn to Die 2016',
-                file: 'Earn to Die 2016.swf',
-                image: 'https://i.ytimg.com/vi/9YZRlN5uv5Y/maxresdefault.jpg',
-                desc: 'Interdimensional adventure!',
-                related: ['happywheels', 'robotunicornattack', 'ruahm']
-            },
-            'EarntoDiePart2': {
-                name: 'Earn to Die Part 2',
-                file: 'Earn to Die Part 2.swf',
-                image: 'https://i.ytimg.com/vi/9YZRlN5uv5Y/maxresdefault.jpg',
-                desc: 'Interdimensional adventure!',
-                related: ['happywheels', 'robotunicornattack', 'ruahm']
-            }
-            'tj_trapomatic': {
-                name: 'tj_trapomatic',
-                file: 'tj_trapomatic.swf',
-                image: 'https://i.ytimg.com/vi/9YZRlN5uv5Y/maxresdefault.jpg',
-                desc: 'Interdimensional adventure!',
-                related: ['happywheels', 'robotunicornattack', 'ruahm']
-            }
+            'motherload': { name: 'MOTHERLOAD', file: '1269 - MotherLoad.swf', image: 'https://archive.org/serve/motherload_202209/motherload_202209_screenshot.gif', desc: 'Dig deep for Martian minerals!', related: ['earntodie', 'gold01', 'raftwars'] },
+            'happywheels': { name: 'HAPPY WHEELS', file: 'HappyWheels.swf', image: 'https://archive.org/serve/billiardss/00_A.png', desc: 'Ragdoll physics mayhem!', related: ['earntodie', 'robotunicornattack', 'ruahm'] },
+            'gunblood': { name: 'GUN BLOOD', file: 'gunblood.swf', image: 'https://archive.org/download/gun-blood-flash-game/gunblood-menu.png', desc: 'Quick-draw western duels!', related: ['bushshootout', 'raftwars', 'raftwars2'] },
+            'raftwars': { name: 'RAFT WARS', file: 'raftwars.swf', image: 'https://archive.org/serve/raft-wars_202207/raft-wars_202207_screenshot.gif', desc: 'Defend your treasure!', related: ['raftwars2', 'gunblood', 'gold01'] },
+            'raftwars2': { name: 'RAFT WARS 2', file: 'raftwars2.swf', image: 'https://archive.org/serve/miniclip_raft_wars_2/miniclip_raft_wars_2_screenshot.gif', desc: 'More raft battles!', related: ['raftwars', 'gunblood', 'motherload'] },
+            'robotunicornattack': { name: 'ROBOT UNICORN ATTACK', file: 'robotunicornattack_flash.swf', image: 'https://archive.org/serve/robotunicornattack_flash/RobotUnicornAttack_screenshot.jpg', desc: 'Chase your dreams!', related: ['ruahm', 'happywheels', 'earntodie'] },
+            'ruahm': { name: 'ROBOT UNICORN ATTACK: HEAVY METAL', file: 'ruahm.swf', image: 'https://archive.org/serve/ruahm/ruahm_screenshot.gif', desc: 'Heavy metal edition!', related: ['robotunicornattack', 'happywheels', 'earntodie'] },
+            'retrounicornattack': { name: 'RETRO UNICORN ATTACK', file: 'Retro-unicorn-attack.swf', image: 'https://archive.org/serve/robot_unicorn_attack/robot_unicorn_attack_screenshot.gif', desc: 'Classic unicorn runner!', related: ['robotunicornattack', 'ruahm', 'happywheels'] },
+            'earntodie': { name: 'EARN TO DIE', file: 'EarnToDie_NotDoppler_dec.swf', image: 'https://archive.org/serve/etd_20220311/etd_20220311_screenshot.gif', desc: 'Drive through zombies!', related: ['earntodie2012', 'EarntoDie2016', 'EarntoDiePart2'] },
+            'earntodie2012': { name: 'EARN TO DIE 2012', file: 'earn-to-die-2012.swf', image: 'https://archive.org/serve/earntodie2012/earntodie2012_screenshot.gif', desc: 'Zombie roadkill 2012!', related: ['earntodie', 'EarntoDie2016', 'EarntoDiePart2'] },
+            'EarntoDie2016': { name: 'EARN TO DIE 2016', file: 'Earn to Die 2016.swf', image: 'https://archive.org/serve/earntodie2016/earntodie2016_screenshot.gif', desc: 'Apocalypse 2016!', related: ['earntodie', 'earntodie2012', 'EarntoDiePart2'] },
+            'EarntoDiePart2': { name: 'EARN TO DIE PART 2', file: 'Earn to Die Part 2.swf', image: 'https://archive.org/serve/earntodiepart2/earntodiepart2_screenshot.gif', desc: 'Ultimate sequel!', related: ['earntodie', 'earntodie2012', 'EarntoDie2016'] },
+            'bushshootout': { name: 'BUSH SHOOTOUT', file: '1452__bushshootout_game.swf', image: 'https://i.ytimg.com/vi/ykZC9y5R5TY/maxresdefault.jpg', desc: 'Retro political shooter!', related: ['gunblood', 'raftwars', 'tomandjerrybowling'] },
+            'candymachine': { name: 'CANDY MACHINE DELUXE', file: 'flash_candymachinedeluxe.swf', image: 'https://archive.org/serve/flash_candymachinedeluxe/flash_candymachinedeluxe_screenshot.png', desc: 'Sweet puzzle fun!', related: ['jawbreaker', 'gold01', 'tomandjerrybowling'] },
+            'jawbreaker': { name: 'JAWBREAKER', file: 'jawbreaker.swf', image: 'https://archive.org/serve/miniclip_jawbreaker/miniclip_jawbreaker_screenshot.gif', desc: 'Candy smashing action!', related: ['candymachine', 'gold01', 'tomandjerrybowling'] },
+            'gold01': { name: 'GOLD MINER', file: 'gold01.swf', image: 'https://img.gamepix.com/games/gold-miner/cover/gold-miner.png?width=600&height=340&fit=cover', desc: 'Grab treasures!', related: ['motherload', 'raftwars', 'candymachine'] },
+            'tomandjerrybowling': { name: 'TOM & JERRY BOWLING', file: 'tomandjerrybowling.swf', image: 'https://archive.org/serve/tom-and-jerry-bowling/00_B.png', desc: 'Cartoon bowling!', related: ['candymachine', 'gold01', 'bushshootout'] },
+            'hive-hero': { name: 'HIVE HERO', file: 'hive-hero.swf', image: 'https://archive.org/serve/miniclip_hive_hero/miniclip_hive_hero_screenshot.gif', desc: 'Become the ultimate bee!', related: ['motherload', 'gold01', 'earntodie'] },
+            'tj_trapomatic': { name: 'TJ TRAPOMATIC', file: 'tj_trapomatic.swf', image: 'https://archive.org/serve/tj_trapomatic/tj_trapomatic_screenshot.gif', desc: 'Contraption madness!', related: ['hive-hero', 'candymachine', 'tomandjerrybowling'] },
+            'rickandmorty': { name: 'RICK AND MORTY', file: 'rick-and-morty.swf', image: "https://archive.org/serve/rick-and-mortys-rushed-licensed-adventure/Rick%20and%20Morty's%20Rushed%20Licensed%20Adventure%20sceenshot.jpg", desc: 'Interdimensional adventure!', related: ['happywheels', 'robotunicornattack', 'ruahm'] }
         };
         
         if (gameName && games[gameName]) {
             const currentGame = games[gameName];
-            
-            // Set display name
             document.getElementById('game-title').textContent = currentGame.name;
             document.title = `Playing ${currentGame.name} | Diane Keaton Memorial Arcade`;
             
-            // Configure Ruffle
             window.RufflePlayer = window.RufflePlayer || {};
             window.RufflePlayer.config = {
                 "autoplay": "on",
@@ -619,75 +366,49 @@
                 "letterbox": "on",
                 "warnOnUnsupportedContent": false,
                 "contextMenu": false,
-                "preloader": true,
-                "splashScreen": false,
                 "quality": "high",
                 "scale": "showAll"
             };
             
-            // Create Ruffle player
             const ruffle = window.RufflePlayer.newest();
             const player = ruffle.createPlayer();
             const container = document.getElementById('game');
-            
-            // Add player to container
             container.appendChild(player);
             
-            // Hide loading after 2 seconds
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-            }, 2000);
-            
-            // Load the game
-            console.log(`Loading game: games/${currentGame.file}`);
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 2000);
             
             player.load(`games/${currentGame.file}`)
                 .then(() => {
-                    console.log('Game loaded successfully!');
+                    console.log('Game loaded!');
                     document.getElementById('loading').style.display = 'none';
                 })
                 .catch(error => {
-                    console.error('Failed to load game:', error);
+                    console.error('Error:', error);
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('error-msg').style.display = 'block';
                 });
             
-            // Populate Recommended Games
             const recommendedContainer = document.getElementById('recommended-games');
-            const relatedGames = currentGame.related || [];
-            
-            relatedGames.forEach(gameId => {
+            (currentGame.related || []).forEach(gameId => {
                 const game = games[gameId];
                 if (game) {
                     const card = document.createElement('a');
                     card.href = `game.html?game=${gameId}`;
                     card.className = 'recommended-card';
                     card.innerHTML = `
-                        <img src="${game.image}" alt="${game.name}" class="recommended-image" onerror="this.src='https://via.placeholder.com/300x180/050510/00f3ff?text=${encodeURIComponent(game.name)}'">
+                        <img src="${game.image}" alt="${game.name}" class="recommended-image">
                         <div class="recommended-content">
                             <h3>${game.name}</h3>
                             <p>${game.desc}</p>
-                            <div class="play-mini-btn">PLAY NOW ▶</div>
                         </div>
                     `;
                     recommendedContainer.appendChild(card);
                 }
             });
-            
         } else {
-            // Game not found
-            document.getElementById('game-title').textContent = 'GAME NOT FOUND';
             document.getElementById('loading').innerHTML = `
-                <div style="font-family: Orbitron; font-size: 2em; color: #ff00ff; text-shadow: 0 0 30px #ff00ff;">
-                    ⚠️ GAME NOT FOUND
-                </div>
-                <p style="margin-top: 30px; font-size: 1.1em;">
-                    The game "${gameName}" doesn't exist.<br>
-                    Please return to the arcade and select a game.
-                </p>
-                <a href="index.html" class="try-again-btn" style="margin-top: 30px;">
-                    ← BACK TO ARCADE
-                </a>
+                <div style="font-family: Orbitron; font-size: 2em; color: #ff00ff;">⚠️ GAME NOT FOUND</div>
+                <a href="index.html" class="try-again-btn" style="margin-top: 30px;">← BACK TO ARCADE</a>
             `;
         }
     </script>

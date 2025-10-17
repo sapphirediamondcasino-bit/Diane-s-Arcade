@@ -269,43 +269,6 @@
             color: var(--darker);
         }
         
-        .bio-reactions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .reaction-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 5px 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .reaction-btn:hover {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .reaction-btn.active {
-            background: var(--neon-pink);
-            border-color: var(--neon-pink);
-            box-shadow: 0 0 20px var(--neon-pink);
-        }
-        
-        .reaction-count {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8em;
-            font-weight: 700;
-        }
-        
         .profile-level {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.5em;
@@ -336,41 +299,6 @@
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             box-shadow: 0 0 30px var(--neon-blue);
-        }
-        
-        .social-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .social-btn {
-            padding: 12px 30px;
-            background: rgba(0, 243, 255, 0.1);
-            border: 2px solid var(--neon-blue);
-            border-radius: 25px;
-            color: white;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .social-btn:hover {
-            background: var(--neon-blue);
-            color: var(--darker);
-            box-shadow: 0 0 30px var(--neon-blue);
-            transform: translateY(-3px);
-        }
-        
-        .social-btn.friended {
-            background: var(--neon-green);
-            border-color: var(--neon-green);
-            color: var(--darker);
         }
         
         .profile-stats {
@@ -413,7 +341,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            position: relative;
         }
         
         .section-title::after {
@@ -441,7 +368,6 @@
             padding: 30px;
             text-align: center;
             transition: all 0.3s;
-            position: relative;
         }
         
         .achievement-card.locked {
@@ -452,13 +378,11 @@
         .achievement-card:not(.locked):hover {
             transform: scale(1.05);
             box-shadow: 0 0 50px var(--neon-purple);
-            border-color: var(--neon-pink);
         }
         
         .achievement-icon {
             font-size: 4em;
             margin-bottom: 15px;
-            filter: drop-shadow(0 0 20px var(--neon-purple));
         }
         
         .achievement-name {
@@ -472,14 +396,6 @@
         .achievement-desc {
             font-size: 0.9em;
             opacity: 0.8;
-            line-height: 1.5;
-        }
-        
-        .achievement-date {
-            font-size: 0.8em;
-            color: var(--neon-blue);
-            margin-top: 10px;
-            font-family: 'Orbitron', sans-serif;
         }
         
         .achievement-xp {
@@ -496,67 +412,12 @@
             font-size: 1.5em;
         }
         
-        .achievement-reactions {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            right: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        
-        .achievement-reaction-btn {
-            background: rgba(255, 0, 100, 0.2);
-            border: 2px solid var(--neon-pink);
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1.1em;
-            position: relative;
-        }
-        
-        .achievement-reaction-btn:hover {
-            background: var(--neon-pink);
-            transform: scale(1.15);
-            box-shadow: 0 0 30px var(--neon-pink);
-        }
-        
-        .achievement-reaction-btn.active {
-            background: var(--neon-pink);
-            box-shadow: 0 0 20px var(--neon-pink);
-        }
-        
-        .reaction-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: var(--neon-pink);
-            color: var(--darker);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.6em;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-        }
-        
         .scores-table {
             background: rgba(5, 5, 16, 0.85);
             border: 3px solid var(--neon-blue);
             border-radius: 20px;
             overflow: hidden;
             margin-bottom: 60px;
-            box-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
         }
         
         table {
@@ -574,29 +435,15 @@
             padding: 25px 20px;
             text-align: left;
             color: var(--neon-blue);
-            font-size: 1.1em;
-            letter-spacing: 1px;
-            border-bottom: 2px solid var(--neon-blue);
         }
         
         td {
             padding: 25px 20px;
             border-bottom: 1px solid rgba(0, 243, 255, 0.1);
-            font-size: 1.05em;
-        }
-        
-        tbody tr {
-            transition: all 0.3s;
         }
         
         tbody tr:hover {
             background: rgba(0, 243, 255, 0.05);
-            transform: translateX(5px);
-        }
-        
-        .game-icon-small {
-            font-size: 1.5em;
-            margin-right: 10px;
         }
         
         .score-value {
@@ -604,74 +451,11 @@
             font-size: 1.3em;
             font-weight: 700;
             color: var(--neon-green);
-            text-shadow: 0 0 20px var(--neon-green);
-        }
-        
-        .score-reactions {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        
-        .score-reaction-btn {
-            background: rgba(255, 0, 100, 0.2);
-            border: 2px solid var(--neon-pink);
-            border-radius: 20px;
-            padding: 5px 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 0.9em;
-        }
-        
-        .score-reaction-btn:hover {
-            background: var(--neon-pink);
-            transform: scale(1.05);
-            box-shadow: 0 0 20px var(--neon-pink);
-        }
-        
-        .score-reaction-btn.active {
-            background: var(--neon-pink);
-        }
-        
-        .rank-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 0.9em;
-        }
-        
-        .rank-1 {
-            background: linear-gradient(135deg, #ffd700, #ffed4e);
-            color: #000;
-        }
-        
-        .rank-2 {
-            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
-            color: #000;
-        }
-        
-        .rank-3 {
-            background: linear-gradient(135deg, #cd7f32, #e8a87c);
-            color: #000;
         }
         
         .no-scores {
             text-align: center;
             padding: 60px;
-            font-size: 1.2em;
-            opacity: 0.6;
-        }
-        
-        .no-scores-icon {
-            font-size: 3em;
-            margin-bottom: 20px;
         }
         
         .modal {
@@ -682,7 +466,6 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
@@ -702,7 +485,6 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 0 80px rgba(0, 243, 255, 0.6);
             position: relative;
         }
         
@@ -732,7 +514,6 @@
         
         .close-modal:hover {
             transform: rotate(90deg) scale(1.1);
-            box-shadow: 0 0 30px var(--neon-pink);
         }
         
         .bio-input {
@@ -746,12 +527,6 @@
             font-family: 'Roboto', sans-serif;
             resize: vertical;
             min-height: 100px;
-        }
-        
-        .bio-input:focus {
-            outline: none;
-            background: rgba(0, 243, 255, 0.1);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
         }
         
         .avatar-options, .banner-options {
@@ -801,7 +576,6 @@
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            font-size: 1.2em;
         }
         
         .save-btn {
@@ -814,698 +588,338 @@
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             font-size: 1.1em;
-            letter-spacing: 2px;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 5px 30px rgba(0, 243, 255, 0.4);
         }
         
         .save-btn:hover {
-            box-shadow: 0 10px 50px rgba(0, 243, 255, 0.8);
             transform: translateY(-3px);
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 40px;
-            margin-top: 80px;
-            border-top: 2px solid rgba(0, 243, 255, 0.2);
-            opacity: 0.7;
+            box-shadow: 0 10px 50px rgba(0, 243, 255, 0.8);
         }
         
         @media (max-width: 768px) {
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
-                padding: 30px;
-            }
-            .avatar-container {
-                margin-top: -120px;
-            }
+            .profile-header { flex-direction: column; text-align: center; padding: 30px; }
+            .avatar-container { margin-top: -120px; }
             .profile-username { font-size: 2em; }
             .achievements-grid { grid-template-columns: 1fr; }
-            table { font-size: 0.85em; }
-            th, td { padding: 12px 8px; }
-            .nav-bar { padding: 15px 20px; }
-            .modal-content { padding: 30px; }
-            .avatar-options, .banner-options {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
         }
     </style>
 </head>
 <body>
     <nav class="nav-bar">
-    <div class="nav-brand">🎮 MY PROFILE</div>
-    <div class="nav-links">
-        <a href="index.html" class="nav-link">HOME</a>
-        <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
-        <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
-        <a href="bot.html" class="nav-link bot-btn">DIANE BOT 🤖</a>
-        <button class="nav-link logout-btn" onclick="logout()">LOGOUT</button>
-    </div>
-</nav>
+        <div class="nav-brand">🎮 MY PROFILE</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HOME</a>
+            <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
+            <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
+            <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="bot.html" class="nav-link">DIANE BOT 🤖</a>
+            <button class="nav-link logout-btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </nav>
     
     <div class="container">
         <div class="profile-banner">
-            <img src="" alt="Profile Banner" class="banner-image" id="profile-banner">
+            <img src="" alt="Banner" class="banner-image" id="profile-banner">
             <div class="banner-overlay"></div>
             <button class="edit-banner-btn" onclick="openBannerModal()">✏️ CHANGE BANNER</button>
         </div>
         
         <div class="profile-header">
             <div class="avatar-container">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="Avatar" class="profile-avatar" id="user-avatar">
+                <img src="" alt="Avatar" class="profile-avatar" id="user-avatar">
                 <button class="edit-avatar-btn" onclick="openAvatarModal()">✏️</button>
             </div>
             <div class="profile-info">
-                <h1 class="profile-username" id="username">Loading...</h1>
-                
+                <h1 class="profile-username" id="username">PLAYER</h1>
                 <div class="profile-bio">
-                    <button class="edit-bio-btn" onclick="openBioModal()">✏️ EDIT</button>
-                    <div id="bio-text">No bio yet! Click edit to add one.</div>
-                    <div class="bio-reactions">
-                        <button class="reaction-btn" onclick="reactToBio('❤️', this)">
-                            ❤️ <span class="reaction-count">0</span>
-</button>
-<button class="reaction-btn" onclick="reactToBio('🔥', this)">
-🔥 <span class="reaction-count">0</span>
-</button>
-<button class="reaction-btn" onclick="reactToBio('😎', this)">
-😎 <span class="reaction-count">0</span>
-</button>
-<button class="reaction-btn" onclick="reactToBio('💯', this)">
-💯 <span class="reaction-count">0</span>
-</button>
-<button class="reaction-btn" onclick="reactToBio('👏', this)">
-👏 <span class="reaction-count">0</span>
-</button>
-</div>
-</div>
-            <div class="profile-level">
-                <span>⚡ LEVEL <span id="user-level">1</span></span>
-            </div>
-            <div class="xp-bar-container">
-                <div class="xp-bar" id="xp-bar" style="width: 0%">
-                    <span id="xp-text">0 / 100 XP</span>
+                    <button class="edit-bio-btn" onclick="openBioModal()">✏️</button>
+                    <div id="bio-text">No bio yet!</div>
                 </div>
-            </div>
-            
-            <div class="social-actions">
-                <button class="social-btn" id="friend-btn" onclick="toggleFriend()">
-                    <span>👥</span>
-                    <span id="friend-text">ADD FRIEND</span>
-                </button>
-                <button class="social-btn">
-                    <span>📊</span>
-                    <span>COMPARE STATS</span>
-                </button>
-            </div>
-            
-            <div class="profile-stats">
-                <div class="stat-item">
-                    <span class="stat-value" id="stat-achievements">0</span>
-                    <div class="stat-label">🏆 Achievements</div>
+                <div class="profile-level">⚡ LEVEL <span id="user-level">1</span></div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar" id="xp-bar" style="width: 0%">
+                        <span id="xp-text">0 / 1000 XP</span>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="stat-games">0</span>
-                    <div class="stat-label">🎮 Games Played</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="stat-coins">100</span>
-                    <div class="stat-label">💰 Coins</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="stat-friends">0</span>
-                    <div class="stat-label">👥 Friends</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="stat-joined">...</span>
-                    <div class="stat-label">📅 Member Since</div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-achievements">0</span>
+                        <div class="stat-label">🏆 Achievements</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-games">0</span>
+                        <div class="stat-label">🎮 Games Played</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-coins">100</span>
+                        <div class="stat-label">💰 Coins</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-joined">Jan 2025</span>
+                        <div class="stat-label">📅 Member Since</div>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
+        <div class="achievements-grid" id="achievements-container"></div>
+        
+        <h2 class="section-title">🎮 MY HIGH SCORES</h2>
+        <div class="scores-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>GAME</th>
+                        <th>SCORE</th>
+                        <th>RANK</th>
+                        <th>DATE</th>
+                    </tr>
+                </thead>
+                <tbody id="scores-tbody"></tbody>
+            </table>
+        </div>
     </div>
-    
-    <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
-    <div class="achievements-grid" id="achievements-container"></div>
-    
-    <h2 class="section-title">🎮 MY HIGH SCORES</h2>
-    <div class="scores-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>GAME</th>
-                    <th>HIGH SCORE</th>
-                    <th>RANK</th>
-                    <th>REACTIONS</th>
-                    <th>DATE</th>
-                </tr>
-            </thead>
-            <tbody id="scores-tbody"></tbody>
-        </table>
-    </div>
-    
-    <div class="footer">
-        <p>💜 Diane Keaton Memorial Arcade © 2025</p>
-        <p style="font-size: 0.9em; margin-top: 10px;">Keep playing, keep achieving! ☕</p>
-    </div>
-</div>
 
-<!-- Avatar Modal -->
-<div class="modal" id="avatar-modal">
-    <div class="modal-content">
-        <button class="close-modal" onclick="closeModal('avatar-modal')">×</button>
-        <h2 class="modal-title">CHOOSE YOUR AVATAR</h2>
-        <div class="avatar-options" id="avatar-options"></div>
-        <button class="save-btn" onclick="saveAvatar()">SAVE AVATAR</button>
+    <div class="modal" id="avatar-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('avatar-modal')">×</button>
+            <h2 class="modal-title">CHOOSE AVATAR</h2>
+            <div class="avatar-options" id="avatar-options"></div>
+            <button class="save-btn" onclick="saveAvatar()">SAVE</button>
+        </div>
     </div>
-</div>
 
-<!-- Banner Modal -->
-<div class="modal" id="banner-modal">
-    <div class="modal-content">
-        <button class="close-modal" onclick="closeModal('banner-modal')">×</button>
-        <h2 class="modal-title">CHOOSE YOUR BANNER</h2>
-        <div class="banner-options" id="banner-options"></div>
-        <button class="save-btn" onclick="saveBanner()">SAVE BANNER</button>
+    <div class="modal" id="banner-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('banner-modal')">×</button>
+            <h2 class="modal-title">CHOOSE BANNER</h2>
+            <div class="banner-options" id="banner-options"></div>
+            <button class="save-btn" onclick="saveBanner()">SAVE</button>
+        </div>
     </div>
-</div>
 
-<!-- Bio Modal -->
-<div class="modal" id="bio-modal">
-    <div class="modal-content">
-        <button class="close-modal" onclick="closeModal('bio-modal')">×</button>
-        <h2 class="modal-title">EDIT YOUR BIO</h2>
-        <textarea class="bio-input" id="bio-input" maxlength="200" placeholder="Tell everyone about yourself... (200 characters max)"></textarea>
-        <p style="text-align: right; margin-top: 10px; opacity: 0.7;">
-            <span id="char-count">0</span>/200 characters
-        </p>
-        <button class="save-btn" onclick="saveBio()">SAVE BIO</button>
+    <div class="modal" id="bio-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('bio-modal')">×</button>
+            <h2 class="modal-title">EDIT BIO</h2>
+            <textarea class="bio-input" id="bio-input" maxlength="200"></textarea>
+            <p style="text-align: right; margin: 10px 0; opacity: 0.7;">
+                <span id="char-count">0</span>/200
+            </p>
+            <button class="save-btn" onclick="saveBio()">SAVE</button>
+        </div>
     </div>
-</div>
 
-<script>
-    const allAchievements = [
-        // STARTER ACHIEVEMENTS
-        { id: 'annie_hall', name: 'Annie Hall', description: 'Play your first game', icon: '🎬', xp: 10, film: '1977 - Academy Award Winner' },
-        { id: 'first_steps', name: 'First Steps', description: 'Create your arcade profile', icon: '👣', xp: 5, film: 'Welcome to the Arcade' },
-        { id: 'coffee_break', name: 'Coffee Break', description: 'Play 5 games', icon: '☕', xp: 25, film: 'Diane\'s Favorite Beverage' },
+    <script>
+        let userData = JSON.parse(localStorage.getItem('arcadeUser')) || {
+            username: 'Guest',
+            level: 1,
+            xp: 0,
+            coins: 100,
+            achievements: [],
+            gamesPlayed: 0,
+            highScores: {},
+            joinDate: new Date().toISOString(),
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=guest',
+            banner: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop',
+            bio: 'No bio yet!'
+        };
         
-        // LEVEL ACHIEVEMENTS
-        { id: 'godfather', name: 'The Godfather', description: 'Reach Level 10', icon: '👑', xp: 50, film: '1972 - Classic Mob Film' },
-        { id: 'godfather_2', name: 'The Godfather Part II', description: 'Reach Level 20', icon: '🎭', xp: 75, film: '1974 - Epic Sequel' },
-        { id: 'manhattan', name: 'Manhattan', description: 'Reach Level 25', icon: '🏙️', xp: 100, film: '1979 - Woody Allen Classic' },
-        { id: 'marvins_room', name: "Marvin's Room", description: 'Reach Level 50', icon: '🏠', xp: 250, film: '1996 - Drama with Meryl Streep' },
-        { id: 'century', name: 'Century Club', description: 'Reach Level 100', icon: '💯', xp: 500, film: 'Elite Status' },
+        let selectedAvatar = null;
+        let selectedBanner = null;
         
-        // SCORE ACHIEVEMENTS
-        { id: 'something_gotta_give', name: "Something's Gotta Give", description: 'Score 10,000 points total', icon: '💎', xp: 100, film: '2003 - Romantic Comedy' },
-        { id: 'big_score', name: 'Big Score', description: 'Score 50,000 points total', icon: '💰', xp: 200, film: 'High Roller' },
-        { id: 'mega_score', name: 'Mega Score', description: 'Score 100,000 points total', icon: '🌟', xp: 300, film: 'Score Master' },
-        { id: 'legendary', name: 'Legendary', description: 'Score 1,000,000 points total', icon: '👑', xp: 1000, film: 'Arcade Legend' },
+        const avatarOptions = [
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=felix',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=aneka',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=luna',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=max',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=charlie',
+            'https://api.dicebear.com/7.x/bottts/svg?seed=robot1',
+            'https://api.dicebear.com/7.x/bottts/svg?seed=robot2',
+            'https://api.dicebear.com/7.x/personas/svg?seed=person1'
+        ];
         
-        // GAME COMPLETION
-        { id: 'reds', name: 'Reds', description: 'Earn 20 achievements', icon: '⭐', xp: 150, film: '1981 - Epic Historical Drama' },
-        { id: 'first_wives_club', name: 'First Wives Club', description: 'Complete all games', icon: '💪', xp: 500, film: '1996 - Comedy Classic' },
-        { id: 'father_bride', name: 'Father of the Bride', description: 'Play 100 games', icon: '👰', xp: 300, film: '1991 - Family Comedy' },
-        { id: 'father_bride_2', name: 'Father of the Bride Part II', description: 'Play 200 games', icon: '👶', xp: 400, film: '1995 - Family Sequel' },
-        { id: 'baby_boom', name: 'Baby Boom', description: 'Win 5 games in one day', icon: '🍼', xp: 75, film: '1987 - Comedy Hit' },
+        const bannerOptions = [
+            'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=400&fit=crop'
+        ];
         
-        // EXPLORATION
-        { id: 'manhattan_murder', name: 'Manhattan Murder Mystery', description: 'Try all 20 games', icon: '🔍', xp: 125, film: '1993 - Mystery Comedy' },
-        { id: 'sleeper', name: 'Sleeper', description: 'Play for 24 hours total', icon: '😴', xp: 200, film: '1973 - Sci-Fi Comedy' },
-        { id: 'interiors', name: 'Interiors', description: 'Customize your profile theme', icon: '🖼️', xp: 50, film: '1978 - Bergman-esque Drama' },
-        { id: 'night_owl', name: 'Night Owl', description: 'Play between midnight and 6 AM', icon: '🦉', xp: 50, film: 'Late Night Gaming' },
-        { id: 'morning_glory', name: 'Morning Glory', description: 'Play before 8 AM', icon: '🌅', xp: 50, film: '2010 - Comedy Drama' },
+        const allAchievements = [
+            { id: 'annie_hall', name: 'Annie Hall', description: 'Play your first game', icon: '🎬', xp: 10 },
+            { id: 'first_steps', name: 'First Steps', description: 'Create profile', icon: '👣', xp: 5 },
+            { id: 'coffee_break', name: 'Coffee Break', description: 'Play 5 games', icon: '☕', xp: 25 }
+        ];
         
-        // PERSISTENCE
-        { id: 'love_death', name: 'Love and Death', description: 'Lose 100 times but keep playing', icon: '💀', xp: 50, film: '1975 - Philosophical Comedy' },
-        { id: 'play_again_sam', name: 'Play It Again, Sam', description: 'Replay a game 10 times', icon: '🎭', xp: 100, film: '1972 - Romantic Comedy' },
-        { id: 'never_give_up', name: 'Never Give Up', description: 'Play 7 days in a row', icon: '🔥', xp: 150, film: 'Dedication' },
-        { id: 'town_country', name: 'Town & Country', description: 'Play in 2 different locations', icon: '🌆', xp: 75, film: '2001 - Comedy' },
-        
-        // PERFECTION
-        { id: 'shoot_moon', name: 'Shoot the Moon', description: 'Get a perfect score on any game', icon: '🌙', xp: 300, film: '1982 - Family Drama' },
-        { id: 'flawless', name: 'Flawless Victory', description: 'Win without losing once', icon: '✨', xp: 200, film: 'Perfect Performance' },
-        { id: 'speed_demon', name: 'Speed Demon', description: 'Complete a game in under 5 minutes', icon: '⚡', xp: 150, film: 'Lightning Fast' },
-        { id: 'radio_days', name: 'Radio Days', description: 'Play for 10 hours straight', icon: '📻', xp: 250, film: '1987 - Nostalgic Comedy' },
-        
-        // SOCIAL
-        { id: 'good_mother', name: 'The Good Mother', description: 'Add 50 friends', icon: '✨', xp: 150, film: '1988 - Drama' },
-        { id: 'social_butterfly', name: 'Social Butterfly', description: 'React to 100 posts', icon: '🦋', xp: 100, film: 'Community Member' },
-        { id: 'helpful', name: 'Helpful Friend', description: 'React to 10 friends\' achievements', icon: '🤝', xp: 75, film: 'Supporting Others' },
-        { id: 'hanging_up', name: 'Hanging Up', description: 'Chat with 25 players', icon: '📞', xp: 100, film: '2000 - Family Comedy' },
-        { id: 'book_club', name: 'Book Club', description: 'Join 5 gaming groups', icon: '📚', xp: 125, film: '2018 - Comedy' },
-        
-        // SPECIFIC GAMES
-        { id: 'mars_miner', name: 'Mars Miner', description: 'Score 50,000 in MotherLoad', icon: '⛏️', xp: 100, film: 'Martian Master' },
-        { id: 'unicorn_master', name: 'Unicorn Master', description: 'Score 100,000 in Robot Unicorn Attack', icon: '🦄', xp: 150, film: 'Always Believe' },
-        { id: 'zombie_hunter', name: 'Zombie Hunter', description: 'Complete all Earn to Die games', icon: '🧟', xp: 200, film: 'Apocalypse Survivor' },
-        { id: 'quick_draw', name: 'Quick Draw', description: 'Win 10 Gun Blood duels', icon: '🔫', xp: 125, film: 'Western Legend' },
-        { id: 'raft_champion', name: 'Raft Champion', description: 'Beat both Raft Wars games', icon: '🚣', xp: 150, film: 'Treasure Defender' },
-        
-        // COLLECTION
-        { id: 'collector', name: 'Collector', description: 'Unlock 10 achievements', icon: '📚', xp: 75, film: 'Achievement Hunter' },
-        { id: 'hoarder', name: 'Hoarder', description: 'Collect 10,000 coins', icon: '💰', xp: 150, film: 'Wealthy Player' },
-        { id: 'millionaire', name: 'Millionaire', description: 'Collect 1,000,000 coins', icon: '💎', xp: 500, film: 'Rich Beyond Measure' },
-        
-        // TIME-BASED
-        { id: 'weekend_warrior', name: 'Weekend Warrior', description: 'Play on Saturday and Sunday', icon: '🎮', xp: 50, film: 'Weekend Fun' },
-        { id: 'marathon', name: 'Marathon Runner', description: 'Play for 6 hours straight', icon: '🏃', xp: 200, film: 'Endurance Champion' },
-        { id: 'daily_player', name: 'Daily Player', description: 'Play 30 days in a row', icon: '📅', xp: 300, film: 'Committed Gamer' },
-        { id: 'five_easy_pieces', name: 'Five Easy Pieces', description: 'Win 5 games in a row', icon: '🎲', xp: 125, film: '1970 - Drama Classic' },
-        
-        // RARE
-        { id: 'lucky_seven', name: 'Lucky Seven', description: 'Get exactly 7777 points', icon: '🎰', xp: 250, film: 'Jackpot!' },
-        { id: 'easter_egg', name: 'Easter Egg Hunter', description: 'Find 10 hidden secrets', icon: '🥚', xp: 200, film: 'Secret Finder' },
-        { id: 'diane_fan', name: 'Diane Keaton Fan', description: 'View all Diane Keaton info', icon: '💜', xp: 100, film: 'True Fan' },
-        { id: 'other_sister', name: 'The Other Sister', description: 'Help a friend unlock an achievement', icon: '👭', xp: 100, film: '1999 - Drama Comedy' },
-        
-        // COMPETITIVE
-        { id: 'top_ten', name: 'Top Ten', description: 'Reach top 10 on any leaderboard', icon: '🏆', xp: 200, film: 'Elite Player' },
-        { id: 'top_three', name: 'Top Three', description: 'Reach top 3 on any leaderboard', icon: '🥉', xp: 300, film: 'Podium Finish' },
-        { id: 'number_one', name: 'Number One', description: 'Reach #1 on any leaderboard', icon: '🥇', xp: 500, film: 'Champion' },
-        { id: 'mad_money', name: 'Mad Money', description: 'Earn 100,000 XP', icon: '💵', xp: 300, film: '2008 - Heist Comedy' },
-        
-        // SPECIAL
-        { id: 'early_bird', name: 'Early Bird', description: 'Join in the first month', icon: '🐦', xp: 100, film: 'Pioneer' },
-        { id: 'veteran', name: 'Veteran', description: 'Account 1 year old', icon: '🎖️', xp: 500, film: 'Long-time Player' },
-        { id: 'completionist', name: 'Completionist', description: 'Unlock ALL achievements', icon: '👑', xp: 1000, film: 'Master of the Arcade' },
-        
-        // MORE DIANE KEATON FILMS
-        { id: 'looking_goodbar', name: 'Looking for Mr. Goodbar', description: 'Play all candy games', icon: '🍫', xp: 100, film: '1977 - Drama' },
-        { id: 'running_mates', name: 'Running Mates', description: 'Race in 5 games', icon: '🏃', xp: 75, film: '1992 - TV Movie' },
-        { id: 'mrs_soffel', name: 'Mrs. Soffel', description: 'Help 25 friends', icon: '🚗', xp: 125, film: '1984 - Historical Drama' },
-        { id: 'because_said_so', name: 'Because I Said So', description: 'Customize your profile fully', icon: '🎀', xp: 50, film: '2007 - Rom-Com' },
-        { id: 'family_stone', name: 'The Family Stone', description: 'Play during holidays', icon: '💍', xp: 100, film: '2005 - Holiday Film' },
-        { id: 'little_drummer_girl', name: 'The Little Drummer Girl', description: 'Get 100 perfect rhythm hits', icon: '🥁', xp: 150, film: '1984 - Thriller' },
-        { id: 'mamas_boy', name: "Mama's Boy", description: 'Achieve a 100 game streak', icon: '👩', xp: 200, film: '2007 - Comedy' },
-        { id: 'amelia', name: 'Amelia', description: 'Reach 1000 games played', icon: '✈️', xp: 300, film: '2009 - Historical Drama' },
-        { id: 'finding_dory', name: 'Finding Dory', description: 'Find all hidden Easter eggs', icon: '🐠', xp: 250, film: '2016 - Voice Acting' },
-        { id: 'poms', name: 'Poms', description: 'Join a team competition', icon: '📣', xp: 150, film: '2019 - Sports Comedy' },
-        { id: 'loves_labours_lost', name: "Love's Labour's Lost", description: 'Fail a game but try again', icon: '🎪', xp: 50, film: '2000 - Musical' },
-        { id: 'hampstead', name: 'Hampstead', description: 'Play in different game modes', icon: '🏡', xp: 100, film: '2017 - Romantic Comedy' },
-        { id: 'crossing_delancey', name: 'Crossing Delancey', description: 'Cross 50,000 points', icon: '🥖', xp: 150, film: '1988 - Romantic Comedy' },
-        { id: 'wildflower', name: 'Wildflower', description: 'Get a random achievement', icon: '🌸', xp: 75, film: '1991 - TV Movie' },
-        { id: 'and_so_it_goes', name: 'And So It Goes', description: 'Complete the tutorial', icon: '🎵', xp: 25, film: '2014 - Romantic Comedy' },
-        { id: 'ninja_turtles', name: 'Ninja Turtles', description: 'Beat a boss level', icon: '🐢', xp: 200, film: '2016 - Voice Role' },
-        { id: 'china_syndrome', name: 'The China Syndrome', description: 'Survive a difficult challenge', icon: '☢️', xp: 175, film: '1979 - Referenced Film' },
-        { id: 'wines_roses', name: 'Wines and Roses', description: 'Celebrate 100 wins', icon: '🍷', xp: 200, film: 'Victory Celebration' },
-        { id: 'crimes_heart', name: 'Crimes of the Heart', description: 'Form a guild with friends', icon: '❤️', xp: 150, film: '1986 - Drama' },
-        { id: 'ladies_night', name: "Ladies' Night", description: 'Play with 3 friends simultaneously', icon: '👯', xp: 125, film: 'Social Gaming' },
-        { id: 'reunion', name: 'The Reunion', description: 'Return after 30 days away', icon: '🎊', xp: 150, film: 'Welcome Back!' },
-        { id: 'unstrung_heroes', name: 'Unstrung Heroes', description: 'Unlock 25 achievements', icon: '🦸', xp: 200, film: '1995 - Drama' },
-        { id: 'godmothered', name: 'Godmothered', description: 'Grant a wish in community', icon: '🧚', xp: 100, film: '2020 - Disney Film' },
-        { id: 'sextuplets', name: 'Sextuplets', description: 'Play 6 different games in one day', icon: '6️⃣', xp: 150, film: 'Multi-Game Master' }
-    ];
-    
-    const games = [
-        { id: 'motherload', name: 'MotherLoad', icon: '⛏️' },
-        { id: 'happywheels', name: 'Happy Wheels', icon: '🎡' },
-        { id: 'gunblood', name: 'Gun Blood', icon: '🔫' },
-        { id: 'raftwars', name: 'Raft Wars', icon: '🚣' },
-        { id: 'raftwars2', name: 'Raft Wars 2', icon: '⛵' },
-        { id: 'robotunicornattack', name: 'Robot Unicorn Attack', icon: '🦄' },
-        { id: 'retrounicornattack', name: 'Retro Unicorn Attack', icon: '🌈' },
-        { id: 'earntodie', name: 'Earn to Die', icon: '🧟' },
-        { id: 'earntodie2012', name: 'Earn to Die 2012', icon: '🚗' },
-        { id: 'EarntoDie2016', name: 'Earn to Die 2016', icon: '🔥' },
-        { id: 'EarntoDiePart2', name: 'Earn to Die Part 2', icon: '💀' },
-        { id: 'bushshootout', name: 'Bush Shootout', icon: '🎯' },
-        { id: 'candymachine', name: 'Candy Machine Deluxe', icon: '🍬' },
-        { id: 'jawbreaker', name: 'Jawbreaker', icon: '🍭' },
-        { id: 'gold01', name: 'Gold Miner', icon: '💰' },
-        { id: 'tomandjerrybowling', name: 'Tom & Jerry Bowling', icon: '🎳' },
-        { id: 'ruahm', name: 'Robot Unicorn Heavy Metal', icon: '🎸' },
-        { id: 'hive-hero', name: 'Hive Hero', icon: '🐝' },
-        { id: 'tj_trapomatic', name: 'TJ Trapomatic', icon: '🧠' },
-        { id: 'rickandmorty', name: 'Rick and Morty', icon: '🌀' }
-    ];
-    
-    const avatarOptions = [
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=felix',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=aneka',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=luna',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=max',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=charlie',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=oliver',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=bella',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=milo',
-        'https://api.dicebear.com/7.x/bottts/svg?seed=robot1',
-        'https://api.dicebear.com/7.x/bottts/svg?seed=robot2',
-        'https://api.dicebear.com/7.x/personas/svg?seed=person1',
-        'https://api.dicebear.com/7.x/personas/svg?seed=person2'
-    ];
-    
-    const bannerOptions = [
-        'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=1200&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=1200&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1557682268-e3955ed5d83f?w=1200&h=400&fit=crop'
-    ];
-    
-    let selectedAvatar = null;
-    let selectedBanner = null;
-    
-    if (localStorage.getItem('isLoggedIn') !== 'true') {
-        window.location.href = 'login.html';
-    }
-    
-    let userData = JSON.parse(localStorage.getItem('arcadeUser'));
-    
-    if (userData) {
-        if (!userData.avatar) userData.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`;
-        if (!userData.banner) userData.banner = bannerOptions[0];
-        if (!userData.bio) userData.bio = 'No bio yet! Click edit to add one.';
-        if (!userData.bioReactions) userData.bioReactions = { '❤️': 0, '🔥': 0, '😎': 0, '💯': 0, '👏': 0 };
-        if (!userData.friends) userData.friends = [];
-        if (!userData.achievementReactions) userData.achievementReactions = {};
-        if (!userData.scoreReactions) userData.scoreReactions = {};
-        
-        document.getElementById('username').textContent = userData.username.toUpperCase();
-        document.getElementById('user-level').textContent = userData.level || 1;
-        document.getElementById('stat-achievements').textContent = (userData.achievements || []).filter(a => a.unlocked).length;
-        document.getElementById('stat-games').textContent = userData.gamesPlayed || 0;
-        document.getElementById('stat-coins').textContent = userData.coins || 100;
-        document.getElementById('stat-friends').textContent = userData.friends.length || 0;
-        
-        const joinDate = new Date(userData.joinDate);
-        const monthYear = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        document.getElementById('stat-joined').textContent = monthYear;
-        
-        document.getElementById('user-avatar').src = userData.avatar;
-        document.getElementById('profile-banner').src = userData.banner;
-        document.getElementById('bio-text').textContent = userData.bio;
-        
-        // Load bio reactions
-        Object.keys(userData.bioReactions).forEach((emoji, index) => {
-            const buttons = document.querySelectorAll('.bio-reactions .reaction-btn');
-            if (buttons[index]) {
-                buttons[index].querySelector('.reaction-count').textContent = userData.bioReactions[emoji];
-            }
-        });
-        
-        const currentXP = userData.xp || 0;
-        const xpForNextLevel = userData.level * 100;
-        const xpProgress = Math.min((currentXP / xpForNextLevel) * 100, 100);
-        document.getElementById('xp-bar').style.width = xpProgress + '%';
-        document.getElementById('xp-text').textContent = `${currentXP} / ${xpForNextLevel} XP`;
-        
-        loadAchievements(userData);
-        loadHighScores(userData);
-        localStorage.setItem('arcadeUser', JSON.stringify(userData));
-    }
-    
-    function loadAchievements(userData) {
-        const container = document.getElementById('achievements-container');
-        container.innerHTML = '';
-        const userAchievements = userData.achievements || [];
-        
-        allAchievements.forEach(achievement => {
-            const userAch = userAchievements.find(a => a.id === achievement.id);
-            const isUnlocked = userAch && userAch.unlocked;
-            const card = document.createElement('div');
-            card.className = 'achievement-card' + (isUnlocked ? '' : ' locked');
+        function loadProfile() {
+            document.getElementById('username').textContent = userData.username.toUpperCase();
+            document.getElementById('user-level').textContent = userData.level;
+            document.getElementById('user-avatar').src = userData.avatar;
+            document.getElementById('profile-banner').src = userData.banner;
+            document.getElementById('bio-text').textContent = userData.bio;
+            document.getElementById('stat-achievements').textContent = userData.achievements.filter(a => a.unlocked).length;
+            document.getElementById('stat-games').textContent = userData.gamesPlayed;
+            document.getElementById('stat-coins').textContent = userData.coins;
             
-            let dateText = '';
-            if (isUnlocked && userAch.unlockedAt) {
-                const date = new Date(userAch.unlockedAt);
-                dateText = `<div class="achievement-date">Unlocked ${date.toLocaleDateString()}</div>`;
-            }
+            const xpForNext = userData.level * 1000;
+            const progress = Math.min((userData.xp / xpForNext) * 100, 100);
+            document.getElementById('xp-bar').style.width = progress + '%';
+            document.getElementById('xp-text').textContent = `${userData.xp} / ${xpForNext} XP`;
             
-            const reactions = userData.achievementReactions[achievement.id] || { '❤️': 0, '🔥': 0, '⭐': 0 };
-            
-            card.innerHTML = `
-                ${!isUnlocked ? '<div class="lock-icon">🔒</div>' : ''}
-                <div class="achievement-icon">${achievement.icon}</div>
-                <div class="achievement-name">${achievement.name}</div>
-                <div class="achievement-desc">${achievement.description}</div>
-                ${dateText}
-                <div class="achievement-xp">+${achievement.xp} XP</div>
-                ${isUnlocked ? `
-                    <div class="achievement-reactions">
-                        <button class="achievement-reaction-btn" onclick="reactToAchievement('${achievement.id}', '❤️', this)">
-                            ❤️
-                            ${reactions['❤️'] > 0 ? `<span class="reaction-badge">${reactions['❤️']}</span>` : ''}
-                        </button>
-                        <button class="achievement-reaction-btn" onclick="reactToAchievement('${achievement.id}', '🔥', this)">
-                            🔥
-                            ${reactions['🔥'] > 0 ? `<span class="reaction-badge">${reactions['🔥']}</span>` : ''}
-                        </button>
-                        <button class="achievement-reaction-btn" onclick="reactToAchievement('${achievement.id}', '⭐', this)">
-                            ⭐
-                            ${reactions['⭐'] > 0 ? `<span class="reaction-badge">${reactions['⭐']}</span>` : ''}
-                        </button>
-                    </div>
-                ` : ''}
-            `;
-            container.appendChild(card);
-        });
-    }
-    
-    function loadHighScores(userData) {
-        const tbody = document.getElementById('scores-tbody');
-        tbody.innerHTML = '';
-        const highScores = userData.highScores || {};
-        
-        if (Object.keys(highScores).length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="no-scores">
-                        <div class="no-scores-icon">🎮</div>
-                        <div>No high scores yet!</div>
-                        <div style="font-size: 0.9em; margin-top: 10px;">Play some games to see your scores here!</div>
-                    </td>
-                </tr>
-            `;
-            return;
+            loadAchievements();
+            loadScores();
         }
         
-        const scoresArray = Object.entries(highScores).map(([gameId, data]) => {
-            const game = games.find(g => g.id === gameId);
-            return {
-                gameId,
-                gameName: game ? game.name : gameId,
-                gameIcon: game ? game.icon : '🎮',
-                score: data.score,
-                rank: data.rank || Math.floor(Math.random() * 100) + 1,
-                date: data.date || new Date().toISOString()
-            };
-        }).sort((a, b) => b.score - a.score);
+        function loadAchievements() {
+            const container = document.getElementById('achievements-container');
+            container.innerHTML = '';
+            allAchievements.forEach(ach => {
+                const userAch = userData.achievements.find(a => a.id === ach.id);
+                const unlocked = userAch && userAch.unlocked;
+                const card = document.createElement('div');
+                card.className = 'achievement-card' + (unlocked ? '' : ' locked');
+                card.innerHTML = `
+                    ${!unlocked ? '<div class="lock-icon">🔒</div>' : ''}
+                    <div class="achievement-icon">${ach.icon}</div>
+                    <div class="achievement-name">${ach.name}</div>
+                    <div class="achievement-desc">${ach.description}</div>
+                    <div class="achievement-xp">+${ach.xp} XP</div>
+                `;
+                container.appendChild(card);
+            });
+        }
         
-        scoresArray.forEach(score => {
-            const row = document.createElement('tr');
-            const date = new Date(score.date).toLocaleDateString();
-            
-            let rankHTML = `<span class="rank-badge">#${score.rank}</span>`;
-            if (score.rank === 1) rankHTML = '<span class="rank-badge rank-1">🥇 #1</span>';
-            else if (score.rank === 2) rankHTML = '<span class="rank-badge rank-2">🥈 #2</span>';
-            else if (score.rank === 3) rankHTML = '<span class="rank-badge rank-3">🥉 #3</span>';
-            
-            const reactions = userData.scoreReactions[score.gameId] || { '❤️': 0, '🔥': 0, '💯': 0 };
-            
-            row.innerHTML = `
-                <td>
-                    <span class="game-icon-small">${score.gameIcon}</span>
-                    <strong>${score.gameName}</strong>
-                </td>
-                <td><span class="score-value">${score.score.toLocaleString()}</span></td>
-                <td>${rankHTML}</td>
-                <td>
-                    <div class="score-reactions">
-                        <button class="score-reaction-btn" onclick="reactToScore('${score.gameId}', '❤️', this)">
-                            ❤️ ${reactions['❤️']}
-                        </button>
-                        <button class="score-reaction-btn" onclick="reactToScore('${score.gameId}', '🔥', this)">
-                            🔥 ${reactions['🔥']}
-                        </button>
-                        <button class="score-reaction-btn" onclick="reactToScore('${score.gameId}', '💯', this)">
-💯 ${reactions['💯']}
-</button>
-</div>
-</td>
-<td>${date}</td>
-`;
-tbody.appendChild(row);
-});
-}
-function reactToBio(emoji, button) {
-    if (!userData.bioReactions[emoji]) userData.bioReactions[emoji] = 0;
-    
-    if (button.classList.contains('active')) {
-        button.classList.remove('active');
-        userData.bioReactions[emoji]--;
-    } else {
-        button.classList.add('active');
-        userData.bioReactions[emoji]++;
-    }
-    
-    button.querySelector('.reaction-count').textContent = userData.bioReactions[emoji];
-    localStorage.setItem('arcadeUser', JSON.stringify(userData));
-}
-
-function reactToAchievement(achievementId, emoji, button) {
-    if (!userData.achievementReactions[achievementId]) {
-        userData.achievementReactions[achievementId] = { '❤️': 0, '🔥': 0, '⭐': 0 };
-    }
-    
-    if (button.classList.contains('active')) {
-        button.classList.remove('active');
-        userData.achievementReactions[achievementId][emoji]--;
-    } else {
-        button.classList.add('active');
-        userData.achievementReactions[achievementId][emoji]++;
-    }
-    
-    localStorage.setItem('arcadeUser', JSON.stringify(userData));
-    loadAchievements(userData);
-}
-
-function reactToScore(gameId, emoji, button) {
-    if (!userData.scoreReactions[gameId]) {
-        userData.scoreReactions[gameId] = { '❤️': 0, '🔥': 0, '💯': 0 };
-    }
-    
-    if (button.classList.contains('active')) {
-        button.classList.remove('active');
-        userData.scoreReactions[gameId][emoji]--;
-    } else {
-        button.classList.add('active');
-        userData.scoreReactions[gameId][emoji]++;
-    }
-    
-    button.textContent = `${emoji} ${userData.scoreReactions[gameId][emoji]}`;
-    localStorage.setItem('arcadeUser', JSON.stringify(userData));
-}
-
-function openBioModal() {
-    document.getElementById('bio-modal').classList.add('active');
-    document.getElementById('bio-input').value = userData.bio || '';
-    updateCharCount();
-}
-
-function saveBio() {
-    const bioText = document.getElementById('bio-input').value.trim();
-    userData.bio = bioText || 'No bio yet! Click edit to add one.';
-    document.getElementById('bio-text').textContent = userData.bio;
-    localStorage.setItem('arcadeUser', JSON.stringify(userData));
-    closeModal('bio-modal');
-}
-
-function updateCharCount() {
-    const input = document.getElementById('bio-input');
-    const count = document.getElementById('char-count');
-    count.textContent = input.value.length;
-}
-
-document.getElementById('bio-input')?.addEventListener('input', updateCharCount);
-
-function openAvatarModal() {
-    const modal = document.getElementById('avatar-modal');
-    const container = document.getElementById('avatar-options');
-    container.innerHTML = '';
-    
-    avatarOptions.forEach((avatarUrl, index) => {
-        const option = document.createElement('div');
-        option.className = 'option-item';
-        if (userData.avatar === avatarUrl) option.classList.add('selected');
-        option.innerHTML = `<img src="${avatarUrl}" alt="Avatar ${index + 1}">`;
-        option.onclick = () => selectAvatar(avatarUrl, option);
-        container.appendChild(option);
-    });
-    modal.classList.add('active');
-}
-
-function selectAvatar(url, element) {
-    selectedAvatar = url;
-    document.querySelectorAll('#avatar-options .option-item').forEach(el => el.classList.remove('selected'));
-    element.classList.add('selected');
-}
-
-function saveAvatar() {
-    if (selectedAvatar) {
-        userData.avatar = selectedAvatar;
-        document.getElementById('user-avatar').src = selectedAvatar;
-        localStorage.setItem('arcadeUser', JSON.stringify(userData));
-        closeModal('avatar-modal');
-        alert('✅ Avatar updated!');
-    }
-}
-
-function openBannerModal() {
-    const modal = document.getElementById('banner-modal');
-    const container = document.getElementById('banner-options');
-    container.innerHTML = '';
-    
-    bannerOptions.forEach((bannerUrl, index) => {
-        const option = document.createElement('div');
-        option.className = 'option-item';
-        if (userData.banner === bannerUrl) option.classList.add('selected');
-        option.innerHTML = `<img src="${bannerUrl}" alt="Banner ${index + 1}">`;
-        option.onclick = () => selectBanner(bannerUrl, option);
-        container.appendChild(option);
-    });
-    modal.classList.add('active');
-}
-
-function selectBanner(url, element) {
-    selectedBanner = url;
-    document.querySelectorAll('#banner-options .option-item').forEach(el => el.classList.remove('selected'));
-    element.classList.add('selected');
-}
-
-function saveBanner() {
-    if (selectedBanner) {
-        userData.banner = selectedBanner;
-        document.getElementById('profile-banner').src = selectedBanner;
-        localStorage.setItem('arcadeUser', JSON.stringify(userData));
-        closeModal('banner-modal');
-        alert('✅ Banner updated!');
-    }
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
-    selectedAvatar = null;
-    selectedBanner = null;
-}
-
-function toggleFriend() {
-    const btn = document.getElementById('friend-btn');
-    const text = document.getElementById('friend-text');
-    
-    if (btn.classList.contains('friended')) {
-        btn.classList.remove('friended');
-        text.textContent = 'ADD FRIEND';
-        userData.friends = userData.friends.filter(f => f !== 'viewingUser');
-    } else {
-        btn.classList.add('friended');
-        text.textContent = '✓ FRIENDS';
-        userData.friends.push('viewingUser');
-    }
-    
-    document.getElementById('stat-friends').textContent = userData.friends.length;
-    localStorage.setItem('arcadeUser', JSON.stringify(userData));
-}
-
-function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('arcadeUser');
-        window.location.href = 'login.html';
-    }
-}
-
-window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.classList.remove('active');
-    }
-}
-</script>
+        function loadScores() {
+            const tbody = document.getElementById('scores-tbody');
+            tbody.innerHTML = '';
+            if (Object.keys(userData.highScores).length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="no-scores">
+                            <div>🎮 No high scores yet!</div>
+                            <div style="font-size: 0.9em; margin-top: 10px;">Play some games!</div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                Object.entries(userData.highScores).forEach(([gameId, data]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>🎮 ${gameId}</td>
+                        <td><span class="score-value">${data.score.toLocaleString()}</span></td>
+                        <td>#${data.rank || 'N/A'}</td>
+                        <td>${new Date(data.date).toLocaleDateString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+        
+        function openAvatarModal() {
+            const modal = document.getElementById('avatar-modal');
+            const container = document.getElementById('avatar-options');
+            container.innerHTML = '';
+            avatarOptions.forEach(url => {
+                const option = document.createElement('div');
+                option.className = 'option-item';
+                if (userData.avatar === url) option.classList.add('selected');
+                option.innerHTML = `<img src="${url}" alt="Avatar">`;
+                option.onclick = () => {
+                    selectedAvatar = url;
+                    document.querySelectorAll('#avatar-options .option-item').forEach(el => el.classList.remove('selected'));
+                    option.classList.add('selected');
+                };
+                container.appendChild(option);
+            });
+            modal.classList.add('active');
+        }
+        
+        function saveAvatar() {
+            if (selectedAvatar) {
+                userData.avatar = selectedAvatar;
+                document.getElementById('user-avatar').src = selectedAvatar;
+                localStorage.setItem('arcadeUser', JSON.stringify(userData));
+                closeModal('avatar-modal');
+                alert('✅ Avatar updated!');
+            }
+        }
+        
+        function openBannerModal() {
+            const modal = document.getElementById('banner-modal');
+            const container = document.getElementById('banner-options');
+            container.innerHTML = '';
+            bannerOptions.forEach(url => {
+                const option = document.createElement('div');
+                option.className = 'option-item';
+                if (userData.banner === url) option.classList.add('selected');
+                option.innerHTML = `<img src="${url}" alt="Banner">`;
+                option.onclick = () => {
+                    selectedBanner = url;
+                    document.querySelectorAll('#banner-options .option-item').forEach(el => el.classList.remove('selected'));
+                    option.classList.add('selected');
+                };
+                container.appendChild(option);
+            });
+            modal.classList.add('active');
+        }
+        
+        function saveBanner() {
+            if (selectedBanner) {
+                userData.banner = selectedBanner;
+                document.getElementById('profile-banner').src = selectedBanner;
+                localStorage.setItem('arcadeUser', JSON.stringify(userData));
+                closeModal('banner-modal');
+                alert('✅ Banner updated!');
+            }
+        }
+        
+        function openBioModal() {
+            document.getElementById('bio-modal').classList.add('active');
+            document.getElementById('bio-input').value = userData.bio;
+            updateCharCount();
+        }
+        
+        function saveBio() {
+            const bioText = document.getElementById('bio-input').value.trim();
+            userData.bio = bioText || 'No bio yet!';
+            document.getElementById('bio-text').textContent = userData.bio;
+            localStorage.setItem('arcadeUser', JSON.stringify(userData));
+            closeModal('bio-modal');
+        }
+        
+        function updateCharCount() {
+            const input = document.getElementById('bio-input');
+            const count = document.getElementById('char-count');
+            if (input && count) {
+                count.textContent = input.value.length;
+            }
+        }
+        
+        document.getElementById('bio-input')?.addEventListener('input', updateCharCount);
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            selectedAvatar = null;
+            selectedBanner = null;
+        }
+        
+        function logout() {
+            if (confirm('Logout?')) {
+                localStorage.removeItem('isLoggedIn');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+        
+        loadProfile();
+    </script>
 </body>
 </html>

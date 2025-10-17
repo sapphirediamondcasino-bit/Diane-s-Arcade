@@ -1,395 +1,364 @@
 // ==========================================
-// FIXED app.js - Works with deployed backend
+// Diane's Arcade - Backend Server
+// Internal Data Store (JSON files)
 // ==========================================
 
-class DianeArcade {
-    constructor() {
-        this.currentUser = null;
-        // Use deployed backend URL or localhost for dev
-        this.apiUrl = process.env.API_URL || (window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
-            : `${window.location.protocol}//${window.location.host}`);
-        this.init();
+const express = require('express');
+const cors = require('cors');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ==========================================
+// MIDDLEWARE SETUP
+// ==========================================
+
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
+
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'diane-arcade-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
+}));
 
-    async init() {
-        await this.checkAuth();
-        this.setupEventListeners();
-        this.loadLeaderboard();
-    }
+// ==========================================
+// DATA STORAGE - LOCAL JSON FILES
+// ==========================================
 
-    // Check if user is authenticated
-    async checkAuth() {
-        try {
-            const response = await fetch(`${this.apiUrl}/api/user`, {
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (response.ok) {
-                this.currentUser = await response.json();
-                this.updateUI();
-            } else {
-                this.currentUser = null;
-                this.showLoginPrompt();
-            }
-        } catch (error) {
-            console.error('Auth check failed:', error);
-            // Fall back to localStorage if API fails
-            this.loadFromLocalStorage();
-        }
-    }
+const DATA_DIR = path.join(__dirname, 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const SCORES_FILE = path.join(DATA_DIR, 'scores.json');
+const ACHIEVEMENTS_FILE = path.join(DATA_DIR, 'achievements.json');
 
-    // Load from localStorage as fallback
-    loadFromLocalStorage() {
-        const userData = localStorage.getItem('arcadeUser');
-        if (userData) {
-            this.currentUser = JSON.parse(userData);
-            this.updateUI();
-        }
-    }
-
-    // Update UI based on login state
-    updateUI() {
-        const userProfileHTML = document.getElementById('user-profile-section');
-        const loginBtnHTML = document.getElementById('login-button-section');
-
-        if (this.currentUser) {
-            if (loginBtnHTML) loginBtnHTML.style.display = 'none';
-            if (userProfileHTML) {
-                userProfileHTML.style.display = 'flex';
-                userProfileHTML.innerHTML = `
-                    <div class="user-profile" onclick="arcade.showProfile()">
-                        <img src="${this.currentUser.avatar_url || 'https://via.placeholder.com/30'}" class="user-avatar" alt="Avatar">
-                        <div>
-                            <div class="user-name">${this.currentUser.username}</div>
-                            <div class="user-level">LVL ${this.currentUser.level || 1}</div>
-                        </div>
-                    </div>
-                `;
-            }
-        } else {
-            if (userProfileHTML) userProfileHTML.style.display = 'none';
-            if (loginBtnHTML) loginBtnHTML.style.display = 'block';
-        }
-    }
-
-    // Setup event listeners
-    setupEventListeners() {
-        const loginBtn = document.getElementById('show-login-modal');
-        if (loginBtn) {
-            loginBtn.addEventListener('click', () => this.showLoginModal());
-        }
-
-        const closeModalBtns = document.querySelectorAll('.close-modal');
-        closeModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => this.closeModal());
-        });
-
-        const registerForm = document.getElementById('register-form');
-        if (registerForm) {
-            registerForm.addEventListener('submit', (e) => this.handleRegister(e));
-        }
-
-        const loginForm = document.getElementById('login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        }
-    }
-
-    showLoginModal() {
-        const modal = document.getElementById('login-modal');
-        if (modal) modal.classList.add('active');
-    }
-
-    showLoginPrompt() {
-        const gamesNeedLogin = document.querySelectorAll('[data-requires-login]');
-        gamesNeedLogin.forEach(game => {
-            game.addEventListener('click', (e) => {
-                if (!this.currentUser) {
-                    e.preventDefault();
-                    this.showLoginModal();
-                    this.showNotification('Please login to play games!', 'info');
-                }
-            });
-        });
-    }
-
-    closeModal() {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => modal.classList.remove('active'));
-    }
-
-    // Handle registration
-    async handleRegister(e) {
-        e.preventDefault();
-        
-        const form = e.target;
-        const email = form.querySelector('[name="email"]')?.value;
-        const username = form.querySelector('[name="username"]')?.value;
-        const password = form.querySelector('[name="password"]')?.value;
-
-        if (!email || !username || !password) {
-            this.showNotification('All fields required!', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${this.apiUrl}/api/register`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, username, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.showNotification('Registration successful! Now login.', 'success');
-                this.switchToLogin();
-                form.reset();
-            } else {
-                this.showNotification(data.error || 'Registration failed', 'error');
-            }
-        } catch (error) {
-            console.error('Registration error:', error);
-            this.showNotification('Network error. Try again.', 'error');
-        }
-    }
-
-    // Handle login
-    async handleLogin(e) {
-        e.preventDefault();
-        
-        const form = e.target;
-        const email = form.querySelector('[name="email"]')?.value;
-        const password = form.querySelector('[name="password"]')?.value;
-
-        if (!email || !password) {
-            this.showNotification('Email and password required!', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${this.apiUrl}/api/login`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.currentUser = data.user;
-                // Save to localStorage as backup
-                localStorage.setItem('arcadeUser', JSON.stringify(this.currentUser));
-                this.updateUI();
-                this.closeModal();
-                this.showNotification('Welcome back, ' + data.user.username + '!', 'success');
-                this.loadLeaderboard();
-                form.reset();
-            } else {
-                this.showNotification(data.error || 'Login failed', 'error');
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            this.showNotification('Network error. Try again.', 'error');
-        }
-    }
-
-    // Logout
-    async logout() {
-        try {
-            await fetch(`${this.apiUrl}/api/logout`, { 
-                method: 'POST',
-                credentials: 'include'
-            });
-            this.currentUser = null;
-            localStorage.removeItem('arcadeUser');
-            this.updateUI();
-            this.showNotification('Logged out successfully', 'success');
-            window.location.reload();
-        } catch (error) {
-            this.showNotification('Logout failed', 'error');
-        }
-    }
-
-    switchToLogin() {
-        const registerContainer = document.getElementById('register-form-container');
-        const loginContainer = document.getElementById('login-form-container');
-        if (registerContainer) registerContainer.style.display = 'none';
-        if (loginContainer) loginContainer.style.display = 'block';
-    }
-
-    switchToRegister() {
-        const loginContainer = document.getElementById('login-form-container');
-        const registerContainer = document.getElementById('register-form-container');
-        if (loginContainer) loginContainer.style.display = 'none';
-        if (registerContainer) registerContainer.style.display = 'block';
-    }
-
-    // Save game score
-    async saveGameScore(gameName, score) {
-        if (!this.currentUser) {
-            this.showNotification('Login to save your score!', 'info');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${this.apiUrl}/api/game/score`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ game_name: gameName, score })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.showNotification('Score saved! +' + score + ' XP', 'success');
-                await this.checkAuth();
-            } else {
-                this.showNotification('Failed to save score', 'error');
-            }
-        } catch (error) {
-            console.error('Save score error:', error);
-            this.showNotification('Could not save score (offline mode)', 'warning');
-        }
-    }
-
-    // Load leaderboard
-    async loadLeaderboard() {
-        try {
-            const response = await fetch(`${this.apiUrl}/api/leaderboard`, {
-                credentials: 'include'
-            });
-            const leaderboard = await response.json();
-
-            const leaderboardContainer = document.getElementById('leaderboard-list');
-            if (!leaderboardContainer) return;
-
-            if (!Array.isArray(leaderboard)) {
-                leaderboardContainer.innerHTML = '<p>No leaderboard data</p>';
-                return;
-            }
-
-            leaderboardContainer.innerHTML = leaderboard.map((user, index) => {
-                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
-                
-                return `
-                    <div class="leaderboard-item">
-                        <div class="rank">${medal}</div>
-                        <img src="${user.avatar_url || 'https://via.placeholder.com/40'}" class="lb-avatar" alt="${user.username}">
-                        <div class="lb-info">
-                            <div class="lb-name">${user.username}</div>
-                            <div class="lb-stats">Level ${user.level || 1} • ${user.total_score || 0} pts • ${user.total_games_played || 0} games</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        } catch (error) {
-            console.error('Failed to load leaderboard:', error);
-        }
-    }
-
-    // Load user achievements
-    async loadAchievements() {
-        if (!this.currentUser) return;
-
-        try {
-            const response = await fetch(`${this.apiUrl}/api/user/achievements`, {
-                credentials: 'include'
-            });
-            const achievements = await response.json();
-
-            const achievementsContainer = document.getElementById('achievements-list');
-            if (!achievementsContainer) return;
-
-            achievementsContainer.innerHTML = achievements.map(achievement => {
-                const unlocked = achievement.unlocked_at !== null;
-                return `
-                    <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
-                        <div class="achievement-icon">${achievement.icon}</div>
-                        <div class="achievement-name">${achievement.name}</div>
-                        <div class="achievement-desc">${achievement.description}</div>
-                        <div class="achievement-xp">+${achievement.xp_reward} XP</div>
-                        ${unlocked ? `<div class="unlock-date">Unlocked ${new Date(achievement.unlocked_at).toLocaleDateString()}</div>` : ''}
-                    </div>
-                `;
-            }).join('');
-        } catch (error) {
-            console.error('Failed to load achievements:', error);
-        }
-    }
-
-    // Show user profile
-    async showProfile() {
-        if (!this.currentUser) return;
-
-        try {
-            const response = await fetch(`${this.apiUrl}/api/user/profile/${this.currentUser.id}`, {
-                credentials: 'include'
-            });
-            const profile = await response.json();
-
-            const profileModal = document.getElementById('profile-modal');
-            if (!profileModal) return;
-
-            const profileContent = document.getElementById('profile-content');
-            if (profileContent) {
-                profileContent.innerHTML = `
-                    <img src="${profile.avatar_url || 'https://via.placeholder.com/150'}" class="profile-avatar" alt="${profile.username}">
-                    <h2>${profile.username}</h2>
-                    <div class="profile-stats">
-                        <div class="profile-stat">
-                            <span class="stat-label">Level</span>
-                            <span class="stat-value">${profile.level || 1}</span>
-                        </div>
-                        <div class="profile-stat">
-                            <span class="stat-label">XP</span>
-                            <span class="stat-value">${profile.xp || 0}</span>
-                        </div>
-                        <div class="profile-stat">
-                            <span class="stat-label">Games Played</span>
-                            <span class="stat-value">${profile.total_games || 0}</span>
-                        </div>
-                        <div class="profile-stat">
-                            <span class="stat-label">Achievements</span>
-                            <span class="stat-value">${profile.achievements_unlocked || 0}</span>
-                        </div>
-                        <div class="profile-stat">
-                            <span class="stat-label">High Score</span>
-                            <span class="stat-value">${profile.highest_score || 0}</span>
-                        </div>
-                    </div>
-                    <button onclick="arcade.logout()" class="btn btn-logout">Logout</button>
-                `;
-            }
-
-            profileModal.classList.add('active');
-        } catch (error) {
-            console.error('Failed to load profile:', error);
-        }
-    }
-
-    showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => notification.classList.add('show'), 100);
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
+// Ensure data directory exists
+function ensureDataDir() {
+    if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
     }
 }
 
-// Initialize when page loads
-let arcade;
-document.addEventListener('DOMContentLoaded', () => {
-    arcade = new DianeArcade();
+// Load data from JSON files
+function loadUsers() {
+    ensureDataDir();
+    if (fs.existsSync(USERS_FILE)) {
+        try {
+            return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+        } catch (e) {
+            console.error('Error loading users:', e);
+            return {};
+        }
+    }
+    return {};
+}
+
+function loadScores() {
+    ensureDataDir();
+    if (fs.existsSync(SCORES_FILE)) {
+        try {
+            return JSON.parse(fs.readFileSync(SCORES_FILE, 'utf8'));
+        } catch (e) {
+            console.error('Error loading scores:', e);
+            return [];
+        }
+    }
+    return [];
+}
+
+function loadAchievements() {
+    ensureDataDir();
+    if (fs.existsSync(ACHIEVEMENTS_FILE)) {
+        try {
+            return JSON.parse(fs.readFileSync(ACHIEVEMENTS_FILE, 'utf8'));
+        } catch (e) {
+            console.error('Error loading achievements:', e);
+            return [];
+        }
+    }
+    return [];
+}
+
+// Save data to JSON files
+function saveUsers(users) {
+    ensureDataDir();
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+function saveScores(scores) {
+    ensureDataDir();
+    fs.writeFileSync(SCORES_FILE, JSON.stringify(scores, null, 2));
+}
+
+function saveAchievements(achievements) {
+    ensureDataDir();
+    fs.writeFileSync(ACHIEVEMENTS_FILE, JSON.stringify(achievements, null, 2));
+}
+
+// ==========================================
+// AUTHENTICATION ROUTES
+// ==========================================
+
+// Register
+app.post('/api/register', async (req, res) => {
+    try {
+        const { email, username, password } = req.body;
+
+        if (!email || !username || !password) {
+            return res.status(400).json({ error: 'All fields required' });
+        }
+
+        const users = loadUsers();
+
+        // Check if user exists
+        if (Object.values(users).some(u => u.email === email || u.username === username)) {
+            return res.status(400).json({ error: 'Email or username already exists' });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const userId = Date.now().toString();
+        const newUser = {
+            id: userId,
+            email,
+            username,
+            password: hashedPassword,
+            level: 1,
+            xp: 0,
+            total_score: 0,
+            total_games_played: 0,
+            highest_score: 0,
+            avatar_url: `https://via.placeholder.com/30?text=${username.charAt(0).toUpperCase()}`,
+            created_at: new Date().toISOString()
+        };
+
+        users[userId] = newUser;
+        saveUsers(users);
+
+        res.json({ success: true, message: 'User registered successfully' });
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ error: 'Registration failed' });
+    }
+});
+
+// Login
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password required' });
+        }
+
+        const users = loadUsers();
+        const user = Object.values(users).find(u => u.email === email);
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Set session
+        req.session.userId = user.id;
+
+        // Return user data (without password)
+        const { password: _, ...userWithoutPassword } = user;
+        res.json({ success: true, user: userWithoutPassword });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// Logout
+app.post('/api/logout', (req, res) => {
+    req.session.destroy();
+    res.json({ success: true, message: 'Logged out' });
+});
+
+// Check auth status
+app.get('/api/user', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const users = loadUsers();
+    const user = users[req.session.userId];
+
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+});
+
+// ==========================================
+// GAME ROUTES
+// ==========================================
+
+// Save game score
+app.post('/api/game/score', (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const { game_name, score } = req.body;
+        const users = loadUsers();
+        const user = users[req.session.userId];
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Update user stats
+        user.total_score = (user.total_score || 0) + score;
+        user.total_games_played = (user.total_games_played || 0) + 1;
+        user.highest_score = Math.max(user.highest_score || 0, score);
+
+        // Calculate level based on XP
+        const xpGain = Math.floor(score / 10);
+        user.xp = (user.xp || 0) + xpGain;
+        user.level = Math.floor(user.xp / 100) + 1;
+
+        saveUsers(users);
+
+        // Save score record
+        const scores = loadScores();
+        scores.push({
+            userId: req.session.userId,
+            username: user.username,
+            game_name,
+            score,
+            timestamp: new Date().toISOString()
+        });
+        saveScores(scores);
+
+        res.json({ success: true, message: 'Score saved', xp_gained: xpGain });
+    } catch (error) {
+        console.error('Score save error:', error);
+        res.status(500).json({ error: 'Failed to save score' });
+    }
+});
+
+// ==========================================
+// LEADERBOARD ROUTES
+// ==========================================
+
+app.get('/api/leaderboard', (req, res) => {
+    try {
+        const users = loadUsers();
+        const leaderboard = Object.values(users)
+            .sort((a, b) => (b.total_score || 0) - (a.total_score || 0))
+            .slice(0, 50)
+            .map(user => ({
+                id: user.id,
+                username: user.username,
+                level: user.level,
+                total_score: user.total_score,
+                total_games_played: user.total_games_played,
+                avatar_url: user.avatar_url
+            }));
+
+        res.json(leaderboard);
+    } catch (error) {
+        console.error('Leaderboard error:', error);
+        res.status(500).json({ error: 'Failed to load leaderboard' });
+    }
+});
+
+// ==========================================
+// USER PROFILE ROUTES
+// ==========================================
+
+app.get('/api/user/profile/:userId', (req, res) => {
+    try {
+        const users = loadUsers();
+        const user = users[req.params.userId];
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Get user achievements
+        const achievements = loadAchievements();
+        const userAchievements = achievements.filter(a => a.userId === req.params.userId);
+
+        const { password: _, ...profile } = user;
+        profile.achievements_unlocked = userAchievements.length;
+
+        res.json(profile);
+    } catch (error) {
+        console.error('Profile error:', error);
+        res.status(500).json({ error: 'Failed to load profile' });
+    }
+});
+
+// ==========================================
+// ACHIEVEMENTS ROUTES
+// ==========================================
+
+app.get('/api/user/achievements', (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const achievements = loadAchievements();
+        const userAchievements = achievements.filter(a => a.userId === req.session.userId);
+
+        // Return all achievements with unlock status
+        const allAchievements = [
+            { id: 1, name: 'First Score', description: 'Save your first game score', icon: '🎮', xp_reward: 50 },
+            { id: 2, name: 'Century', description: 'Reach 100 points in a single game', icon: '💯', xp_reward: 100 },
+            { id: 3, name: 'High Roller', description: 'Reach 500 total points', icon: '🎰', xp_reward: 200 },
+            { id: 4, name: 'Arcade Master', description: 'Reach level 10', icon: '👑', xp_reward: 500 },
+            { id: 5, name: 'Persistence', description: 'Play 50 games', icon: '💪', xp_reward: 300 }
+        ];
+
+        const achievementsWithStatus = allAchievements.map(ach => {
+            const unlocked = userAchievements.find(ua => ua.achievementId === ach.id);
+            return {
+                ...ach,
+                unlocked_at: unlocked ? unlocked.unlockedAt : null
+            };
+        });
+
+        res.json(achievementsWithStatus);
+    } catch (error) {
+        console.error('Achievements error:', error);
+        res.status(500).json({ error: 'Failed to load achievements' });
+    }
+});
+
+// ==========================================
+// ERROR HANDLING & SERVER START
+// ==========================================
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Internal server error' });
+});
+
+app.listen(PORT, () => {
+    console.log(`Diane's Arcade server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    ensureDataDir();
 });

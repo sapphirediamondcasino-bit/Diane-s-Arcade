@@ -1,429 +1,395 @@
 // ==========================================
-// FILE 1: server.js - Backend Server
+// FIXED app.js - Works with deployed backend
 // ==========================================
-const express = require('express');
-const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const bcrypt = require('bcrypt');
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+class DianeArcade {
+    constructor() {
+        this.currentUser = null;
+        // Use deployed backend URL or localhost for dev
+        this.apiUrl = process.env.API_URL || (window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : `${window.location.protocol}//${window.location.host}`);
+        this.init();
+    }
 
-// Database Setup
-const db = new sqlite3.Database('./arcade.db');
+    async init() {
+        await this.checkAuth();
+        this.setupEventListeners();
+        this.loadLeaderboard();
+    }
 
-// Create Tables
-db.serialize(() => {
-    // Users Table
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT,
-        google_id TEXT UNIQUE,
-        username TEXT NOT NULL,
-        avatar_url TEXT,
-        level INTEGER DEFAULT 1,
-        xp INTEGER DEFAULT 0,
-        prestige INTEGER DEFAULT 0,
-        total_games_played INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+    // Check if user is authenticated
+    async checkAuth() {
+        try {
+            const response = await fetch(`${this.apiUrl}/api/user`, {
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                this.currentUser = await response.json();
+                this.updateUI();
+            } else {
+                this.currentUser = null;
+                this.showLoginPrompt();
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            // Fall back to localStorage if API fails
+            this.loadFromLocalStorage();
+        }
+    }
 
-    // Game Scores Table
-    db.run(`CREATE TABLE IF NOT EXISTS game_scores (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        game_name TEXT NOT NULL,
-        score INTEGER NOT NULL,
-        played_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )`);
+    // Load from localStorage as fallback
+    loadFromLocalStorage() {
+        const userData = localStorage.getItem('arcadeUser');
+        if (userData) {
+            this.currentUser = JSON.parse(userData);
+            this.updateUI();
+        }
+    }
 
-    // Achievements Table
-    db.run(`CREATE TABLE IF NOT EXISTS achievements (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        description TEXT NOT NULL,
-        icon TEXT NOT NULL,
-        xp_reward INTEGER DEFAULT 100
-    )`);
+    // Update UI based on login state
+    updateUI() {
+        const userProfileHTML = document.getElementById('user-profile-section');
+        const loginBtnHTML = document.getElementById('login-button-section');
 
-    // User Achievements Table
-    db.run(`CREATE TABLE IF NOT EXISTS user_achievements (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        achievement_id INTEGER NOT NULL,
-        unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id),
-        FOREIGN KEY (achievement_id) REFERENCES achievements(id)
-    )`);
+        if (this.currentUser) {
+            if (loginBtnHTML) loginBtnHTML.style.display = 'none';
+            if (userProfileHTML) {
+                userProfileHTML.style.display = 'flex';
+                userProfileHTML.innerHTML = `
+                    <div class="user-profile" onclick="arcade.showProfile()">
+                        <img src="${this.currentUser.avatar_url || 'https://via.placeholder.com/30'}" class="user-avatar" alt="Avatar">
+                        <div>
+                            <div class="user-name">${this.currentUser.username}</div>
+                            <div class="user-level">LVL ${this.currentUser.level || 1}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            if (userProfileHTML) userProfileHTML.style.display = 'none';
+            if (loginBtnHTML) loginBtnHTML.style.display = 'block';
+        }
+    }
 
-    // Insert Default Achievements
-    const achievements = [
-        ['First Steps', 'Play your first game', '🎮', 100],
-        ['Getting Started', 'Reach Level 5', '⭐', 200],
-        ['Dedicated Player', 'Reach Level 10', '🌟', 500],
-        ['High Roller', 'Score 10,000 points in any game', '💯', 300],
-        ['Winner', 'Win 10 games', '🏆', 250],
-        ['Champion', 'Win 50 games', '👑', 1000],
-        ['Master', 'Complete all games at least once', '🎯', 2000],
-        ['Century Club', 'Play 100 games', '💯', 500],
-        ['Elite', 'Reach Level 25', '💎', 1000],
-        ['Legend', 'Reach Level 50', '👑', 2500]
-    ];
+    // Setup event listeners
+    setupEventListeners() {
+        const loginBtn = document.getElementById('show-login-modal');
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => this.showLoginModal());
+        }
 
-    const stmt = db.prepare('INSERT OR IGNORE INTO achievements (name, description, icon, xp_reward) VALUES (?, ?, ?, ?)');
-    achievements.forEach(achievement => stmt.run(achievement));
-    stmt.finalize();
-});
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.closeModal());
+        });
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
-app.use(session({
-    secret: 'diane-keaton-arcade-secret-key-change-this',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+        }
 
-// Passport Configuration
-passport.use(new LocalStrategy(
-    { usernameField: 'email' },
-    (email, password, done) => {
-        db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
-            if (err) return done(err);
-            if (!user) return done(null, false, { message: 'Incorrect email.' });
-            
-            bcrypt.compare(password, user.password, (err, isMatch) => {
-                if (err) return done(err);
-                if (!isMatch) return done(null, false, { message: 'Incorrect password.' });
-                return done(null, user);
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        }
+    }
+
+    showLoginModal() {
+        const modal = document.getElementById('login-modal');
+        if (modal) modal.classList.add('active');
+    }
+
+    showLoginPrompt() {
+        const gamesNeedLogin = document.querySelectorAll('[data-requires-login]');
+        gamesNeedLogin.forEach(game => {
+            game.addEventListener('click', (e) => {
+                if (!this.currentUser) {
+                    e.preventDefault();
+                    this.showLoginModal();
+                    this.showNotification('Please login to play games!', 'info');
+                }
             });
         });
     }
-));
 
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'YOUR_GOOGLE_CLIENT_SECRET',
-    callbackURL: '/auth/google/callback'
-}, (accessToken, refreshToken, profile, done) => {
-    db.get('SELECT * FROM users WHERE google_id = ?', [profile.id], (err, user) => {
-        if (err) return done(err);
-        
-        if (user) {
-            return done(null, user);
-        } else {
-            // Create new user
-            const email = profile.emails[0].value;
-            const username = profile.displayName;
-            const avatar_url = profile.photos[0]?.value;
-            
-            db.run(
-                'INSERT INTO users (email, google_id, username, avatar_url) VALUES (?, ?, ?, ?)',
-                [email, profile.id, username, avatar_url],
-                function(err) {
-                    if (err) return done(err);
-                    db.get('SELECT * FROM users WHERE id = ?', [this.lastID], (err, newUser) => {
-                        return done(err, newUser);
-                    });
-                }
-            );
-        }
-    });
-}));
-
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser((id, done) => {
-    db.get('SELECT * FROM users WHERE id = ?', [id], (err, user) => {
-        done(err, user);
-    });
-});
-
-// ==========================================
-// ROUTES
-// ==========================================
-
-// Register with Email
-app.post('/api/register', async (req, res) => {
-    const { email, password, username } = req.body;
-    
-    if (!email || !password || !username) {
-        return res.status(400).json({ error: 'All fields are required' });
+    closeModal() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => modal.classList.remove('active'));
     }
 
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
+    // Handle registration
+    async handleRegister(e) {
+        e.preventDefault();
         
-        db.run(
-            'INSERT INTO users (email, password, username) VALUES (?, ?, ?)',
-            [email, hashedPassword, username],
-            function(err) {
-                if (err) {
-                    if (err.message.includes('UNIQUE')) {
-                        return res.status(400).json({ error: 'Email already exists' });
-                    }
-                    return res.status(500).json({ error: 'Registration failed' });
-                }
+        const form = e.target;
+        const email = form.querySelector('[name="email"]')?.value;
+        const username = form.querySelector('[name="username"]')?.value;
+        const password = form.querySelector('[name="password"]')?.value;
+
+        if (!email || !username || !password) {
+            this.showNotification('All fields required!', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.apiUrl}/api/register`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showNotification('Registration successful! Now login.', 'success');
+                this.switchToLogin();
+                form.reset();
+            } else {
+                this.showNotification(data.error || 'Registration failed', 'error');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            this.showNotification('Network error. Try again.', 'error');
+        }
+    }
+
+    // Handle login
+    async handleLogin(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const email = form.querySelector('[name="email"]')?.value;
+        const password = form.querySelector('[name="password"]')?.value;
+
+        if (!email || !password) {
+            this.showNotification('Email and password required!', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.apiUrl}/api/login`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.currentUser = data.user;
+                // Save to localStorage as backup
+                localStorage.setItem('arcadeUser', JSON.stringify(this.currentUser));
+                this.updateUI();
+                this.closeModal();
+                this.showNotification('Welcome back, ' + data.user.username + '!', 'success');
+                this.loadLeaderboard();
+                form.reset();
+            } else {
+                this.showNotification(data.error || 'Login failed', 'error');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showNotification('Network error. Try again.', 'error');
+        }
+    }
+
+    // Logout
+    async logout() {
+        try {
+            await fetch(`${this.apiUrl}/api/logout`, { 
+                method: 'POST',
+                credentials: 'include'
+            });
+            this.currentUser = null;
+            localStorage.removeItem('arcadeUser');
+            this.updateUI();
+            this.showNotification('Logged out successfully', 'success');
+            window.location.reload();
+        } catch (error) {
+            this.showNotification('Logout failed', 'error');
+        }
+    }
+
+    switchToLogin() {
+        const registerContainer = document.getElementById('register-form-container');
+        const loginContainer = document.getElementById('login-form-container');
+        if (registerContainer) registerContainer.style.display = 'none';
+        if (loginContainer) loginContainer.style.display = 'block';
+    }
+
+    switchToRegister() {
+        const loginContainer = document.getElementById('login-form-container');
+        const registerContainer = document.getElementById('register-form-container');
+        if (loginContainer) loginContainer.style.display = 'none';
+        if (registerContainer) registerContainer.style.display = 'block';
+    }
+
+    // Save game score
+    async saveGameScore(gameName, score) {
+        if (!this.currentUser) {
+            this.showNotification('Login to save your score!', 'info');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.apiUrl}/api/game/score`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ game_name: gameName, score })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showNotification('Score saved! +' + score + ' XP', 'success');
+                await this.checkAuth();
+            } else {
+                this.showNotification('Failed to save score', 'error');
+            }
+        } catch (error) {
+            console.error('Save score error:', error);
+            this.showNotification('Could not save score (offline mode)', 'warning');
+        }
+    }
+
+    // Load leaderboard
+    async loadLeaderboard() {
+        try {
+            const response = await fetch(`${this.apiUrl}/api/leaderboard`, {
+                credentials: 'include'
+            });
+            const leaderboard = await response.json();
+
+            const leaderboardContainer = document.getElementById('leaderboard-list');
+            if (!leaderboardContainer) return;
+
+            if (!Array.isArray(leaderboard)) {
+                leaderboardContainer.innerHTML = '<p>No leaderboard data</p>';
+                return;
+            }
+
+            leaderboardContainer.innerHTML = leaderboard.map((user, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
                 
-                res.json({ 
-                    success: true, 
-                    message: 'Registration successful!',
-                    userId: this.lastID 
-                });
+                return `
+                    <div class="leaderboard-item">
+                        <div class="rank">${medal}</div>
+                        <img src="${user.avatar_url || 'https://via.placeholder.com/40'}" class="lb-avatar" alt="${user.username}">
+                        <div class="lb-info">
+                            <div class="lb-name">${user.username}</div>
+                            <div class="lb-stats">Level ${user.level || 1} • ${user.total_score || 0} pts • ${user.total_games_played || 0} games</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Failed to load leaderboard:', error);
+        }
+    }
+
+    // Load user achievements
+    async loadAchievements() {
+        if (!this.currentUser) return;
+
+        try {
+            const response = await fetch(`${this.apiUrl}/api/user/achievements`, {
+                credentials: 'include'
+            });
+            const achievements = await response.json();
+
+            const achievementsContainer = document.getElementById('achievements-list');
+            if (!achievementsContainer) return;
+
+            achievementsContainer.innerHTML = achievements.map(achievement => {
+                const unlocked = achievement.unlocked_at !== null;
+                return `
+                    <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
+                        <div class="achievement-icon">${achievement.icon}</div>
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-desc">${achievement.description}</div>
+                        <div class="achievement-xp">+${achievement.xp_reward} XP</div>
+                        ${unlocked ? `<div class="unlock-date">Unlocked ${new Date(achievement.unlocked_at).toLocaleDateString()}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Failed to load achievements:', error);
+        }
+    }
+
+    // Show user profile
+    async showProfile() {
+        if (!this.currentUser) return;
+
+        try {
+            const response = await fetch(`${this.apiUrl}/api/user/profile/${this.currentUser.id}`, {
+                credentials: 'include'
+            });
+            const profile = await response.json();
+
+            const profileModal = document.getElementById('profile-modal');
+            if (!profileModal) return;
+
+            const profileContent = document.getElementById('profile-content');
+            if (profileContent) {
+                profileContent.innerHTML = `
+                    <img src="${profile.avatar_url || 'https://via.placeholder.com/150'}" class="profile-avatar" alt="${profile.username}">
+                    <h2>${profile.username}</h2>
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <span class="stat-label">Level</span>
+                            <span class="stat-value">${profile.level || 1}</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="stat-label">XP</span>
+                            <span class="stat-value">${profile.xp || 0}</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="stat-label">Games Played</span>
+                            <span class="stat-value">${profile.total_games || 0}</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="stat-label">Achievements</span>
+                            <span class="stat-value">${profile.achievements_unlocked || 0}</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="stat-label">High Score</span>
+                            <span class="stat-value">${profile.highest_score || 0}</span>
+                        </div>
+                    </div>
+                    <button onclick="arcade.logout()" class="btn btn-logout">Logout</button>
+                `;
             }
-        );
-    } catch (error) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
 
-// Login with Email
-app.post('/api/login', passport.authenticate('local'), (req, res) => {
-    res.json({ 
-        success: true, 
-        user: {
-            id: req.user.id,
-            email: req.user.email,
-            username: req.user.username,
-            level: req.user.level,
-            xp: req.user.xp,
-            prestige: req.user.prestige,
-            avatar_url: req.user.avatar_url
+            profileModal.classList.add('active');
+        } catch (error) {
+            console.error('Failed to load profile:', error);
         }
-    });
-});
-
-// Google OAuth
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-app.get('/auth/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/login' }),
-    (req, res) => {
-        res.redirect('/');
-    }
-);
-
-// Logout
-app.post('/api/logout', (req, res) => {
-    req.logout(() => {
-        res.json({ success: true });
-    });
-});
-
-// Get Current User
-app.get('/api/user', (req, res) => {
-    if (!req.isAuthenticated()) {
-        return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    res.json({
-        id: req.user.id,
-        email: req.user.email,
-        username: req.user.username,
-        level: req.user.level,
-        xp: req.user.xp,
-        prestige: req.user.prestige,
-        avatar_url: req.user.avatar_url,
-        total_games_played: req.user.total_games_played
-    });
-});
-
-// Save Game Score
-app.post('/api/game/score', (req, res) => {
-    if (!req.isAuthenticated()) {
-        return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const { game_name, score } = req.body;
-    const user_id = req.user.id;
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
 
-    db.run(
-        'INSERT INTO game_scores (user_id, game_name, score) VALUES (?, ?, ?)',
-        [user_id, game_name, score],
-        function(err) {
-            if (err) {
-                return res.status(500).json({ error: 'Failed to save score' });
-            }
-
-            // Update user stats
-            db.run(
-                'UPDATE users SET total_games_played = total_games_played + 1 WHERE id = ?',
-                [user_id]
-            );
-
-            // Check for achievements
-            checkAchievements(user_id, score);
-
-            res.json({ success: true, scoreId: this.lastID });
-        }
-    );
-});
-
-// Get Leaderboard
-app.get('/api/leaderboard', (req, res) => {
-    const query = `
-        SELECT 
-            u.id,
-            u.username,
-            u.avatar_url,
-            u.level,
-            u.prestige,
-            u.xp,
-            SUM(gs.score) as total_score,
-            COUNT(gs.id) as games_played
-        FROM users u
-        LEFT JOIN game_scores gs ON u.id = gs.user_id
-        GROUP BY u.id
-        ORDER BY u.prestige DESC, u.level DESC, total_score DESC
-        LIMIT 100
-    `;
-
-    db.all(query, [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to get leaderboard' });
-        }
-        res.json(rows);
-    });
-});
-
-// Get User Achievements
-app.get('/api/user/achievements', (req, res) => {
-    if (!req.isAuthenticated()) {
-        return res.status(401).json({ error: 'Not authenticated' });
+        setTimeout(() => notification.classList.add('show'), 100);
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
-
-    const query = `
-        SELECT 
-            a.id,
-            a.name,
-            a.description,
-            a.icon,
-            a.xp_reward,
-            ua.unlocked_at
-        FROM achievements a
-        LEFT JOIN user_achievements ua ON a.id = ua.achievement_id AND ua.user_id = ?
-        ORDER BY ua.unlocked_at DESC, a.id ASC
-    `;
-
-    db.all(query, [req.user.id], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to get achievements' });
-        }
-        res.json(rows);
-    });
-});
-
-// Get User Profile
-app.get('/api/user/profile/:userId', (req, res) => {
-    const userId = req.params.userId;
-
-    const query = `
-        SELECT 
-            u.*,
-            COUNT(DISTINCT gs.id) as total_games,
-            COUNT(DISTINCT ua.id) as achievements_unlocked,
-            MAX(gs.score) as highest_score
-        FROM users u
-        LEFT JOIN game_scores gs ON u.id = gs.user_id
-        LEFT JOIN user_achievements ua ON u.id = ua.user_id
-        WHERE u.id = ?
-        GROUP BY u.id
-    `;
-
-    db.get(query, [userId], (err, user) => {
-        if (err || !user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        res.json(user);
-    });
-});
-
-// Helper: Check and unlock achievements
-function checkAchievements(userId, score) {
-    // Check various achievement conditions
-    db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
-        if (err) return;
-
-        // First game achievement
-        if (user.total_games_played === 1) {
-            unlockAchievement(userId, 1);
-        }
-
-        // Level achievements
-        if (user.level === 5) unlockAchievement(userId, 2);
-        if (user.level === 10) unlockAchievement(userId, 3);
-        if (user.level === 25) unlockAchievement(userId, 9);
-        if (user.level === 50) unlockAchievement(userId, 10);
-
-        // Score achievement
-        if (score >= 10000) unlockAchievement(userId, 4);
-
-        // Games played achievements
-        if (user.total_games_played === 100) unlockAchievement(userId, 8);
-    });
-
-    // Check win achievements
-    db.get('SELECT COUNT(*) as wins FROM game_scores WHERE user_id = ? AND score > 0', [userId], (err, result) => {
-        if (result && result.wins === 10) unlockAchievement(userId, 5);
-        if (result && result.wins === 50) unlockAchievement(userId, 6);
-    });
 }
 
-function unlockAchievement(userId, achievementId) {
-    db.run(
-        'INSERT OR IGNORE INTO user_achievements (user_id, achievement_id) VALUES (?, ?)',
-        [userId, achievementId],
-        function(err) {
-            if (this.changes > 0) {
-                // Give XP reward
-                db.get('SELECT xp_reward FROM achievements WHERE id = ?', [achievementId], (err, achievement) => {
-                    if (achievement) {
-                        db.run('UPDATE users SET xp = xp + ? WHERE id = ?', [achievement.xp_reward, userId]);
-                    }
-                });
-            }
-        }
-    );
-}
-
-// Start Server
-app.listen(PORT, () => {
-    console.log(`🎮 Diane's Arcade Server running on http://localhost:${PORT}`);
+// Initialize when page loads
+let arcade;
+document.addEventListener('DOMContentLoaded', () => {
+    arcade = new DianeArcade();
 });
-
-// ==========================================
-// FILE 2: package.json
-// ==========================================
-
-{
-  "name": "dianes-arcade",
-  "version": "1.0.0",
-  "description": "Diane Keaton's Arcade - Retro games with achievements and leaderboards",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "express-session": "^1.17.3",
-    "passport": "^0.6.0",
-    "passport-local": "^1.0.0",
-    "passport-google-oauth20": "^2.0.0",
-    "bcrypt": "^5.1.1",
-    "sqlite3": "^5.1.6"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  }
-}
-*/

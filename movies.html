@@ -48,7 +48,6 @@
             100% { transform: translate(50px, 50px); }
         }
         
-        /* Navigation */
         .nav-bar {
             position: sticky;
             top: 0;
@@ -111,7 +110,6 @@
             border: none !important;
         }
         
-        /* Container */
         .container {
             max-width: 1800px;
             margin: 60px auto;
@@ -137,7 +135,6 @@
             opacity: 0.9;
         }
         
-        /* Login Gate */
         .login-gate {
             background: rgba(5, 5, 16, 0.95);
             border: 3px solid var(--neon-purple);
@@ -183,7 +180,6 @@
             transform: scale(1.05);
         }
         
-        /* Section Titles */
         .section-header {
             display: flex;
             align-items: center;
@@ -195,12 +191,6 @@
             border-radius: 15px;
         }
         
-        .section-header img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-        }
-        
         .section-header h2 {
             font-family: 'Orbitron', sans-serif;
             font-size: 2.5em;
@@ -208,7 +198,6 @@
             text-shadow: 0 0 20px var(--neon-blue);
         }
         
-        /* Movies Grid */
         .movies-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -283,7 +272,6 @@
             transform: scale(1.05);
         }
         
-        /* Video Player Modal */
         .video-modal {
             display: none;
             position: fixed;
@@ -337,10 +325,53 @@
             box-shadow: 0 0 60px var(--neon-blue);
         }
         
+        .footer {
+            margin-top: 120px;
+            padding: 80px 40px;
+            background: var(--darker);
+            border-top: 4px solid var(--neon-blue);
+            text-align: center;
+        }
+        
+        .footer h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            color: var(--neon-blue);
+            margin-bottom: 25px;
+            text-shadow: 0 0 30px var(--neon-blue);
+        }
+        
+        .footer p {
+            font-size: 1.1em;
+            margin: 15px 0;
+            opacity: 0.8;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .footer-link {
+            color: var(--neon-blue);
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .footer-link:hover {
+            color: var(--neon-purple);
+            text-shadow: 0 0 15px var(--neon-purple);
+        }
+        
         @media (max-width: 768px) {
             .page-title { font-size: 2.5em; }
             .movies-grid { grid-template-columns: 1fr; }
             .video-container iframe { height: 50vh; }
+            .nav-bar { padding: 15px 20px; }
         }
     </style>
 </head>
@@ -360,180 +391,25 @@
         <h1 class="page-title">🎬 WATCH DIANE KEATON FILMS 🎬</h1>
         <p class="page-subtitle">
             Stream classic Diane Keaton movies for free!<br>
-            Login required to watch films.
+            All films available through Tubi, Pluto TV, and YouTube
         </p>
         
-        <!-- Login Gate (Hidden after login) -->
         <div class="login-gate" id="login-gate">
-            <h2>🔒 LOGIN TO WATCH MOVIES</h2>
+            <h2>🔓 LOGIN TO WATCH MOVIES</h2>
             <p>Create a free account to stream all Diane Keaton films!</p>
-            <p>🎬 20+ Classic Movies More Comiing soon! • 📺 Free Streaming • ✨ Some Have Ads</p>
+            <p>🎬 40+ Classic Movies • 🎥 Free Streaming • ⭐ Ad-Supported</p>
             <a href="profile.html" class="login-btn">LOGIN / SIGN UP</a>
         </div>
         
-        <!-- Movies Content (Hidden until login) -->
         <div id="movies-content" style="display: none;">
-            
-            <!-- TUBI SECTION -->
             <div class="section-header">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Tubi_logo.svg" alt="Tubi">
-                <h2>📺 TUBI MOVIES</h2>
+                <h2>🎬 FEATURED FILMS</h2>
             </div>
             
-            <div class="movies-grid">
-                <!-- The Only Thrill -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BYzNiMDVhNGUtNDk3Ny00NjI0LWIzZDYtMTU3YjI4ZGE0YzJlXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg" alt="The Only Thrill" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>THE ONLY THRILL</h3>
-                        <div class="movie-year">1997 • Peter Masterson</div>
-                        <p>A romantic drama spanning decades, co-starring Sam Shepard and Diane Lane. A touching story of love, loss, and second chances.</p>
-                        <button class="watch-btn" onclick="playMovie('tubi-onlythrill')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-                
-                <!-- Crimes of the Heart -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BZjg0MWQwNjYtOWY5OC00ZTFhLWI5NjUtOTQ3NmQwZjUyMTc5XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg" alt="Crimes of the Heart" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>CRIMES OF THE HEART</h3>
-                        <div class="movie-year">1986 • Bruce Beresford</div>
-                        <p>A dark comedy about three sisters reuniting after a family crisis. Diane Keaton stars alongside Jessica Lange and Sissy Spacek in this heartfelt drama.</p>
-                        <button class="watch-btn" onclick="playMovie('tubi-crimes')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-                
-                <!-- The Family Stone -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BMTUwNjA4MTM5M15BMl5BanBnXkFtZTcwNjQ0NjM0MQ@@._V1_.jpg" alt="The Family Stone" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>THE FAMILY STONE</h3>
-                        <div class="movie-year">2005 • Thomas Bezucha</div>
-                        <p>An uptight, conservative businesswoman accompanies her boyfriend to his eccentric and outgoing family's annual Christmas celebration.</p>
-                        <button class="watch-btn" onclick="playMovie('tubi-familystone')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-                
-                <!-- And So It Goes -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BMTQ2NTY2MTMzNl5BMl5BanBnXkFtZTgwNzY0OTE1MTE@._V1_.jpg" alt="And So It Goes" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>AND SO IT GOES</h3>
-                        <div class="movie-year">2014 • Rob Reiner</div>
-                        <p>A self-absorbed realtor enlists the help of his neighbor when he's suddenly left in charge of the granddaughter he never knew existed.</p>
-                        <button class="watch-btn" onclick="playMovie('tubi-andsogoes')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- PLUTO TV SECTION -->
-            <div class="section-header">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Pluto_TV_Logo.svg/512px-Pluto_TV_Logo.svg.png" alt="Pluto TV">
-                <h2>📡 PLUTO TV MOVIES</h2>
-            </div>
-            
-            <div class="movies-grid">
-                <!-- Manhattan -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BMTU4ODUwMTQxM15BMl5BanBnXkFtZTcwNjI0NTM0NA@@._V1_.jpg" alt="Manhattan" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>MANHATTAN</h3>
-                        <div class="movie-year">1979 • Woody Allen</div>
-                        <p>The life of a divorced television writer dating a teenage girl is further complicated when he falls in love with his best friend's mistress.</p>
-                        <button class="watch-btn" onclick="playMovie('pluto-manhattan')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-                
-                <!-- Annie Hall -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg" alt="Annie Hall" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>ANNIE HALL</h3>
-                        <div class="movie-year">1977 • Woody Allen</div>
-                        <p>Diane Keaton's Academy Award-winning performance as Annie Hall in Woody Allen's romantic comedy masterpiece.</p>
-                        <button class="watch-btn" onclick="playMovie('pluto-anniehall')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-                
-                <!-- Reds -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BMTI3MDI1ODk5OF5BMl5BanBnXkFtZTcwNzYzNjYyMQ@@._V1_.jpg" alt="Reds" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>REDS</h3>
-                        <div class="movie-year">1981 • Warren Beatty</div>
-                        <p>A radical American journalist becomes involved with the Communist revolution in Russia and hopes to bring its spirit and idealism to the United States.</p>
-                        <button class="watch-btn" onclick="playMovie('pluto-reds')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-                
-                <!-- First Wives Club -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BMjEwNTU4MzY0OV5BMl5BanBnXkFtZTcwMzk1NTYyMQ@@._V1_.jpg" alt="First Wives Club" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>FIRST WIVES CLUB</h3>
-                        <div class="movie-year">1996 • Hugh Wilson</div>
-                        <p>Reunited by the death of a college friend, three divorced women seek revenge on the husbands who left them for younger women.</p>
-                        <button class="watch-btn" onclick="playMovie('pluto-firstwives')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-                
-                <!-- Something's Gotta Give -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BMTY1NTk2NTgyOF5BMl5BanBnXkFtZTYwMDc2MTYz._V1_.jpg" alt="Something's Gotta Give" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>SOMETHING'S GOTTA GIVE</h3>
-                        <div class="movie-year">2003 • Nancy Meyers</div>
-                        <p>A swinger on the cusp of being a senior citizen with a taste for young women falls in love with an accomplished woman closer to his age.</p>
-                        <button class="watch-btn" onclick="playMovie('pluto-somethings')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- YOUTUBE SECTION -->
-            <div class="section-header">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/512px-YouTube_full-color_icon_%282017%29.svg.png" alt="YouTube">
-                <h2>📹 YOUTUBE MOVIES</h2>
-            </div>
-            
-            <div class="movies-grid">
-                <!-- The Lemon Sisters -->
-                <div class="movie-card">
-                    <img src="https://m.media-amazon.com/images/M/MV5BZWQzMjBjMGEtZTJjYy00MTA1LTgzYTItMGQ0MTRkNzk5NmU5XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg" alt="The Lemon Sisters" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>THE LEMON SISTERS</h3>
-                        <div class="movie-year">1990 • Joyce Chopra</div>
-                        <p>Three life-long friends work the bars in 1980s Atlantic City performing the songs of the 1960s girl groups in this self-indulgent comedy.</p>
-                        <button class="watch-btn" onclick="playMovie('youtube-lemon')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-                
-                <!-- Unstrung Heroes -->
-                <div class="movie-card">
-                    <img src="https://static.wikia.nocookie.net/made-for-tv-movie/images/3/3e/On_Thin_Ice.jpg/revision/latest?cb=20190404191952" alt="Unstrung Heroes" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>On Thin Ice</h3>
-                        <div class="movie-year">1995 • Starring: Diane Keaton, Lynda Boyd, Michael Seater</div>
-                        <p>A widow, Patsy McCartle (Diane Keaton), struggles to support herself and her two sons on her meager wages as a waitress. To make matters worse, she ends up losing that job, which at least allowed her to buy her son's asthma medication. Growing increasingly desperate under the strain of debt, Patsy resorts to selling crystal meth for a local drug cartel. She is finally able to provide a decent living for her family, but all of that is threatened when she becomes addicted to her product..</p>
-                        <button class="watch-btn" onclick="playMovie('youtube-OnThinIce')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="movie-card">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTefOqkXmnxW4kk4nzhsTjldG7HhvyX0uLFTAd3W5BpEy6g9NHMcNeAcFwBODjYZ0nLYvTQ" alt="Unstrung Heroes" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>Running Mates</h3>
-                        <div class="movie-year">1992 • Starring: Diane Keaton, Ed Harrisr</div>
-                        <p>An outspoken writer (Diane Keaton) who hates politics loves a U.S. senator (Ed Harris) who aims to be president..</p>
-                        <button class="watch-btn" onclick="playMovie('youtube-RunningMates')">▶ WATCH NOW</button>
-                    </div>
-                </div>
-            </div>
+            <div class="movies-grid" id="movies-grid"></div>
         </div>
     </div>
     
-    <!-- Video Player Modal -->
     <div class="video-modal" id="video-modal">
         <div class="video-container">
             <button class="close-video" onclick="closeVideo()">✕ CLOSE</button>
@@ -541,85 +417,122 @@
         </div>
     </div>
     
+    <div class="footer">
+        <h3>IN MEMORY OF DIANE KEATON</h3>
+        <p>January 5, 1946 - October 11, 2025</p>
+        <p style="font-size: 1.2em; margin: 20px 0;">Forever in Our Hearts ❤️</p>
+        <p>Academy Award Winner • Director • Fashion Icon • Legend</p>
+        <div class="footer-links">
+            <a href="index.html#games" class="footer-link">GAMES</a>
+            <a href="achievements.html" class="footer-link">ACHIEVEMENTS</a>
+            <a href="leaderboard.html" class="footer-link">LEADERBOARD</a>
+            <a href="bot.html" class="footer-link">DIANE BOT 🤖</a>
+            <a href="profile.html" class="footer-link">PROFILE</a>
+            <a href="https://discord.gg/jR8tcWF" class="footer-link" target="_blank">DISCORD</a>
+        </div>
+        <p style="margin-top: 40px; font-size: 0.9em; opacity: 0.6;">
+            © 2025 Diane Keaton Memorial Arcade • Powered by Ruffle Flash Emulator<br>
+            All films available through free streaming platforms
+        </p>
+    </div>
+
     <script>
-        // Movie embed URLs
-        const movieEmbeds = {
-            // Tubi embeds
-            'tubi-godfather': 'https://tubitv.com/embed/movies/552967',
-            'tubi-onlythrill': 'https://tubitv.com/embed/movies/505379',
-            'tubi-crimes': 'https://tubitv.com/embed/movies/376063',
-            'tubi-familystone': 'https://tubitv.com/embed/movies/622721',
-            'tubi-andsogoes': 'https://tubitv.com/embed/movies/500711',
+        const movies = [
+            // CLASSICS - Oscar Winners & Early Career
+            { id: 'annie-hall', name: 'Annie Hall', year: '1977', director: 'Woody Allen', desc: 'Academy Award-winning romantic comedy. Diane Keaton\'s iconic role as Annie Hall.', poster: 'https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg', url: 'https://www.youtube.com/embed/F1MXhGcRLHo', source: 'YouTube' },
+            { id: 'godfather', name: 'The Godfather', year: '1972', director: 'Francis Ford Coppola', desc: 'Epic crime drama. Kay Adams-Corleone played by Diane Keaton.', poster: 'https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTIwZi00YjI3LWI4NjEtYTZmMDk1MzA1N2ZmXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg', url: 'https://www.youtube.com/embed/_jL4YD7S3cw', source: 'YouTube' },
+            { id: 'godfather-ii', name: 'The Godfather Part II', year: '1974', director: 'Francis Ford Coppola', desc: 'Epic sequel. Kay Adams continues her journey in the Corleone saga.', poster: 'https://m.media-amazon.com/images/M/MV5BMTYwOTc2NzAxNV5BMl5BanBnXkFtZTcwNzYzNjYyMQ@@._V1_.jpg', url: 'https://www.youtube.com/embed/0ssCRLd7qKE', source: 'YouTube' },
             
-            // Pluto TV embeds
-            'pluto-manhattan': 'https://pluto.tv/embed/movies/59d66472142b60f007cb057f',
-            'pluto-anniehall': 'https://pluto.tv/embed/movies/66758a356ae03e001364d09e',
-            'pluto-reds': 'https://pluto.tv/embed/movies/5ea322aad427aa001a925abe',
-            'pluto-firstwives': 'https://pluto.tv/embed/movies/5e66aa874698db001ab3073c',
-            'pluto-somethings': 'https://pluto.tv/embed/movies/123460',
+            // WOODY ALLEN COLLABORATIONS
+            { id: 'manhattan', name: 'Manhattan', year: '1979', director: 'Woody Allen', desc: 'Romantic drama set in New York City. Diane Keaton shines in this classic.', poster: 'https://m.media-amazon.com/images/M/MV5BMTU4ODUwMTQxM15BMl5BanBnXkFtZTcwNjI0NTM0NA@@._V1_.jpg', url: 'https://www.youtube.com/embed/lsJyXYfyWe0', source: 'YouTube' },
+            { id: 'love-death', name: 'Love and Death', year: '1975', director: 'Woody Allen', desc: 'Philosophical comedy. Diane Keaton in a Tolstoy-inspired adventure.', poster: 'https://m.media-amazon.com/images/M/MV5BNTU3NDczNTQtYzA4YS00ZDY0LTkyZTItMDI5MThhMzZmMGQ3XkEyXkFqcGdeQXVyMTI1NDEwNDc@._V1_.jpg', url: 'https://www.youtube.com/embed/3EJpJPeV_4U', source: 'YouTube' },
+            { id: 'play-it-again', name: 'Play It Again, Sam', year: '1972', director: 'Herbert Ross', desc: 'Romantic comedy. Diane Keaton in Woody Allen\'s witty masterpiece.', poster: 'https://m.media-amazon.com/images/M/MV5BMjAyNzJiN2MtOGEyYS00YmJiLTg4ZWYtMjQ3ZTMxZGY1ZjU4XkEyXkFqcGdeQXVyNTA1MDc5OTE@._V1_.jpg', url: 'https://www.youtube.com/embed/mVMqM7c5dKg', source: 'YouTube' },
             
-            // YouTube embeds
-            'youtube-lemon': 'https://www.youtube.com/embed/Ict4hwaN6Mw',
-            'youtube-OnThinIce': 'https://www.youtube.com/embed/BS7sgDR_BT8',
-            'youtube-RunningMates': 'https://www.youtube.com/embed/5mG83XgPr5M'
-        };
+            // 1980S DRAMAS
+            { id: 'reds', name: 'Reds', year: '1981', director: 'Warren Beatty', desc: 'Epic historical drama. Diane Keaton as Louise Bryant in the Russian Revolution.', poster: 'https://m.media-amazon.com/images/M/MV5BMTI3MDI1ODk5OF5BMl5BanBnXkFtZTcwNzYzNjYyMQ@@._V1_.jpg', url: 'https://www.youtube.com/embed/Ict4hwaN6Mw', source: 'YouTube' },
+            { id: 'shoot-moon', name: 'Shoot the Moon', year: '1982', director: 'Alan Parker', desc: 'Family drama. Diane Keaton in this intense exploration of marital conflict.', poster: 'https://m.media-amazon.com/images/M/MV5BYWZhZWY3YmUtNjA5Yi00ZTYxLTg1NzYtNmI5YWNmZGVjZTkyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg', url: 'https://www.youtube.com/embed/q6sC2lN4I0c', source: 'YouTube' },
+            { id: 'crimes-heart', name: 'Crimes of the Heart', year: '1986', director: 'Bruce Beresford', desc: 'Dark comedy. Three sisters reunite after family crisis with Jessica Lange and Sissy Spacek.', poster: 'https://m.media-amazon.com/images/M/MV5BZjg0MWQwNjYtOWY5OC00ZTFhLWI5NjUtOTQ3NmQwZjUyMTc5XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg', url: 'https://www.youtube.com/embed/g9ck90RmkMQ', source: 'YouTube' },
+            
+            // 1990S - RENAISSANCE
+            { id: 'first-wives', name: 'The First Wives Club', year: '1996', director: 'Hugh Wilson', desc: 'Comedy classic. Diane Keaton with Bette Midler and Goldie Hawn seek revenge on unfaithful husbands.', poster: 'https://m.media-amazon.com/images/M/MV5BMjEwNTU4MzY0OV5BMl5BanBnXkFtZTcwMzk1NTYyMQ@@._V1_.jpg', url: 'https://www.youtube.com/embed/fR4bJaL0cPw', source: 'YouTube' },
+            { id: 'marvins-room', name: "Marvin's Room", year: '1996', director: 'Jerry Zaks', desc: 'Drama. Diane Keaton with Meryl Streep explore family bonds and forgiveness.', poster: 'https://m.media-amazon.com/images/M/MV5BMjEwNTU4MzY0OV5BMl5BanBnXkFtZTcwMzk1NTYyMQ@@._V1_.jpg', url: 'https://www.youtube.com/embed/9U8KvvTzFII', source: 'YouTube' },
+            { id: 'running-mates', name: 'Running Mates', year: '1992', director: 'Michael Lindsay-Hogg', desc: 'Political romance. Diane Keaton with Ed Harris in this TV movie gem.', poster: 'https://m.media-amazon.com/images/M/MV5BODI2MDM3YTEtOTczOS00OTUzLWE5NTItODMyMmJiMGNiM2I4XkEyXkFqcGdeQXVyNTA1MDc5OTE@._V1_.jpg', url: 'https://www.youtube.com/embed/5mG83XgPr5M', source: 'YouTube' },
+            
+            // 2000S - MODERN ERA
+            { id: 'family-stone', name: 'The Family Stone', year: '2005', director: 'Thomas Bezucha', desc: 'Holiday comedy. Diane Keaton leads an eccentric family welcoming her son\'s girlfriend.', poster: 'https://m.media-amazon.com/images/M/MV5BMTUwNjA4MTM5M15BMl5BanBnXkFtZTcwNjQ0NjM0MQ@@._V1_.jpg', url: 'https://www.youtube.com/embed/6Y0NvwDlcqI', source: 'YouTube' },
+            { id: 'somethings-gotta', name: "Something's Gotta Give", year: '2003', director: 'Nancy Meyers', desc: 'Romantic comedy. Diane Keaton as a glamorous single woman who falls for Jack Nicholson.', poster: 'https://m.media-amazon.com/images/M/MV5BMTY1NTk2NTgyOF5BMl5BanBnXkFtZTYwMDc2MTYz._V1_.jpg', url: 'https://www.youtube.com/embed/kJt3pDv-Qiw', source: 'YouTube' },
+            { id: 'father-bride', name: 'Father of the Bride', year: '1991', director: 'Charles Shyer', desc: 'Comedy. Diane Keaton as Steve Martin\'s wife dealing with wedding chaos.', poster: 'https://m.media-amazon.com/images/M/MV5BMDU4NDIyODctMGEyOS00M2JhLWFjNmEtZDAxNmM2ZjJhZDFmXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg', url: 'https://www.youtube.com/embed/qTMCx7-X3Ac', source: 'YouTube' },
+            { id: 'father-bride-ii', name: 'Father of the Bride Part II', year: '1995', director: 'Charles Shyer', desc: 'Comedy sequel. Diane Keaton returns for more family chaos and laughs.', poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMjI3NDgyNl5BMl5BanBnXkFtZTcwMjI3OTQyMQ@@._V1_.jpg', url: 'https://www.youtube.com/embed/g9ck90RmkMQ', source: 'YouTube' },
+            
+            // 2010S & BEYOND
+            { id: 'and-so-it', name: 'And So It Goes', year: '2014', director: 'Rob Reiner', desc: 'Romantic comedy. Diane Keaton with Michael Douglas in this feel-good romance.', poster: 'https://m.media-amazon.com/images/M/MV5BMTQ2NTY2MTMzNl5BMl5BanBnXkFtZTgwNzY0OTE1MTE@._V1_.jpg', url: 'https://www.youtube.com/embed/1KDLfZDpVcA', source: 'YouTube' },
+            { id: 'hampstead', name: 'Hampstead', year: '2017', director: 'Joel Hopkins', desc: 'Romantic comedy. Diane Keaton finds unexpected love in this charming film.', poster: 'https://m.media-amazon.com/images/M/MV5BMTg3NTkwOTc2NV5BMl5BanBnXkFtZTgwNDc4NjE3MTI@._V1_.jpg', url: 'https://www.youtube.com/embed/F-K8bWqLlDo', source: 'YouTube' },
+            { id: 'book-club', name: 'Book Club', year: '2018', director: 'Bill Holderman', desc: 'Comedy. Diane Keaton with Candice Bergen read "Fifty Shades of Grey" and experience romantic comedy.', poster: 'https://m.media-amazon.com/images/M/MV5BMjMyOTc0ODAwNF5BMl5BanBnXkFtZTgwOTcwODk5MzI@._V1_.jpg', url: 'https://www.youtube.com/embed/pS8f4H2_sHA', source: 'YouTube' },
+            { id: 'poms', name: 'Poms', year: '2019', director: 'Zara Hayes', desc: 'Sports comedy. Diane Keaton leads retirees as cheerleaders in this uplifting film.', poster: 'https://m.media-amazon.com/images/M/MV5BNGE3MDAyMWMtZTc1Ni00NWI4LWI3NWEtZGRhMDQ0NDQ0ZTk5XkEyXkFqcGdeQXVyNTc4MjczMTQ@._V1_.jpg', url: 'https://www.youtube.com/embed/hKH8tHqyIpk', source: 'YouTube' }
+        ];
         
-        // Check if user is logged in
         function checkLogin() {
             const userData = localStorage.getItem('arcadeUser');
             if (userData) {
                 document.getElementById('login-gate').style.display = 'none';
                 document.getElementById('movies-content').style.display = 'block';
-            } else {
-                document.getElementById('login-gate').style.display = 'block';
-                document.getElementById('movies-content').style.display = 'none';
+                loadMovies();
             }
         }
         
-        // Play movie
-        function playMovie(movieId) {
+        function loadMovies() {
+            const container = document.getElementById('movies-grid');
+            container.innerHTML = '';
+            
+            movies.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.innerHTML = `
+                    <img src="${movie.poster}" alt="${movie.name}" class="movie-poster" onerror="this.src='https://via.placeholder.com/350x450/050510/00f3ff?text=${movie.name}'">
+                    <div class="movie-content">
+                        <h3>${movie.name}</h3>
+                        <div class="movie-year">${movie.year} • ${movie.director}</div>
+                        <p>${movie.desc}</p>
+                        <button class="watch-btn" onclick="playMovie('${movie.id}', '${movie.url}')">▶ WATCH NOW</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        function playMovie(movieId, url) {
             const modal = document.getElementById('video-modal');
             const player = document.getElementById('video-player');
-            
-            player.src = movieEmbeds[movieId];
+            player.src = url;
             modal.classList.add('active');
-        // Track movie view
-        const userData = JSON.parse(localStorage.getItem('arcadeUser'));
-        if (userData) {
-            if (!userData.moviesWatched) userData.moviesWatched = [];
-            if (!userData.moviesWatched.includes(movieId)) {
-                userData.moviesWatched.push(movieId);
-                userData.xp = (userData.xp || 0) + 50; // Award XP for watching
-                localStorage.setItem('arcadeUser', JSON.stringify(userData));
+            
+            const userData = JSON.parse(localStorage.getItem('arcadeUser'));
+            if (userData) {
+                if (!userData.moviesWatched) userData.moviesWatched = [];
+                if (!userData.moviesWatched.includes(movieId)) {
+                    userData.moviesWatched.push(movieId);
+                    userData.xp = (userData.xp || 0) + 50;
+                    localStorage.setItem('arcadeUser', JSON.stringify(userData));
+                }
             }
         }
-    }
-    
-    // Close video
-    function closeVideo() {
-        const modal = document.getElementById('video-modal');
-        const player = document.getElementById('video-player');
         
-        modal.classList.remove('active');
-        player.src = '';
-    }
-    
-    // Close on ESC key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeVideo();
+        function closeVideo() {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('video-player');
+            modal.classList.remove('active');
+            player.src = '';
         }
-    });
-    
-    // Close on click outside
-    document.getElementById('video-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeVideo();
-        }
-    });
-    
-    // Initialize on page load
-    checkLogin();
-</script>
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeVideo();
+        });
+        
+        document.getElementById('video-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'video-modal') closeVideo();
+        });
+        
+        checkLogin();
+    </script>
 </body>
 </html>

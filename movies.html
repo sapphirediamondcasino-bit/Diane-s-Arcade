@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch 30+ Diane Keaton Movies Free - Memorial Arcade</title>
+    <title>Watch 40+ Diane Keaton Movies Free - Memorial Arcade</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,6 +13,7 @@
             --neon-purple: #bf00ff;
             --neon-pink: #ff00ff;
             --neon-green: #39ff14;
+            --neon-orange: #ff6600;
             --dark-bg: #050510;
             --darker: #020208;
         }
@@ -172,6 +173,54 @@
             box-shadow: 0 0 60px var(--neon-blue);
             transform: scale(1.05);
         }
+
+        .live-player-section {
+            background: rgba(5, 5, 16, 0.95);
+            border: 3px solid var(--neon-green);
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 60px;
+            box-shadow: 0 0 60px rgba(57, 255, 20, 0.3);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .live-dot {
+            width: 15px;
+            height: 15px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--neon-green);
+            animation: blink 1.5s ease infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .live-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            color: var(--neon-green);
+            text-shadow: 0 0 20px var(--neon-green);
+            letter-spacing: 2px;
+        }
+
+        .pluto-player {
+            width: 100%;
+            height: 600px;
+            border: 4px solid var(--neon-green);
+            border-radius: 20px;
+            box-shadow: 0 0 40px var(--neon-green);
+            background: #000;
+        }
         
         .section-header {
             display: flex;
@@ -183,6 +232,16 @@
             border-left: 5px solid var(--neon-blue);
             border-radius: 15px;
             box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+        }
+
+        .section-header.youtube {
+            border-left-color: var(--neon-orange);
+            box-shadow: 0 0 30px rgba(255, 102, 0, 0.3);
+        }
+
+        .section-header.youtube h2 {
+            color: var(--neon-orange);
+            text-shadow: 0 0 20px var(--neon-orange);
         }
         
         .section-header img {
@@ -213,6 +272,15 @@
             transition: all 0.4s;
             cursor: pointer;
         }
+
+        .movie-card.youtube {
+            border-color: var(--neon-orange);
+        }
+
+        .movie-card.youtube:hover {
+            border-color: #ff0000;
+            box-shadow: 0 20px 60px rgba(255, 0, 0, 0.5);
+        }
         
         .movie-card:hover {
             transform: translateY(-10px);
@@ -226,6 +294,10 @@
             object-fit: cover;
             border-bottom: 3px solid var(--neon-blue);
         }
+
+        .movie-card.youtube .movie-poster {
+            border-bottom-color: var(--neon-orange);
+        }
         
         .movie-content {
             padding: 20px;
@@ -237,6 +309,10 @@
             color: var(--neon-blue);
             margin-bottom: 8px;
             font-weight: 900;
+        }
+
+        .movie-card.youtube h3 {
+            color: var(--neon-orange);
         }
         
         .movie-year {
@@ -269,58 +345,20 @@
             cursor: pointer;
             width: 100%;
         }
+
+        .watch-btn.youtube {
+            background: linear-gradient(135deg, #ff0000, var(--neon-orange));
+            color: white;
+            box-shadow: 0 0 20px #ff0000;
+        }
+
+        .watch-btn.youtube:hover {
+            box-shadow: 0 0 40px #ff0000;
+        }
         
         .watch-btn:hover {
             box-shadow: 0 0 40px var(--neon-green);
             transform: scale(1.05);
-        }
-        
-        .video-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .video-modal.active { display: flex; }
-        
-        .video-container {
-            width: 100%;
-            max-width: 1400px;
-            position: relative;
-        }
-        
-        .close-video {
-            position: absolute;
-            top: -50px; right: 0;
-            background: var(--neon-pink);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .close-video:hover {
-            background: var(--neon-purple);
-            transform: scale(1.1);
-        }
-        
-        .video-container iframe {
-            width: 100%;
-            height: 80vh;
-            border: 4px solid var(--neon-blue);
-            border-radius: 20px;
-            box-shadow: 0 0 60px var(--neon-blue);
         }
         
         .footer {
@@ -334,7 +372,7 @@
         @media (max-width: 768px) {
             .page-title { font-size: 2.5em; }
             .movies-grid { grid-template-columns: 1fr; }
-            .video-container iframe { height: 50vh; }
+            .pluto-player { height: 400px; }
             .nav-bar { flex-direction: column; }
         }
     </style>
@@ -348,161 +386,235 @@
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="bot.html" class="nav-link bot-btn">DIANE BOT 🤖</a>
             <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
+            <a href="terms.html" class="nav-link">TERMS</a>
+            <a href="privacy.html" class="nav-link">PRIVACY</a>
         </div>
     </nav>
     
     <div class="container">
-        <h1 class="page-title">🎬 WATCH 30+ DIANE KEATON FILMS 🎬</h1>
+        <h1 class="page-title">🎬 WATCH 40+ DIANE KEATON FILMS 🎬</h1>
         <p class="page-subtitle">
-            Stream 30+ classic Diane Keaton movies completely FREE!<br>
-            Powered by Tubi & Pluto TV • Login required
+            Stream 40+ classic Diane Keaton movies completely FREE!<br>
+            Powered by YouTube, Tubi and Pluto TV
         </p>
         
         <div class="login-gate" id="login-gate">
             <h2>🔒 LOGIN TO WATCH MOVIES</h2>
             <p>Create a free account to stream ALL Diane Keaton films!</p>
-            <p>🎬 30+ Movies • 📺 100% Free • ✨ Some Have Ads</p>
+            <p>🎬 40+ Movies • 📺 100% Free • ✨ YouTube, Tubi and Pluto TV</p>
             <a href="profile.html" class="login-btn">LOGIN / SIGN UP</a>
         </div>
         
         <div id="movies-content" style="display: none;">
             
-            <!-- TUBI SECTION -->
+            <!-- PLUTO TV LIVE PLAYER -->
+            <div class="live-player-section">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <h2 class="live-title">📡 PLUTO TV LIVE - 24/7 STREAMING</h2>
+                </div>
+                <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px; opacity: 0.9;">
+                    Watch classic movies LIVE 24/7! No account needed.
+                </p>
+                <iframe 
+                    class="pluto-player"
+                    src="https://pluto.tv/en/live-tv/pluto-tv-classic-movies"
+                    allowfullscreen
+                    allow="autoplay; encrypted-media"
+                    frameborder="0">
+                </iframe>
+            </div>
+
+            <!-- TUBI TV LIVE PLAYER -->
+            <div class="live-player-section" style="border-color: var(--neon-blue); box-shadow: 0 0 60px rgba(0, 243, 255, 0.3);">
+                <div class="live-indicator">
+                    <div class="live-dot" style="background: var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue);"></div>
+                    <h2 class="live-title" style="color: var(--neon-blue); text-shadow: 0 0 20px var(--neon-blue);">📺 TUBI TV - FREE STREAMING</h2>
+                </div>
+                <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px; opacity: 0.9;">
+                    Watch thousands of free movies and TV shows!
+                </p>
+                <iframe 
+                    src="https://tubitv.com/home"
+                    style="width: 100%; height: 600px; border: 4px solid var(--neon-blue); border-radius: 20px; box-shadow: 0 0 40px var(--neon-blue); background: #000;"
+                    allowfullscreen
+                    allow="autoplay; encrypted-media"
+                    frameborder="0"
+                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms">
+                </iframe>
+            </div>
+
+            <div class="section-header youtube">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube">
+                <h2>📺 YOUTUBE - 10 FREE FULL MOVIES</h2>
+            </div>
+            
+            <div class="movies-grid" id="youtube-movies"></div>
+
             <div class="section-header">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Tubi_logo.svg" alt="Tubi">
                 <h2>📺 TUBI - 17 FREE MOVIES</h2>
             </div>
             
-            <div class="movies-grid">
-                <!-- Movie cards will be dynamically loaded here -->
-            </div>
+            <div class="movies-grid" id="tubi-movies"></div>
             
-            <!-- PLUTO TV SECTION -->
             <div class="section-header">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Pluto_TV_Logo.svg/512px-Pluto_TV_Logo.svg.png" alt="Pluto TV">
                 <h2>📡 PLUTO TV - 15 FREE MOVIES</h2>
             </div>
             
-            <div class="movies-grid" id="pluto-movies">
-                <!-- Movie cards will be dynamically loaded here -->
-            </div>
-        </div>
-    </div>
-    
-    <div class="video-modal" id="video-modal">
-        <div class="video-container">
-            <button class="close-video" onclick="closeVideo()">✕ CLOSE</button>
-            <iframe id="video-player" src="" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+            <div class="movies-grid" id="pluto-movies"></div>
         </div>
     </div>
     
     <div class="footer">
         <p>💜 Diane Keaton Memorial Arcade © 2025</p>
-        <p style="font-size: 0.9em; margin-top: 10px;">30+ Movies Streaming Free • Powered by Tubi & Pluto TV</p>
-        <p style="font-size: 0.8em; margin-top: 10px;">Note: External streaming links open movies directly on platform pages</p>
+        <p style="font-size: 0.9em; margin-top: 10px;">40+ Movies Streaming Free</p>
+    </div>
+    
+    <div style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 10000; justify-content: center; align-items: center; padding: 20px;" id="video-modal">
+        <div style="width: 100%; max-width: 1400px; position: relative;">
+            <button onclick="closeVideo()" style="position: absolute; top: -50px; right: 0; background: #ff00ff; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.2em; cursor: pointer; transition: all 0.3s;">✕ CLOSE</button>
+            <iframe id="video-player" src="" style="width: 100%; height: 80vh; border: 4px solid #00f3ff; border-radius: 20px; box-shadow: 0 0 60px #00f3ff;" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
     </div>
     
     <script>
-        // REAL Diane Keaton movies from Tubi (based on search results)
-        const tubiMovies = [
-            {title:'Baby Boom', year:'1987', desc:'A Manhattan career woman inherits a baby. Classic comedy.', url:'https://tubitv.com/movies/100007410'},
-            {title:'Annie Hall', year:'1977', desc:'Academy Award-winning romantic comedy. Keaton\'s iconic role.', url:'https://tubitv.com/movies/447858'},
-            {title:'Maybe I Do', year:'2023', desc:'Parents meet at wedding. Stars Emma Roberts, Richard Gere.', url:'https://tubitv.com/movies/100008877'},
-            {title:'Love the Coopers', year:'2015', desc:'Family Christmas chaos. Stars John Goodman.', url:'https://tubitv.com/movies/470648'},
-            {title:'Hampstead', year:'2017', desc:'American widow in London falls for squatter.', url:'https://tubitv.com/movies/533882'},
-            {title:'Darling Companion', year:'2012', desc:'Family searches for lost dog. Stars Kevin Kline.', url:'https://tubitv.com/movies/440915'},
-            {title:'Poms', year:'2019', desc:'Woman forms cheerleading squad at retirement home.', url:'https://tubitv.com/movies/534189'},
-            {title:'Smother', year:'2008', desc:'Mother moves in with son, dark comedy ensues.', url:'https://tubitv.com/movies/400948'},
-            {title:'Love, Weddings & Other Disasters', year:'2020', desc:'Boston-set romantic comedy anthology.', url:'https://tubitv.com/movies/596033'},
-            {title:'Crimes of the Heart', year:'1986', desc:'Three sisters reunite. Stars Jessica Lange.', url:'https://tubitv.com/movies/456331'},
-            {title:'Manhattan', year:'1979', desc:'Woody Allen classic. Black-and-white NYC romance.', url:'https://tubitv.com/movies/400948'},
-            {title:'The Only Thrill', year:'1997', desc:'Decades-spanning romance. Stars Sam Shepard.', url:'https://tubitv.com/movies/477192'},
-            {title:'On Thin Ice', year:'2003', desc:'Widow turns to drug dealing. Powerful drama.', url:'https://tubitv.com/movies/438891'},
-            {title:'Mama\'s Boy', year:'2007', desc:'29-year-old lives with mother. Stars Anna Faris.', url:'https://tubitv.com/movies/418624'},
-            {title:'Radio Days', year:'1987', desc:'Woody Allen\'s nostalgic 1940s radio era.', url:'https://tubitv.com/movies/451027'},
-            {title:'Interiors', year:'1978', desc:'Bergman-esque drama about dysfunctional family.', url:'https://tubitv.com/movies/481156'},
-            {title:'Harry and Walter Go to New York', year:'1976', desc:'Period comedy with James Caan, Michael Caine.', url:'https://tubitv.com/movies/527336'}
+        var youtubeMovies = [
+            {title:"The Only Thrill", year:"1997", desc:"Romantic drama spanning decades. Stars Sam Shepard.", url:"https://www.youtube.com/watch?v=AoaiNpsoaIs", videoId:"AoaiNpsoaIs", poster:"https://m.media-amazon.com/images/M/MV5BMTEzNzQ5MTI3NjReQTJeQWpwZ15BbWU3MDM4NTYzMjI@._V1_.jpg"},
+            {title:"Smother", year:"2008", desc:"Mother moves in with son. Dark comedy ensues.", url:"https://www.youtube.com/watch?v=P3xcgABiXWM", videoId:"P3xcgABiXWM", poster:"https://m.media-amazon.com/images/M/MV5BMTg5NzMxNDQ4M15BMl5BanBnXkFtZTcwOTI4MDk0MQ@@._V1_.jpg"},
+            {title:"The First Wives Club", year:"1996", desc:"Three divorced women get revenge. Comedy gold.", url:"https://www.youtube.com/watch?v=nHA_nB5HT4U", videoId:"nHA_nB5HT4U", poster:"https://m.media-amazon.com/images/M/MV5BMTc3MDcyMzE0M15BMl5BanBnXkFtZTgwNzE3NjM1NjE@._V1_.jpg"},
+            {title:"5 Flights Up", year:"2014", desc:"Brooklyn couple faces life changes. Stars Morgan Freeman.", url:"https://www.youtube.com/watch?v=tkcMbn1Xkk8", videoId:"tkcMbn1Xkk8", poster:"https://m.media-amazon.com/images/M/MV5BMTczNjczMzAwN15BMl5BanBnXkFtZTgwNTcwNzA5NTE@._V1_.jpg"},
+            {title:"Darling Companion", year:"2012", desc:"Family searches for lost dog. Stars Kevin Kline.", url:"https://www.youtube.com/watch?v=k6n55M6jWr8", videoId:"k6n55M6jWr8", poster:"https://m.media-amazon.com/images/M/MV5BMTU4ODM3MzA0MV5BMl5BanBnXkFtZTcwMjk1NjYwNw@@._V1_.jpg"},
+            {title:"Annie Hall", year:"1977", desc:"Oscar-winning romantic comedy. Woody Allen classic.", url:"https://www.youtube.com/watch?v=fEsca_3P2VA", videoId:"fEsca_3P2VA", poster:"https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
+            {title:"Crossed Over", year:"2002", desc:"TV movie about death row pen pals. Powerful drama.", url:"https://www.youtube.com/watch?v=0HBGUkSY_nM", videoId:"0HBGUkSY_nM", poster:"https://m.media-amazon.com/images/M/MV5BMTc2MTk1NTUyMV5BMl5BanBnXkFtZTcwNzE4MjQyMQ@@._V1_.jpg"},
+            {title:"Secrets of Summer", year:"2007", desc:"Beach house mystery. Romantic thriller.", url:"https://www.youtube.com/watch?v=Ott6O47zCfs", videoId:"Ott6O47zCfs", poster:"https://m.media-amazon.com/images/M/MV5BMTYzNDY4NTc3NV5BMl5BanBnXkFtZTcwMjU0MzQzMw@@._V1_.jpg"},
+            {title:"On Thin Ice", year:"2003", desc:"Widow turns to drug dealing. Powerful drama.", url:"https://www.youtube.com/watch?v=BS7sgDR_BT8", videoId:"BS7sgDR_BT8", poster:"https://m.media-amazon.com/images/M/MV5BMTY2MTMxMzY4M15BMl5BanBnXkFtZTcwNzg0NTIyMQ@@._V1_.jpg"}
+        ];
+
+        var tubiMovies = [
+            {title:"Baby Boom", year:"1987", desc:"Career woman inherits a baby.", url:"https://tubitv.com/movies/100007410", poster:"https://m.media-amazon.com/images/M/MV5BMTUwNzA2MTg5Nl5BMl5BanBnXkFtZTcwMTQyNDQyNA@@._V1_.jpg"},
+            {title:"Annie Hall", year:"1977", desc:"Academy Award-winning romantic comedy.", url:"https://tubitv.com/movies/447858", poster:"https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
+            {title:"Maybe I Do", year:"2023", desc:"Parents meet at wedding.", url:"https://tubitv.com/movies/100008877", poster:"https://m.media-amazon.com/images/M/MV5BYzJmYzBkODYtYjc5Yi00ODFhLTlmNGItOThhNTcxZmRhMGU2XkEyXkFqcGdeQXVyMTE0MTY2Mzk2._V1_.jpg"},
+            {title:"Love the Coopers", year:"2015", desc:"Family Christmas chaos.", url:"https://tubitv.com/movies/470648", poster:"https://m.media-amazon.com/images/M/MV5BMTczNzcyNDY2N15BMl5BanBnXkFtZTgwNjk5OTE0NzE@._V1_.jpg"},
+            {title:"Hampstead", year:"2017", desc:"American widow in London.", url:"https://tubitv.com/movies/533882", poster:"https://m.media-amazon.com/images/M/MV5BMjMyODQ0ODYyNl5BMl5BanBnXkFtZTgwNDU4NDY1MTI@._V1_.jpg"},
+            {title:"Darling Companion", year:"2012", desc:"Family searches for lost dog.", url:"https://tubitv.com/movies/440915", poster:"https://m.media-amazon.com/images/M/MV5BMTU4ODM3MzA0MV5BMl5BanBnXkFtZTcwMjk1NjYwNw@@._V1_.jpg"},
+            {title:"Poms", year:"2019", desc:"Cheerleading squad at retirement home.", url:"https://tubitv.com/movies/534189", poster:"https://m.media-amazon.com/images/M/MV5BOWZmMTEzMDUtYjk1OC00YzQ4LWFjNzYtMjE0MTY3NjI5NzVhXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg"},
+            {title:"Smother", year:"2008", desc:"Mother moves in with son.", url:"https://tubitv.com/movies/400948", poster:"https://m.media-amazon.com/images/M/MV5BMTg5NzMxNDQ4M15BMl5BanBnXkFtZTcwOTI4MDk0MQ@@._V1_.jpg"},
+            {title:"Love Weddings Disasters", year:"2020", desc:"Boston romantic comedy.", url:"https://tubitv.com/movies/596033", poster:"https://m.media-amazon.com/images/M/MV5BNmQ1YmVlZTAtYmQ2MC00OGIxLTk1OGQtM2M5YWVlMmY3ZDg2XkEyXkFqcGdeQXVyNzEzNjU1NDg@._V1_.jpg"},
+            {title:"Crimes of the Heart", year:"1986", desc:"Three sisters reunite.", url:"https://tubitv.com/movies/456331", poster:"https://m.media-amazon.com/images/M/MV5BMTU1MTI1OTUyN15BMl5BanBnXkFtZTcwMjg5NzQyNA@@._V1_.jpg"},
+            {title:"Manhattan", year:"1979", desc:"Woody Allen classic.", url:"https://tubitv.com/movies/400948", poster:"https://m.media-amazon.com/images/M/MV5BMTU2Mzc5MTMtNjgyNi00NGI1LTk0M2YtMzhmYjc5YzFjMDBiXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
+            {title:"The Only Thrill", year:"1997", desc:"Decades-spanning romance.", url:"https://tubitv.com/movies/477192", poster:"https://m.media-amazon.com/images/M/MV5BMTEzNzQ5MTI3NjReQTJeQWpwZ15BbWU3MDM4NTYzMjI@._V1_.jpg"},
+            {title:"On Thin Ice", year:"2003", desc:"Widow turns to drug dealing.", url:"https://tubitv.com/movies/438891", poster:"https://m.media-amazon.com/images/M/MV5BMTY2MTMxMzY4M15BMl5BanBnXkFtZTcwNzg0NTIyMQ@@._V1_.jpg"},
+            {title:"Mamas Boy", year:"2007", desc:"Man living with mother.", url:"https://tubitv.com/movies/418624", poster:"https://m.media-amazon.com/images/M/MV5BMTYxNDU0MzE1MV5BMl5BanBnXkFtZTcwMzU1OTIzMw@@._V1_.jpg"},
+            {title:"Radio Days", year:"1987", desc:"Nostalgic 1940s radio era.", url:"https://tubitv.com/movies/451027", poster:"https://m.media-amazon.com/images/M/MV5BNjEwNzM2MTk1MF5BMl5BanBnXkFtZTcwMzk2Mzc1NA@@._V1_.jpg"},
+            {title:"Interiors", year:"1978", desc:"Dysfunctional family drama.", url:"https://tubitv.com/movies/481156", poster:"https://m.media-amazon.com/images/M/MV5BMTk0NzE3NTExNl5BMl5BanBnXkFtZTcwODgyODgyNA@@._V1_.jpg"},
+            {title:"Harry and Walter", year:"1976", desc:"Period comedy.", url:"https://tubitv.com/movies/527336", poster:"https://m.media-amazon.com/images/M/MV5BNjE4MjM0Njk0N15BMl5BanBnXkFtZTcwMzI5NDcyMQ@@._V1_.jpg"}
         ];
         
-        // REAL Pluto TV movies
-        const plutoMovies = [
-            {title:'The Godfather', year:'1972', desc:'Francis Ford Coppola\'s masterpiece. Keaton as Kay Adams-Corleone.', url:'https://pluto.tv/en/on-demand/movies/the-godfather-1-1972-1-1'},
-            {title:'The Godfather Part II', year:'1974', desc:'Epic sequel. Best Picture winner.', url:'https://pluto.tv/en/on-demand/movies/the-godfather-part-ii-1974-1-1'},
-            {title:'Annie Hall', year:'1977', desc:'Oscar-winning romantic comedy that defined a generation.', url:'https://pluto.tv/en/on-demand/movies/annie-hall-1977-1-1'},
-            {title:'Manhattan', year:'1979', desc:'Woody Allen\'s black-and-white NYC love letter.', url:'https://pluto.tv/en/on-demand/movies/manhattan-1979-1-1'},
-            {title:'Love and Death', year:'1975', desc:'Woody Allen\'s Russian lit comedy. Screwball masterpiece.', url:'https://pluto.tv/en/on-demand/movies/love-and-death-1975-1-1'},
-            {title:'Radio Days', year:'1987', desc:'Nostalgic look at 1940s Brooklyn radio era.', url:'https://pluto.tv/en/on-demand/movies/radio-days-1987-1-1'},
-            {title:'Interiors', year:'1978', desc:'Allen\'s serious Bergman-inspired family drama.', url:'https://pluto.tv/en/on-demand/movies/interiors-1978-1-1'},
-            {title:'Reds', year:'1981', desc:'Warren Beatty\'s epic. Keaton Oscar-nominated.', url:'https://pluto.tv/en/on-demand/movies/reds-1981-1-1'},
-            {title:'Baby Boom', year:'1987', desc:'Nancy Meyers comedy about career woman and baby.', url:'https://pluto.tv/en/on-demand/movies/baby-boom-1987-1-1'},
-            {title:'Love the Coopers', year:'2015', desc:'Family Christmas movie with ensemble cast.', url:'https://pluto.tv/en/on-demand/movies/love-the-coopers-2015-1-1'},
-            {title:'The Only Thrill', year:'1997', desc:'Romantic drama spanning decades.', url:'https://pluto.tv/en/on-demand/movies/the-only-thrill-1997-1-1'},
-            {title:'Crossed Over', year:'2002', desc:'TV movie about death row pen pals.', url:'https://pluto.tv/en/on-demand/movies/crossed-over-2002-1-1'},
-            {title:'Love, Weddings & Other Disasters', year:'2020', desc:'Romantic comedy anthology.', url:'https://pluto.tv/en/on-demand/movies/love-weddings-other-disasters-2020-1-1'},
-            {title:'Mama\'s Boy', year:'2007', desc:'Comedy about man living with mother.', url:'https://pluto.tv/en/on-demand/movies/mamas-boy-2007-1-1'},
-            {title:'Poms', year:'2019', desc:'Cheerleading squad at retirement community.', url:'https://pluto.tv/en/on-demand/movies/poms-2019-1-1'}
+        var plutoMovies = [
+            {title:"The Godfather", year:"1972", desc:"Coppola masterpiece.", url:"https://pluto.tv/en/on-demand/movies/the-godfather-1-1972-1-1", poster:"https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg"},
+            {title:"The Godfather Part II", year:"1974", desc:"Epic sequel.", url:"https://pluto.tv/en/on-demand/movies/the-godfather-part-ii-1974-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMWMwMGQzZTItY2JlNC00OWZiLWIyMDctNDk2ZDQ2YjRjMWQ0XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg"},
+            {title:"Annie Hall", year:"1977", desc:"Oscar-winning comedy.", url:"https://pluto.tv/en/on-demand/movies/annie-hall-1977-1-1", poster:"https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
+            {title:"Manhattan", year:"1979", desc:"NYC love letter.", url:"https://pluto.tv/en/on-demand/movies/manhattan-1979-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTU2Mzc5MTMtNjgyNi00NGI1LTk0M2YtMzhmYjc5YzFjMDBiXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
+            {title:"Love and Death", year:"1975", desc:"Russian lit comedy.", url:"https://pluto.tv/en/on-demand/movies/love-and-death-1975-1-1", poster:"https://m.media-amazon.com/images/M/MV5BZDk5OWVjMjItMDk5NS00ZTljLThkNTItMzQ4NzcyYWM3MjQ3XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg"},
+            {title:"Radio Days", year:"1987", desc:"1940s radio era.", url:"https://pluto.tv/en/on-demand/movies/radio-days-1987-1-1", poster:"https://m.media-amazon.com/images/M/MV5BNjEwNzM2MTk1MF5BMl5BanBnXkFtZTcwMzk2Mzc1NA@@._V1_.jpg"},
+            {title:"Interiors", year:"1978", desc:"Family drama.", url:"https://pluto.tv/en/on-demand/movies/interiors-1978-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTk0NzE3NTExNl5BMl5BanBnXkFtZTcwODgyODgyNA@@._V1_.jpg"},
+            {title:"Reds", year:"1981", desc:"Warren Beatty epic.", url:"https://pluto.tv/en/on-demand/movies/reds-1981-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTQwNTY5NTEyMl5BMl5BanBnXkFtZTcwOTg4NjcyNA@@._V1_.jpg"},
+            {title:"Baby Boom", year:"1987", desc:"Career woman comedy.", url:"https://pluto.tv/en/on-demand/movies/baby-boom-1987-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTUwNzA2MTg5Nl5BMl5BanBnXkFtZTcwMTQyNDQyNA@@._V1_.jpg"},
+            {title:"Love the Coopers", year:"2015", desc:"Family Christmas.", url:"https://pluto.tv/en/on-demand/movies/love-the-coopers-2015-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTczNzcyNDY2N15BMl5BanBnXkFtZTgwNjk5OTE0NzE@._V1_.jpg"},
+            {title:"The Only Thrill", year:"1997", desc:"Romantic drama.", url:"https://pluto.tv/en/on-demand/movies/the-only-thrill-1997-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTEzNzQ5MTI3NjReQTJeQWpwZ15BbWU3MDM4NTYzMjI@._V1_.jpg"},
+            {title:"Crossed Over", year:"2002", desc:"Death row drama.", url:"https://pluto.tv/en/on-demand/movies/crossed-over-2002-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTc2MTk1NTUyMV5BMl5BanBnXkFtZTcwNzE4MjQyMQ@@._V1_.jpg"},
+            {title:"Love Weddings Disasters", year:"2020", desc:"Romantic anthology.", url:"https://pluto.tv/en/on-demand/movies/love-weddings-other-disasters-2020-1-1", poster:"https://m.media-amazon.com/images/M/MV5BNmQ1YmVlZTAtYmQ2MC00OGIxLTk1OGQtM2M5YWVlMmY3ZDg2XkEyXkFqcGdeQXVyNzEzNjU1NDg@._V1_.jpg"},
+            {title:"Mamas Boy", year:"2007", desc:"Man with mother.", url:"https://pluto.tv/en/on-demand/movies/mamas-boy-2007-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTYxNDU0MzE1MV5BMl5BanBnXkFtZTcwMzU1OTIzMw@@._V1_.jpg"},
+            {title:"Poms", year:"2019", desc:"Cheerleading squad.", url:"https://pluto.tv/en/on-demand/movies/poms-2019-1-1", poster:"https://m.media-amazon.com/images/M/MV5BOWZmMTEzMDUtYjk1OC00YzQ4LWFjNzYtMjE0MTY3NjI5NzVhXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg"}
         ];
         
-        function createMovieCard(movie, isTubi = true) {
-            const posterPlaceholder = `https://via.placeholder.com/300x380/050510/00f3ff?text=${movie.title.replace(/ /g, '+')}`;
-            return `
-                <div class="movie-card" onclick="openMovie('${movie.url}')">
-                    <img src="${posterPlaceholder}" alt="${movie.title}" class="movie-poster">
-                    <div class="movie-content">
-                        <h3>${movie.title}</h3>
-                        <div class="movie-year">${movie.year} ${isTubi ? '• Tubi' : '• Pluto TV'}</div>
-                        <p>${movie.desc}</p>
-                        <button class="watch-btn">▶ WATCH ON ${isTubi ? 'TUBI' : 'PLUTO TV'}</button>
-                    </div>
-                </div>
-            `;
+        function createMovieCard(movie, platform) {
+            var isYoutube = platform === "youtube";
+            var youtubeClass = isYoutube ? "youtube" : "";
+            var platformText = isYoutube ? "YOUTUBE" : (platform === "tubi" ? "TUBI" : "PLUTO TV");
+            var onclick = isYoutube ? "openMovie('" + movie.url + "', '" + movie.videoId + "')" : "openMovie('" + movie.url + "')";
+            
+            return '<div class="movie-card ' + youtubeClass + '" onclick="' + onclick + '">' +
+                '<img src="' + movie.poster + '" alt="' + movie.title + '" class="movie-poster" onerror="this.src=\'https://via.placeholder.com/300x380/050510/00f3ff?text=' + movie.title.replace(/ /g, '+') + '\'">' +
+                '<div class="movie-content">' +
+                '<h3>' + movie.title + '</h3>' +
+                '<div class="movie-year">' + movie.year + ' • ' + platformText + '</div>' +
+                '<p>' + movie.desc + '</p>' +
+                '<button class="watch-btn ' + youtubeClass + '">▶ WATCH ON ' + platformText + '</button>' +
+                '</div></div>';
         }
         
         function loadMovies() {
-            const tubiContainer = document.querySelector('.movies-grid');
-            const plutoContainer = document.getElementById('pluto-movies');
+            var youtubeContainer = document.getElementById("youtube-movies");
+            var tubiContainer = document.getElementById("tubi-movies");
+            var plutoContainer = document.getElementById("pluto-movies");
             
-            tubiContainer.innerHTML = tubiMovies.map(m => createMovieCard(m, true)).join('');
-            plutoContainer.innerHTML = plutoMovies.map(m => createMovieCard(m, false)).join('');
+            var youtubeHTML = "";
+            for (var i = 0; i < youtubeMovies.length; i++) {
+                youtubeHTML += createMovieCard(youtubeMovies[i], "youtube");
+            }
+            youtubeContainer.innerHTML = youtubeHTML;
+            
+            var tubiHTML = "";
+            for (var i = 0; i < tubiMovies.length; i++) {
+                tubiHTML += createMovieCard(tubiMovies[i], "tubi");
+            }
+            tubiContainer.innerHTML = tubiHTML;
+            
+            var plutoHTML = "";
+            for (var i = 0; i < plutoMovies.length; i++) {
+                plutoHTML += createMovieCard(plutoMovies[i], "pluto");
+            }
+            plutoContainer.innerHTML = plutoHTML;
         }
         
         function checkLogin() {
-            const userData = localStorage.getItem('arcadeUser');
+            var userData = localStorage.getItem("arcadeUser");
             if (userData) {
-                document.getElementById('login-gate').style.display = 'none';
-                document.getElementById('movies-content').style.display = 'block';
+                document.getElementById("login-gate").style.display = "none";
+                document.getElementById("movies-content").style.display = "block";
                 loadMovies();
             } else {
-                document.getElementById('login-gate').style.display = 'block';
-                document.getElementById('movies-content').style.display = 'none';
+                document.getElementById("login-gate").style.display = "block";
+                document.getElementById("movies-content").style.display = "none";
             }
         }
         
-        function openMovie(url) {
-            // Track movie view
-            const userData = JSON.parse(localStorage.getItem('arcadeUser'));
+        function openMovie(url, videoId) {
+            var userData = localStorage.getItem("arcadeUser");
             if (userData) {
+                userData = JSON.parse(userData);
                 if (!userData.moviesWatched) userData.moviesWatched = [];
                 userData.moviesWatched.push(url);
                 userData.xp = (userData.xp || 0) + 50;
                 userData.coins = (userData.coins || 0) + 10;
-                localStorage.setItem('arcadeUser', JSON.stringify(userData));
+                localStorage.setItem("arcadeUser", JSON.stringify(userData));
             }
             
-            // Open movie in new tab (platform handles playback)
-            window.open(url, '_blank');
+            if (videoId) {
+                showYouTubePlayer(videoId);
+            } else {
+                window.open(url, "_blank");
+            }
+        }
+        
+        function showYouTubePlayer(videoId) {
+            var modal = document.getElementById("video-modal");
+            var player = document.getElementById("video-player");
+            player.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
+            modal.style.display = "flex";
         }
         
         function closeVideo() {
-            const modal = document.getElementById('video-modal');
-            const player = document.getElementById('video-player');
-            modal.classList.remove('active');
-            player.src = '';
+            var modal = document.getElementById("video-modal");
+            var player = document.getElementById("video-player");
+            modal.style.display = "none";
+            player.src = "";
         }
-        
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
         
         checkLogin();
     </script>
 </body>
-</html>
+</html>v

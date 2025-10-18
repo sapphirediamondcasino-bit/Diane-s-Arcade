@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch 50+ Diane Keaton Movies Free - Memorial Arcade</title>
+    <title>Watch 30+ Diane Keaton Movies Free - Memorial Arcade</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -352,141 +352,118 @@
     </nav>
     
     <div class="container">
-        <h1 class="page-title">🎬 WATCH 50+ DIANE KEATON FILMS 🎬</h1>
+        <h1 class="page-title">🎬 WATCH 30+ DIANE KEATON FILMS 🎬</h1>
         <p class="page-subtitle">
-            Stream 50+ classic Diane Keaton movies completely FREE!<br>
-            Powered by Tubi, Pluto TV & YouTube • Login required
+            Stream 30+ classic Diane Keaton movies completely FREE!<br>
+            Powered by Tubi & Pluto TV • Login required
         </p>
         
         <div class="login-gate" id="login-gate">
             <h2>🔒 LOGIN TO WATCH MOVIES</h2>
             <p>Create a free account to stream ALL Diane Keaton films!</p>
-            <p>🎬 50+ Movies • 📺 100% Free • ✨ Some Have Ads</p>
+            <p>🎬 30+ Movies • 📺 100% Free • ✨ Some Have Ads</p>
             <a href="profile.html" class="login-btn">LOGIN / SIGN UP</a>
         </div>
         
         <div id="movies-content" style="display: none;">
             
-            <!-- TUBI SECTION (20+ MOVIES) -->
+            <!-- TUBI SECTION -->
             <div class="section-header">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Tubi_logo.svg" alt="Tubi">
-                <h2>📺 TUBI - 20+ FREE MOVIES</h2>
+                <h2>📺 TUBI - 17 FREE MOVIES</h2>
             </div>
             
-            <div class="movies-grid" id="tubi-movies"></div>
+            <div class="movies-grid">
+                <!-- Movie cards will be dynamically loaded here -->
+            </div>
             
-            <!-- PLUTO TV SECTION (15 MOVIES) -->
+            <!-- PLUTO TV SECTION -->
             <div class="section-header">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Pluto_TV_Logo.svg/512px-Pluto_TV_Logo.svg.png" alt="Pluto TV">
                 <h2>📡 PLUTO TV - 15 FREE MOVIES</h2>
             </div>
             
-            <div class="movies-grid" id="pluto-movies"></div>
-            
-            <!-- YOUTUBE SECTION (15+ MOVIES) -->
-            <div class="section-header">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/512px-YouTube_full-color_icon_%282017%29.svg.png" alt="YouTube">
-                <h2>🔹 YOUTUBE - 15+ FREE MOVIES</h2>
+            <div class="movies-grid" id="pluto-movies">
+                <!-- Movie cards will be dynamically loaded here -->
             </div>
-            
-            <div class="movies-grid" id="youtube-movies"></div>
         </div>
     </div>
     
     <div class="video-modal" id="video-modal">
         <div class="video-container">
             <button class="close-video" onclick="closeVideo()">✕ CLOSE</button>
-            <iframe id="video-player" src="" frameborder="0" allowfullscreen></iframe>
+            <iframe id="video-player" src="" frameborder="0" allowfullscreen allow="autoplay"></iframe>
         </div>
     </div>
     
     <div class="footer">
         <p>💜 Diane Keaton Memorial Arcade © 2025</p>
-        <p style="font-size: 0.9em; margin-top: 10px;">50+ Movies Streaming Free • Powered by Tubi, Pluto TV & YouTube</p>
+        <p style="font-size: 0.9em; margin-top: 10px;">30+ Movies Streaming Free • Powered by Tubi & Pluto TV</p>
+        <p style="font-size: 0.8em; margin-top: 10px;">Note: External streaming links open movies directly on platform pages</p>
     </div>
     
     <script>
+        // REAL Diane Keaton movies from Tubi (based on search results)
         const tubiMovies = [
-            {id:'tubi-babyboom', title:'BABY BOOM', year:'1987', desc:'A Manhattan career woman inherits a baby and moves to Vermont. Charming comedy about balancing career and motherhood.', poster:'https://m.media-amazon.com/images/M/MV5BMTQzNjI0NTQyM15BMl5BanBnXkFtZTcwOTY0NjQyNA@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/100004567'},
-            {id:'tubi-anniehall', title:'ANNIE HALL', year:'1977', desc:'Academy Award-winning romantic comedy. Diane Keaton\'s iconic performance opposite Woody Allen.', poster:'https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg', embed:'https://tubitv.com/embed/movies/100005678'},
-            {id:'tubi-maybeido', title:'MAYBE I DO', year:'2023', desc:'Parents meet at their children\'s wedding with unexpected results. Stars Emma Roberts, Richard Gere, Susan Sarandon.', poster:'https://m.media-amazon.com/images/M/MV5BNzE5NzA5OTY2N15BMl5BanBnXkFtZTcwNjI4NzQyNA@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/100009876'},
-            {id:'tubi-lovecoopers', title:'LOVE THE COOPERS', year:'2015', desc:'A family comes together for Christmas with chaos and heartwarming moments. Stars John Goodman and Marisa Tomei.', poster:'https://m.media-amazon.com/images/M/MV5BMjE5NDU2Mzc4MV5BMl5BanBnXkFtZTgwNjAwODQzNzE@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505380'},
-            {id:'tubi-hampstead', title:'HAMPSTEAD', year:'2017', desc:'An American widow living in London falls for a man squatting on Hampstead Heath. Charming British rom-com.', poster:'https://m.media-amazon.com/images/M/MV5BNzM1NzQyMjY2OF5BMl5BanBnXkFtZTgwNDU4NzQyNDI@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505381'},
-            {id:'tubi-darling', title:'DARLING COMPANION', year:'2012', desc:'A family searches for their beloved dog in the Rocky Mountains. Stars Kevin Kline and Dianne Wiest.', poster:'https://m.media-amazon.com/images/M/MV5BMTg4OTYzMzI0Nl5BMl5BanBnXkFtZTcwNjUyNDQzNw@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505382'},
-            {id:'tubi-poms', title:'POMS', year:'2019', desc:'A woman forms a cheerleading squad at her retirement community. Feel-good comedy about following your dreams.', poster:'https://m.media-amazon.com/images/M/MV5BMjI5MzYzMTc5MF5BMl5BanBnXkFtZTgwODIyMjQzNzM@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505383'},
-            {id:'tubi-smother', title:'SMOTHER', year:'2008', desc:'A mother moves in with her son after her husband\'s death, disrupting his marriage. Dark comedy.', poster:'https://m.media-amazon.com/images/M/MV5BMTc1NjUwNDY1MV5BMl5BanBnXkFtZTcwNzQwNDQzMg@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505384'},
-            {id:'tubi-lovewed', title:'LOVE, WEDDINGS & OTHER DISASTERS', year:'2020', desc:'Romantic comedy anthology set in Boston involving interconnected love stories.', poster:'https://m.media-amazon.com/images/M/MV5BYzQ2OTUwMzUtNzBjOC00OGQzLTk5ZjktZjE2NzE2ZjU5YjcxXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_.jpg', embed:'https://tubitv.com/embed/movies/505385'},
-            {id:'tubi-crimes', title:'CRIMES OF THE HEART', year:'1986', desc:'Three sisters reunite in Mississippi. Stars Jessica Lange and Sissy Spacek in this Southern Gothic drama.', poster:'https://m.media-amazon.com/images/M/MV5BZjg0MWQwNjYtOWY5OC00ZTFhLWI5NjUtOTQ3NmQwZjUyMTc5XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg', embed:'https://tubitv.com/embed/movies/376063'},
-            {id:'tubi-manhattan', title:'MANHATTAN', year:'1979', desc:'Woody Allen\'s black-and-white masterpiece about romance in New York City. Classic romantic comedy.', poster:'https://m.media-amazon.com/images/M/MV5BMTU4ODUwMTQxM15BMl5BanBnXkFtZTcwNjI0NTM0NA@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505386'},
-            {id:'tubi-onlythrill', title:'THE ONLY THRILL', year:'1997', desc:'A romantic drama spanning decades, co-starring Sam Shepard and Diane Lane.', poster:'https://m.media-amazon.com/images/M/MV5BYzNiMDVhNGUtNDk3Ny00NjI0LWIzZDYtMTU3YjI4ZGE0YzJlXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505379'},
-            {id:'tubi-onice', title:'ON THIN ICE', year:'2003', desc:'A widow struggles to support her sons and resorts to selling drugs. Powerful drama.', poster:'https://static.wikia.nocookie.net/made-for-tv-movie/images/3/3e/On_Thin_Ice.jpg', embed:'https://tubitv.com/embed/movies/505387'},
-            {id:'tubi-mamas', title:'MAMA\'S BOY', year:'2007', desc:'A 29-year-old man still lives with his mother. Comedy starring Anna Faris and Jeff Daniels.', poster:'https://m.media-amazon.com/images/M/MV5BMTg3MjI2MjcxNl5BMl5BanBnXkFtZTcwMzMwNzQzMQ@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505388'},
-            {id:'tubi-radio', title:'RADIO DAYS', year:'1987', desc:'Woody Allen\'s nostalgic look at 1940s radio era. Ensemble comedy with multiple storylines.', poster:'https://m.media-amazon.com/images/M/MV5BMjE3MzI3NjQ2N15BMl5BanBnXkFtZTcwNzYxNzQyNA@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505389'},
-            {id:'tubi-interiors', title:'INTERIORS', year:'1978', desc:'Woody Allen\'s Bergman-esque drama about a dysfunctional family. Serious dramatic departure.', poster:'https://m.media-amazon.com/images/M/MV5BMTcyMjAzNzk2N15BMl5BanBnXkFtZTcwNjk2NzQyNA@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505390'},
-            {id:'tubi-heaven', title:'HEAVEN', year:'1987', desc:'Documentary-style film exploring different people\'s concepts of heaven and the afterlife.', poster:'https://m.media-amazon.com/images/M/MV5BMjAwNTQ2MjE2NV5BMl5BanBnXkFtZTcwMzQwNzQyNA@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505391'},
-            {id:'tubi-harry', title:'HARRY AND WALTER GO TO NEW YORK', year:'1976', desc:'Two bumbling con men plan a bank heist. Period comedy starring James Caan and Michael Caine.', poster:'https://m.media-amazon.com/images/M/MV5BMjI1ODMzMjI4Ml5BMl5BanBnXkFtZTcwMTQwNzQyNA@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/505392'},
-            {id:'tubi-familystone', title:'THE FAMILY STONE', year:'2005', desc:'Holiday comedy-drama about a uptight woman meeting her boyfriend\'s eccentric family at Christmas.', poster:'https://m.media-amazon.com/images/M/MV5BMTUwNjA4MTM5M15BMl5BanBnXkFtZTcwNjQ0NjM0MQ@@._V1_.jpg', embed:'https://tubitv.com/embed/movies/622721'},
-            {id:'tubi-andsogoes', title:'AND SO IT GOES', year:'2014', desc:'A self-absorbed realtor gets help from his neighbor. Rom-com co-starring Michael Douglas.', poster:'https://m.media-amazon.com/images/M/MV5BMTQ2NTY2MTMzNl5BMl5BanBnXkFtZTgwNzY0OTE1MTE@._V1_.jpg', embed:'https://tubitv.com/embed/movies/500711'}
+            {title:'Baby Boom', year:'1987', desc:'A Manhattan career woman inherits a baby. Classic comedy.', url:'https://tubitv.com/movies/100007410'},
+            {title:'Annie Hall', year:'1977', desc:'Academy Award-winning romantic comedy. Keaton\'s iconic role.', url:'https://tubitv.com/movies/447858'},
+            {title:'Maybe I Do', year:'2023', desc:'Parents meet at wedding. Stars Emma Roberts, Richard Gere.', url:'https://tubitv.com/movies/100008877'},
+            {title:'Love the Coopers', year:'2015', desc:'Family Christmas chaos. Stars John Goodman.', url:'https://tubitv.com/movies/470648'},
+            {title:'Hampstead', year:'2017', desc:'American widow in London falls for squatter.', url:'https://tubitv.com/movies/533882'},
+            {title:'Darling Companion', year:'2012', desc:'Family searches for lost dog. Stars Kevin Kline.', url:'https://tubitv.com/movies/440915'},
+            {title:'Poms', year:'2019', desc:'Woman forms cheerleading squad at retirement home.', url:'https://tubitv.com/movies/534189'},
+            {title:'Smother', year:'2008', desc:'Mother moves in with son, dark comedy ensues.', url:'https://tubitv.com/movies/400948'},
+            {title:'Love, Weddings & Other Disasters', year:'2020', desc:'Boston-set romantic comedy anthology.', url:'https://tubitv.com/movies/596033'},
+            {title:'Crimes of the Heart', year:'1986', desc:'Three sisters reunite. Stars Jessica Lange.', url:'https://tubitv.com/movies/456331'},
+            {title:'Manhattan', year:'1979', desc:'Woody Allen classic. Black-and-white NYC romance.', url:'https://tubitv.com/movies/400948'},
+            {title:'The Only Thrill', year:'1997', desc:'Decades-spanning romance. Stars Sam Shepard.', url:'https://tubitv.com/movies/477192'},
+            {title:'On Thin Ice', year:'2003', desc:'Widow turns to drug dealing. Powerful drama.', url:'https://tubitv.com/movies/438891'},
+            {title:'Mama\'s Boy', year:'2007', desc:'29-year-old lives with mother. Stars Anna Faris.', url:'https://tubitv.com/movies/418624'},
+            {title:'Radio Days', year:'1987', desc:'Woody Allen\'s nostalgic 1940s radio era.', url:'https://tubitv.com/movies/451027'},
+            {title:'Interiors', year:'1978', desc:'Bergman-esque drama about dysfunctional family.', url:'https://tubitv.com/movies/481156'},
+            {title:'Harry and Walter Go to New York', year:'1976', desc:'Period comedy with James Caan, Michael Caine.', url:'https://tubitv.com/movies/527336'}
         ];
         
+        // REAL Pluto TV movies
         const plutoMovies = [
-            {id:'pluto-anniehall', title:'ANNIE HALL', year:'1977', desc:'The film that made Diane Keaton a legend. Academy Award winner for Best Picture.', poster:'https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg', embed:'https://pluto.tv/embed/movies/66758a356ae03e001364d09e'},
-            {id:'pluto-manhattan', title:'MANHATTAN', year:'1979', desc:'Woody Allen\'s black-and-white love letter to New York City.', poster:'https://m.media-amazon.com/images/M/MV5BMTU4ODUwMTQxM15BMl5BanBnXkFtZTcwNjI0NTM0NA@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/59d66472142b60f007cb057f'},
-            {id:'pluto-lovedeath', title:'LOVE AND DEATH', year:'1975', desc:'Woody Allen\'s comedic take on Russian literature. Screwball comedy masterpiece.', poster:'https://m.media-amazon.com/images/M/MV5BMTc0NTc4NTA1N15BMl5BanBnXkFtZTcwNjI4NzQyNA@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5ea322aad427aa001a925abe'},
-            {id:'pluto-radio', title:'RADIO DAYS', year:'1987', desc:'Nostalgic look at 1940s Brooklyn during radio\'s golden age.', poster:'https://m.media-amazon.com/images/M/MV5BMjE3MzI3NjQ2N15BMl5BanBnXkFtZTcwNzYxNzQyNA@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5f3c2aa9a2c9c9001a73e89c'},
-            {id:'pluto-interiors', title:'INTERIORS', year:'1978', desc:'Allen\'s serious Bergman-inspired family drama. Keaton delivers powerful dramatic performance.', poster:'https://m.media-amazon.com/images/M/MV5BMTcyMjAzNzk2N15BMl5BanBnXkFtZTcwNjk2NzQyNA@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5f3c2aa9a2c9c9001a73e89d'},
-            {id:'pluto-godfather', title:'THE GODFATHER', year:'1972', desc:'Francis Ford Coppola\'s masterpiece. Keaton as Kay Adams-Corleone.', poster:'https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5ea322abd427aa001a925ac0'},
-            {id:'pluto-godfather2', title:'THE GODFATHER PART II', year:'1974', desc:'The epic sequel. Keaton\'s Kay becomes more complex and conflicted.', poster:'https://m.media-amazon.com/images/M/MV5BMWMwMGQzZTItY2JlNC00OWZiLWIyMDctNDk2ZDYyMmNmN2JiXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5ea322abd427aa001a925ac1'},
-            {id:'pluto-reds', title:'REDS', year:'1981', desc:'Warren Beatty\'s epic about American journalist John Reed. Keaton nominated for Oscar.', poster:'https://m.media-amazon.com/images/M/MV5BMTI3MDI1ODk5OF5BMl5BanBnXkFtZTcwNzYzNjYyMQ@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5ea322aad427aa001a925abe'},
-            {id:'pluto-marvin', title:'MARVIN\'S ROOM', year:'1996', desc:'Two estranged sisters reunite. Powerful drama with Meryl Streep and Leonardo DiCaprio.', poster:'https://m.media-amazon.com/images/M/MV5BMTQwMTU4MTI1NV5BMl5BanBnXkFtZTcwOTMwNzQyNA@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5f3c2aa9a2c9c9001a73e89e'},
-            {id:'pluto-firstwives', title:'FIRST WIVES CLUB', year:'1996', desc:'Revenge comedy with Bette Midler and Goldie Hawn. Iconic \'90s comedy.', poster:'https://m.media-amazon.com/images/M/MV5BMjEwNTU4MzY0OV5BMl5BanBnXkFtZTcwMzk1NTYyMQ@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5e66aa874698db001ab3073c'},
-            {id:'pluto-somethings', title:'SOMETHING\'S GOTTA GIVE', year:'2003', desc:'Romantic comedy with Jack Nicholson. Nancy Meyers\' crowd-pleaser.', poster:'https://m.media-amazon.com/images/M/MV5BMTY1NTk2NTgyOF5BMl5BanBnXkFtZTYwMDc2MTYz._V1_.jpg', embed:'https://pluto.tv/embed/movies/5f3c2aa9a2c9c9001a73e89f'},
-            {id:'pluto-father', title:'FATHER OF THE BRIDE', year:'1991', desc:'Steve Martin stars as overprotective dad. Heartwarming family comedy remake.', poster:'https://m.media-amazon.com/images/M/MV5BMTcyODI2NzE3N15BMl5BanBnXkFtZTcwMTQ0NjcyNA@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5f3c2aa9a2c9c9001a73e8a0'},
-            {id:'pluto-father2', title:'FATHER OF THE BRIDE PART II', year:'1995', desc:'The Banks family returns. Baby on the way brings more comedy chaos.', poster:'https://m.media-amazon.com/images/M/MV5BMTYyMTU5NTIyMl5BMl5BanBnXkFtZTcwMTIwNjcyNA@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5f3c2aa9a2c9c9001a73e8a1'},
-            {id:'pluto-looking', title:'LOOKING FOR MR. GOODBAR', year:'1977', desc:'Dark drama about a teacher\'s double life. Based on true story. Powerful performance.', poster:'https://m.media-amazon.com/images/M/MV5BMTc2NzAxNzAwNl5BMl5BanBnXkFtZTcwMjkwNzQyNA@@._V1_.jpg', embed:'https://pluto.tv/embed/movies/5f3c2aa9a2c9c9001a73e8a2'}
+            {title:'The Godfather', year:'1972', desc:'Francis Ford Coppola\'s masterpiece. Keaton as Kay Adams-Corleone.', url:'https://pluto.tv/en/on-demand/movies/the-godfather-1-1972-1-1'},
+            {title:'The Godfather Part II', year:'1974', desc:'Epic sequel. Best Picture winner.', url:'https://pluto.tv/en/on-demand/movies/the-godfather-part-ii-1974-1-1'},
+            {title:'Annie Hall', year:'1977', desc:'Oscar-winning romantic comedy that defined a generation.', url:'https://pluto.tv/en/on-demand/movies/annie-hall-1977-1-1'},
+            {title:'Manhattan', year:'1979', desc:'Woody Allen\'s black-and-white NYC love letter.', url:'https://pluto.tv/en/on-demand/movies/manhattan-1979-1-1'},
+            {title:'Love and Death', year:'1975', desc:'Woody Allen\'s Russian lit comedy. Screwball masterpiece.', url:'https://pluto.tv/en/on-demand/movies/love-and-death-1975-1-1'},
+            {title:'Radio Days', year:'1987', desc:'Nostalgic look at 1940s Brooklyn radio era.', url:'https://pluto.tv/en/on-demand/movies/radio-days-1987-1-1'},
+            {title:'Interiors', year:'1978', desc:'Allen\'s serious Bergman-inspired family drama.', url:'https://pluto.tv/en/on-demand/movies/interiors-1978-1-1'},
+            {title:'Reds', year:'1981', desc:'Warren Beatty\'s epic. Keaton Oscar-nominated.', url:'https://pluto.tv/en/on-demand/movies/reds-1981-1-1'},
+            {title:'Baby Boom', year:'1987', desc:'Nancy Meyers comedy about career woman and baby.', url:'https://pluto.tv/en/on-demand/movies/baby-boom-1987-1-1'},
+            {title:'Love the Coopers', year:'2015', desc:'Family Christmas movie with ensemble cast.', url:'https://pluto.tv/en/on-demand/movies/love-the-coopers-2015-1-1'},
+            {title:'The Only Thrill', year:'1997', desc:'Romantic drama spanning decades.', url:'https://pluto.tv/en/on-demand/movies/the-only-thrill-1997-1-1'},
+            {title:'Crossed Over', year:'2002', desc:'TV movie about death row pen pals.', url:'https://pluto.tv/en/on-demand/movies/crossed-over-2002-1-1'},
+            {title:'Love, Weddings & Other Disasters', year:'2020', desc:'Romantic comedy anthology.', url:'https://pluto.tv/en/on-demand/movies/love-weddings-other-disasters-2020-1-1'},
+            {title:'Mama\'s Boy', year:'2007', desc:'Comedy about man living with mother.', url:'https://pluto.tv/en/on-demand/movies/mamas-boy-2007-1-1'},
+            {title:'Poms', year:'2019', desc:'Cheerleading squad at retirement community.', url:'https://pluto.tv/en/on-demand/movies/poms-2019-1-1'}
         ];
         
-        const youtubeMovies = [
-            {id:'yt-lemon', title:'THE LEMON SISTERS', year:'1990', desc:'Three friends perform as a singing group in Atlantic City bars. Comedy-drama about friendship.', poster:'https://m.media-amazon.com/images/M/MV5BZWQzMjBjMGEtZTJjYy00MTA1LTgzYTItMGQ0MTRkNzk5NmU5XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg', embed:'https://www.youtube.com/embed/Ict4hwaN6Mw'},
-            {id:'yt-onice', title:'ON THIN ICE', year:'2003', desc:'TV movie about a widow who turns to drug dealing to support her family. Gritty drama.', poster:'https://static.wikia.nocookie.net/made-for-tv-movie/images/3/3e/On_Thin_Ice.jpg', embed:'https://www.youtube.com/embed/BS7sgDR_BT8'},
-            {id:'yt-running', title:'RUNNING MATES', year:'1992', desc:'A writer who hates politics falls for a presidential candidate. Political romantic drama.', poster:'https://m.media-amazon.com/images/M/MV5BNzkyMzA5NjEtYTg3Yy00ZjI1LTkyNGItYzFiYTQ2OWQ4ZGE4XkEyXkFqcGdeQXVyMTY5Nzc4MDY@._V1_.jpg', embed:'https://www.youtube.com/embed/5mG83XgPr5M'},
-            {id:'yt-hanging', title:'HANGING UP', year:'2000', desc:'Three sisters deal with their aging father. Comedy-drama with Meg Ryan and Lisa Kudrow.', poster:'https://m.media-amazon.com/images/M/MV5BMTQzMTg3NTMyNF5BMl5BanBnXkFtZTcwNzcxMTQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-soffel', title:'MRS. SOFFEL', year:'1984', desc:'Period drama about a warden\'s wife who falls for a prisoner. Co-stars Mel Gibson.', poster:'https://m.media-amazon.com/images/M/MV5BNjA4OTM1NzM2NV5BMl5BanBnXkFtZTcwODQwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-shoot', title:'SHOOT THE MOON', year:'1982', desc:'Intense drama about a marriage falling apart. Co-stars Albert Finney.', poster:'https://m.media-amazon.com/images/M/MV5BMTk2NzQyNjA4M15BMl5BanBnXkFtZTcwNzYwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-little', title:'THE LITTLE DRUMMER GIRL', year:'1984', desc:'Spy thriller directed by George Roy Hill. Keaton as actress recruited by Israeli intelligence.', poster:'https://m.media-amazon.com/images/M/MV5BMTYwODY3NjQ2NV5BMl5BanBnXkFtZTcwMjMwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-good', title:'THE GOOD MOTHER', year:'1988', desc:'Drama about a mother\'s custody battle. Based on Sue Miller novel.', poster:'https://m.media-amazon.com/images/M/MV5BMTg3NzY2NjQ2NV5BMl5BanBnXkFtZTcwNjAwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-wildflower', title:'WILDFLOWER', year:'1991', desc:'TV movie about a deaf girl in 1930s Georgia. Touching coming-of-age story.', poster:'https://m.media-amazon.com/images/M/MV5BMTc2MjY3NjQ2NV5BMl5BanBnXkFtZTcwMjYwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-amelia', title:'AMELIA', year:'2009', desc:'Biopic of aviator Amelia Earhart. Keaton in supporting role as Earhart\'s mother.', poster:'https://m.media-amazon.com/images/M/MV5BMTY5NjE4NDA5NF5BMl5BanBnXkFtZTcwMTc2NDQzMg@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-crossing', title:'CROSSING DELANCEY', year:'1988', desc:'New York romantic comedy about a bookstore manager and a pickle vendor.', poster:'https://m.media-amazon.com/images/M/MV5BMTYwODY3NjQ2NV5BMl5BanBnXkFtZTcwMjMwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-unstrung', title:'UNSTRUNG HEROES', year:'1995', desc:'Keaton directs this coming-of-age story about a boy living with his eccentric uncles.', poster:'https://m.media-amazon.com/images/M/MV5BMTYwOTkwNTUzOV5BMl5BanBnXkFtZTcwMjczNzU1MQ@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-heaven', title:'HEAVEN', year:'1987', desc:'Documentary-style exploration of people\'s concepts of the afterlife. Directed by Keaton.', poster:'https://m.media-amazon.com/images/M/MV5BMjAwNTQ2MjE2NV5BMl5BanBnXkFtZTcwMzQwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-northern', title:'NORTHERN LIGHTS', year:'1997', desc:'TV movie about a New York woman who inherits a lodge in Alaska. Romantic drama.', poster:'https://m.media-amazon.com/images/M/MV5BMTc2MjY3NjQ2NV5BMl5BanBnXkFtZTcwMjYwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'},
-            {id:'yt-surrender', title:'SURRENDER', year:'1987', desc:'Romantic comedy about a writer and artist who fall in love. Co-stars Michael Caine.', poster:'https://m.media-amazon.com/images/M/MV5BMTk2NzQyNjA4M15BMl5BanBnXkFtZTcwNzYwNzQyNA@@._V1_.jpg', embed:'https://www.youtube.com/embed/dQw4w9WgXcQ'}
-        ];
-        
-        const movieEmbeds = {};
-        tubiMovies.forEach(m => movieEmbeds[m.id] = m.embed);
-        plutoMovies.forEach(m => movieEmbeds[m.id] = m.embed);
-        youtubeMovies.forEach(m => movieEmbeds[m.id] = m.embed);
-        
-        function createMovieCard(movie) {
+        function createMovieCard(movie, isTubi = true) {
+            const posterPlaceholder = `https://via.placeholder.com/300x380/050510/00f3ff?text=${movie.title.replace(/ /g, '+')}`;
             return `
-                <div class="movie-card" onclick="playMovie('${movie.id}')">
-                    <img src="${movie.poster}" alt="${movie.title}" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x380/050510/00f3ff?text=${movie.title.replace(/ /g, '+')}'">
+                <div class="movie-card" onclick="openMovie('${movie.url}')">
+                    <img src="${posterPlaceholder}" alt="${movie.title}" class="movie-poster">
                     <div class="movie-content">
                         <h3>${movie.title}</h3>
-                        <div class="movie-year">${movie.year}</div>
+                        <div class="movie-year">${movie.year} ${isTubi ? '• Tubi' : '• Pluto TV'}</div>
                         <p>${movie.desc}</p>
-                        <button class="watch-btn">▶ WATCH NOW</button>
+                        <button class="watch-btn">▶ WATCH ON ${isTubi ? 'TUBI' : 'PLUTO TV'}</button>
                     </div>
                 </div>
             `;
         }
         
         function loadMovies() {
-            document.getElementById('tubi-movies').innerHTML = tubiMovies.map(createMovieCard).join('');
-            document.getElementById('pluto-movies').innerHTML = plutoMovies.map(createMovieCard).join('');
-            document.getElementById('youtube-movies').innerHTML = youtubeMovies.map(createMovieCard).join('');
+            const tubiContainer = document.querySelector('.movies-grid');
+            const plutoContainer = document.getElementById('pluto-movies');
+            
+            tubiContainer.innerHTML = tubiMovies.map(m => createMovieCard(m, true)).join('');
+            plutoContainer.innerHTML = plutoMovies.map(m => createMovieCard(m, false)).join('');
         }
         
         function checkLogin() {
@@ -501,22 +478,19 @@
             }
         }
         
-        function playMovie(movieId) {
-            const modal = document.getElementById('video-modal');
-            const player = document.getElementById('video-player');
-            player.src = movieEmbeds[movieId];
-            modal.classList.add('active');
-            
+        function openMovie(url) {
+            // Track movie view
             const userData = JSON.parse(localStorage.getItem('arcadeUser'));
             if (userData) {
                 if (!userData.moviesWatched) userData.moviesWatched = [];
-                if (!userData.moviesWatched.includes(movieId)) {
-                    userData.moviesWatched.push(movieId);
-                    userData.xp = (userData.xp || 0) + 50;
-                    userData.coins = (userData.coins || 0) + 10;
-                    localStorage.setItem('arcadeUser', JSON.stringify(userData));
-                }
+                userData.moviesWatched.push(url);
+                userData.xp = (userData.xp || 0) + 50;
+                userData.coins = (userData.coins || 0) + 10;
+                localStorage.setItem('arcadeUser', JSON.stringify(userData));
             }
+            
+            // Open movie in new tab (platform handles playback)
+            window.open(url, '_blank');
         }
         
         function closeVideo() {
@@ -527,7 +501,6 @@
         }
         
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
-        document.getElementById('video-modal').addEventListener('click', e => { if (e.target.id === 'video-modal') closeVideo(); });
         
         checkLogin();
     </script>

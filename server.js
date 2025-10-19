@@ -16,8 +16,9 @@ const PORT = process.env.PORT || 3000;
 
 // Admin emails - Add your admin emails here
 const ADMIN_EMAILS = [
-    'admin@dianesarcade.com',
-    'your-email@example.com' // ADD YOUR ADMIN EMAIL HERE
+    'tannerkurrasch@gmail.com',
+    'kurraschgamingmerchstore@gmail.com', // ADD YOUR ADMIN EMAIL HERE
+    'gamekillerszone@gmail.com'
 ];
 
 // ==========================================

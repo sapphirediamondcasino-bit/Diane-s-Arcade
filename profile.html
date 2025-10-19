@@ -638,6 +638,7 @@
         <div class="nav-brand">🎮 MY PROFILE</div>
         <div class="nav-links">
             <a href="index.html" class="nav-link">HOME</a>
+            <a href="shop.html" class="nav-link">Coin Shop</a>
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
@@ -795,10 +796,118 @@
         ];
         
         const allAchievements = [
-            { id: 'annie_hall', name: 'Annie Hall', description: 'Play your first game', icon: '🎬', xp: 10 },
-            { id: 'first_steps', name: 'First Steps', description: 'Create profile', icon: '👣', xp: 5 },
-            { id: 'coffee_break', name: 'Coffee Break', description: 'Play 5 games', icon: '☕', xp: 25 }
-        ];
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>STARTER ACHIEVEMENTS</p>";
+        'annie_hall': { id: 'annie_hall', name: 'Annie Hall', description: 'Play your first game', icon: '🎬', xp_reward: 10, coins_reward: 5, film: '1977 - Academy Award Winner' },
+        'first_steps': { id: 'first_steps', name: 'First Steps', description: 'Create your arcade profile', icon: '👣', xp_reward: 5, coins_reward: 5, film: 'Welcome to the Arcade' },
+        'coffee_break': { id: 'coffee_break', name: 'Coffee Break', description: 'Play 5 games', icon: '☕', xp_reward: 25, coins_reward: 10, film: "Diane's Favorite Beverage" },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>LEVEL ACHIEVEMENTS</p>";
+        'godfather': { id: 'godfather', name: 'The Godfather', description: 'Reach Level 10', icon: '👑', xp_reward: 50, coins_reward: 25, film: '1972 - Classic Mob Film' },
+        'godfather_2': { id: 'godfather_2', name: 'The Godfather Part II', description: 'Reach Level 20', icon: '🎭', xp_reward: 75, coins_reward: 35, film: '1974 - Epic Sequel' },
+        'manhattan': { id: 'manhattan', name: 'Manhattan', description: 'Reach Level 25', icon: '🏙️', xp_reward: 100, coins_reward: 50, film: '1979 - Woody Allen Classic' },
+        'marvins_room': { id: 'marvins_room', name: "Marvin's Room", description: 'Reach Level 50', icon: '🏠', xp_reward: 250, coins_reward: 100, film: '1996 - Drama with Meryl Streep' },
+        'century': { id: 'century', name: 'Century Club', description: 'Reach Level 100', icon: '💯', xp_reward: 500, coins_reward: 250, film: 'Elite Status' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>SCORE ACHIEVEMENTS</p>";v
+        'something_gotta_give': { id: 'something_gotta_give', name: "Something's Gotta Give", description: 'Score 10,000 points total', icon: '💎', xp_reward: 100, coins_reward: 50, film: '2003 - Romantic Comedy' },
+        'big_score': { id: 'big_score', name: 'Big Score', description: 'Score 50,000 points total', icon: '💰', xp_reward: 200, coins_reward: 100, film: 'High Roller' },
+        'mega_score': { id: 'mega_score', name: 'Mega Score', description: 'Score 100,000 points total', icon: '🌟', xp_reward: 300, coins_reward: 150, film: 'Score Master' },
+        'legendary': { id: 'legendary', name: 'Legendary', description: 'Score 1,000,000 points total', icon: '👑', xp_reward: 1000, coins_reward: 500, film: 'Arcade Legend' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>GAME COMPLETION</p>";
+        'reds': { id: 'reds', name: 'Reds', description: 'Earn 20 achievements', icon: '⭐', xp_reward: 150, coins_reward: 75, film: '1981 - Epic Historical Drama' },
+        'first_wives_club': { id: 'first_wives_club', name: 'First Wives Club', description: 'Complete all games', icon: '💪', xp_reward: 500, coins_reward: 250, film: '1996 - Comedy Classic' },
+        'father_bride': { id: 'father_bride', name: 'Father of the Bride', description: 'Play 100 games', icon: '👰', xp_reward: 300, coins_reward: 150, film: '1991 - Family Comedy' },
+        'father_bride_2': { id: 'father_bride_2', name: 'Father of the Bride Part II', description: 'Play 200 games', icon: '👶', xp_reward: 400, coins_reward: 200, film: '1995 - Family Sequel' },
+        'baby_boom': { id: 'baby_boom', name: 'Baby Boom', description: 'Win 5 games in one day', icon: '🍼', xp_reward: 75, coins_reward: 35, film: '1987 - Comedy Hit' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>EXPLORATION</p>";
+        'manhattan_murder': { id: 'manhattan_murder', name: 'Manhattan Murder Mystery', description: 'Try all 20 games', icon: '🔍', xp_reward: 125, coins_reward: 60, film: '1993 - Mystery Comedy' },
+        'sleeper': { id: 'sleeper', name: 'Sleeper', description: 'Play for 24 hours total', icon: '😴', xp_reward: 200, coins_reward: 100, film: '1973 - Sci-Fi Comedy' },
+        'interiors': { id: 'interiors', name: 'Interiors', description: 'Customize your profile theme', icon: '🖼️', xp_reward: 50, coins_reward: 25, film: '1978 - Bergman-esque Drama' },
+        'night_owl': { id: 'night_owl', name: 'Night Owl', description: 'Play between midnight and 6 AM', icon: '🦉', xp_reward: 50, coins_reward: 25, film: 'Late Night Gaming' },
+        'morning_glory': { id: 'morning_glory', name: 'Morning Glory', description: 'Play before 8 AM', icon: '🌅', xp_reward: 50, coins_reward: 25, film: '2010 - Comedy Drama' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>PERSISTENCE</p>";
+        'love_death': { id: 'love_death', name: 'Love and Death', description: 'Lose 100 times but keep playing', icon: '💀', xp_reward: 50, coins_reward: 25, film: '1975 - Philosophical Comedy' },
+        'play_again_sam': { id: 'play_again_sam', name: 'Play It Again, Sam', description: 'Replay a game 10 times', icon: '🎭', xp_reward: 100, coins_reward: 50, film: '1972 - Romantic Comedy' },
+        'never_give_up': { id: 'never_give_up', name: 'Never Give Up', description: 'Play 7 days in a row', icon: '🔥', xp_reward: 150, coins_reward: 75, film: 'Dedication' },
+        'town_country': { id: 'town_country', name: 'Town & Country', description: 'Play in 2 different locations', icon: '🌆', xp_reward: 75, coins_reward: 35, film: '2001 - Comedy' },
+        
+        document.body.innerHTML += "<p>PERFECTION</p>";
+        'shoot_moon': { id: 'shoot_moon', name: 'Shoot the Moon', description: 'Get a perfect score on any game', icon: '🌙', xp_reward: 300, coins_reward: 150, film: '1982 - Family Drama' },
+        'flawless': { id: 'flawless', name: 'Flawless Victory', description: 'Win without losing once', icon: '✨', xp_reward: 200, coins_reward: 100, film: 'Perfect Performance' },
+        'speed_demon': { id: 'speed_demon', name: 'Speed Demon', description: 'Complete a game in under 5 minutes', icon: '⚡', xp_reward: 150, coins_reward: 75, film: 'Lightning Fast' },
+        'radio_days': { id: 'radio_days', name: 'Radio Days', description: 'Play for 10 hours straight', icon: '📻', xp_reward: 250, coins_reward: 125, film: '1987 - Nostalgic Comedy' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>SOCIAL</p>";
+        'good_mother': { id: 'good_mother', name: 'The Good Mother', description: 'Add 50 friends', icon: '✨', xp_reward: 150, coins_reward: 75, film: '1988 - Drama' },
+        'social_butterfly': { id: 'social_butterfly', name: 'Social Butterfly', description: 'Add 5 friends', icon: '🦋', xp_reward: 100, coins_reward: 50, film: 'Community Member' },
+        'helpful': { id: 'helpful', name: 'Helpful Friend', description: 'Help 10 friends', icon: '🤝', xp_reward: 75, coins_reward: 35, film: 'Supporting Others' },
+        'hanging_up': { id: 'hanging_up', name: 'Hanging Up', description: 'Chat with 25 players', icon: '📞', xp_reward: 100, coins_reward: 50, film: '2000 - Family Comedy' },
+        'book_club': { id: 'book_club', name: 'Book Club', description: 'Join 5 gaming groups', icon: '📚', xp_reward: 125, coins_reward: 60, film: '2018 - Comedy' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>SPECIFIC GAMES</p>";
+        'mars_miner': { id: 'mars_miner', name: 'Mars Miner', description: 'Score 50,000 in MotherLoad', icon: '⛏️', xp_reward: 100, coins_reward: 50, film: 'Martian Master' },
+        'unicorn_master': { id: 'unicorn_master', name: 'Unicorn Master', description: 'Score 100,000 in Robot Unicorn Attack', icon: '🦄', xp_reward: 150, coins_reward: 75, film: 'Always Believe' },
+        'zombie_hunter': { id: 'zombie_hunter', name: 'Zombie Hunter', description: 'Complete all Earn to Die games', icon: '🧟', xp_reward: 200, coins_reward: 100, film: 'Apocalypse Survivor' },
+        'quick_draw': { id: 'quick_draw', name: 'Quick Draw', description: 'Win 10 Gun Blood duels', icon: '🔫', xp_reward: 125, coins_reward: 60, film: 'Western Legend' },
+        'raft_champion': { id: 'raft_champion', name: 'Raft Champion', description: 'Beat both Raft Wars games', icon: '🚣', xp_reward: 150, coins_reward: 75, film: 'Treasure Defender' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>COLLECTION</p>";
+        'collector': { id: 'collector', name: 'Collector', description: 'Unlock 10 achievements', icon: '📚', xp_reward: 75, coins_reward: 35, film: 'Achievement Hunter' },
+        'hoarder': { id: 'hoarder', name: 'Hoarder', description: 'Collect 10,000 coins', icon: '💰', xp_reward: 150, coins_reward: 75, film: 'Wealthy Player' },
+        'millionaire': { id: 'millionaire', name: 'Millionaire', description: 'Collect 1,000,000 coins', icon: '💎', xp_reward: 500, coins_reward: 250, film: 'Rich Beyond Measure' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>TIME-BASED</p>";
+        'weekend_warrior': { id: 'weekend_warrior', name: 'Weekend Warrior', description: 'Play on Saturday and Sunday', icon: '🎮', xp_reward: 50, coins_reward: 25, film: 'Weekend Fun' },
+        'marathon': { id: 'marathon', name: 'Marathon Runner', description: 'Play for 6 hours straight', icon: '🏃', xp_reward: 200, coins_reward: 100, film: 'Endurance Champion' },
+        'daily_player': { id: 'daily_player', name: 'Daily Player', description: 'Play 30 days in a row', icon: '📅', xp_reward: 300, coins_reward: 150, film: 'Committed Gamer' },
+        'five_easy_pieces': { id: 'five_easy_pieces', name: 'Five Easy Pieces', description: 'Win 5 games in a row', icon: '🎲', xp_reward: 125, coins_reward: 60, film: '1970 - Drama Classic' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>RARES</p>";
+        'lucky_seven': { id: 'lucky_seven', name: 'Lucky Seven', description: 'Get exactly 7777 points', icon: '🎰', xp_reward: 250, coins_reward: 125, film: 'Jackpot!' },
+        'easter_egg': { id: 'easter_egg', name: 'Easter Egg Hunter', description: 'Find 10 hidden secrets', icon: '🥚', xp_reward: 200, coins_reward: 100, film: 'Secret Finder' },
+        'diane_fan': { id: 'diane_fan', name: 'Diane Keaton Fan', description: 'View all Diane Keaton info', icon: '💜', xp_reward: 100, coins_reward: 50, film: 'True Fan' },
+        'other_sister': { id: 'other_sister', name: 'The Other Sister', description: 'Help a friend unlock an achievement', icon: '👭', xp_reward: 100, coins_reward: 50, film: '1999 - Drama Comedy' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>COMPETITIVE</p>";
+        'top_ten': { id: 'top_ten', name: 'Top Ten', description: 'Reach top 10 on any leaderboard', icon: '🏆', xp_reward: 200, coins_reward: 100, film: 'Elite Player' },
+        'top_three': { id: 'top_three', name: 'Top Three', description: 'Reach top 3 on any leaderboard', icon: '🥉', xp_reward: 300, coins_reward: 150, film: 'Podium Finish' },
+        'number_one': { id: 'number_one', name: 'Number One', description: 'Reach #1 on any leaderboard', icon: '🥇', xp_reward: 500, coins_reward: 250, film: 'Champion' },
+        'mad_money': { id: 'mad_money', name: 'Mad Money', description: 'Earn 100,000 XP', icon: '💵', xp_reward: 300, coins_reward: 150, film: '2008 - Heist Comedy' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>SPECIAL</p>";
+        'early_bird': { id: 'early_bird', name: 'Early Bird', description: 'Join in the first month', icon: '🐦', xp_reward: 100, coins_reward: 50, film: 'Pioneer' },
+        'veteran': { id: 'veteran', name: 'Veteran', description: 'Account 1 year old', icon: '🎖️', xp_reward: 500, coins_reward: 250, film: 'Long-time Player' },
+        'completionist': { id: 'completionist', name: 'Completionist', description: 'Unlock ALL achievements', icon: '👑', xp_reward: 1000, coins_reward: 500, film: 'Master of the Arcade' },
+        
+        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>MORE DIANE KEATON FILMS</p>";
+        'looking_goodbar': { id: 'looking_goodbar', name: 'Looking for Mr. Goodbar', description: 'Play all candy games', icon: '🍫', xp_reward: 100, coins_reward: 50, film: '1977 - Drama' },
+        'running_mates': { id: 'running_mates', name: 'Running Mates', description: 'Race in 5 games', icon: '🏃', xp_reward: 75, coins_reward: 35, film: '1992 - TV Movie' },
+        'mrs_soffel': { id: 'mrs_soffel', name: 'Mrs. Soffel', description: 'Help 25 friends', icon: '🚗', xp_reward: 125, coins_reward: 60, film: '1984 - Historical Drama' },
+        'because_said_so': { id: 'because_said_so', name: 'Because I Said So', description: 'Customize your profile fully', icon: '🎀', xp_reward: 50, coins_reward: 25, film: '2007 - Rom-Com' },
+        'family_stone': { id: 'family_stone', name: 'The Family Stone', description: 'Play during holidays', icon: '💍', xp_reward: 100, coins_reward: 50, film: '2005 - Holiday Film' },
+        'little_drummer_girl': { id: 'little_drummer_girl', name: 'The Little Drummer Girl', description: 'Get 100 perfect rhythm hits', icon: '🥁', xp_reward: 150, coins_reward: 75, film: '1984 - Thriller' },
+        'mamas_boy': { id: 'mamas_boy', name: "Mama's Boy", description: 'Achieve a 100 game streak', icon: '👩', xp_reward: 200, coins_reward: 100, film: '2007 - Comedy' },
+        'amelia': { id: 'amelia', name: 'Amelia', description: 'Reach 1000 games played', icon: '✈️', xp_reward: 300, coins_reward: 150, film: '2009 - Historical Drama' },
+        'finding_dory': { id: 'finding_dory', name: 'Finding Dory', description: 'Find all hidden Easter eggs', icon: '🐠', xp_reward: 250, coins_reward: 125, film: '2016 - Voice Acting' },
+        'poms': { id: 'poms', name: 'Poms', description: 'Join a team competition', icon: '📣', xp_reward: 150, coins_reward: 75, film: '2019 - Sports Comedy' },
+        'loves_labours_lost': { id: 'loves_labours_lost', name: "Love's Labour's Lost", description: 'Fail a game but try again', icon: '🎪', xp_reward: 50, coins_reward: 25, film: '2000 - Musical' },
+        'hampstead': { id: 'hampstead', name: 'Hampstead', description: 'Play in different game modes', icon: '🏡', xp_reward: 100, coins_reward: 50, film: '2017 - Romantic Comedy' },
+        'crossing_delancey': { id: 'crossing_delancey', name: 'Crossing Delancey', description: 'Cross 50,000 points', icon: '🥖', xp_reward: 150, coins_reward: 75, film: '1988 - Romantic Comedy' },
+        'wildflower': { id: 'wildflower', name: 'Wildflower', description: 'Get a random achievement', icon: '🌸', xp_reward: 75, coins_reward: 35, film: '1991 - TV Movie' },
+        'and_so_it_goes': { id: 'and_so_it_goes', name: 'And So It Goes', description: 'Complete the tutorial', icon: '🎵', xp_reward: 25, coins_reward: 10, film: '2014 - Romantic Comedy' },
+        'ninja_turtles': { id: 'ninja_turtles', name: 'Ninja Turtles', description: 'Beat a boss level', icon: '🐢', xp_reward: 200, coins_reward: 100, film: '2016 - Voice Role' },
+        'china_syndrome': { id: 'china_syndrome', name: 'The China Syndrome', description: 'Survive a difficult challenge', icon: '☢️', xp_reward: 175, coins_reward: 85, film: '1979 - Referenced Film' },
+        'wines_roses': { id: 'wines_roses', name: 'Wines and Roses', description: 'Celebrate 100 wins', icon: '🍷', xp_reward: 200, coins_reward: 100, film: 'Victory Celebration' },
+        'crimes_heart': { id: 'crimes_heart', name: 'Crimes of the Heart', description: 'Form a guild with friends', icon: '❤️', xp_reward: 150, coins_reward: 75, film: '1986 - Drama' },
+        'ladies_night': { id: 'ladies_night', name: "Ladies' Night", description: 'Play with 3 friends simultaneously', icon: '👯', xp_reward: 125, coins_reward: 60, film: 'Social Gaming' },
+        'reunion': { id: 'reunion', name: 'The Reunion', description: 'Return after 30 days away', icon: '🎊', xp_reward: 150, coins_reward: 75, film: 'Welcome Back!' },
+        'unstrung_heroes': { id: 'unstrung_heroes', name: 'Unstrung Heroes', description: 'Unlock 25 achievements', icon: '🦸', xp_reward: 200, coins_reward: 100, film: '1995 - Drama' },
+        'godmothered': { id: 'godmothered', name: 'Godmothered', description: 'Grant a wish in community', icon: '🧚', xp_reward: 100, coins_reward: 50, film: '2020 - Disney Film' },
+        'sextuplets': { id: 'sextuplets', name: 'Sextuplets', description: 'Play 6 different games in one day', icon: '6️⃣', xp_reward: 150, coins_reward: 75, film: 'Multi-Game Master' }
+    };
         
         function loadProfile() {
             document.getElementById('username').textContent = userData.username.toUpperCase();

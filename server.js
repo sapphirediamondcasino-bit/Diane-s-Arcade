@@ -1,4 +1,11 @@
-// ==========================================
+// Get all users (admin only)
+app.get('/api/admin/users', (req, res) => {
+    try {
+        if (!req.session.userId) {
+            returnapp.get('/api/user/achievements', (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res// ==========================================
 // Diane's Arcade - Backend Server (FIXED)
 // Internal Data Store (JSON files)
 // ==========================================
@@ -337,33 +344,90 @@ function getAchievementDetails(achievementId) {
     return allAchievements[achievementId];
 }
 
-
 // Check and award achievements based on user stats
 function checkAchievements(userId, users) {
     const user = users[userId];
     const newAchievements = [];
     
-    // First Score achievement
+    // Annie Hall - First game played
     if (user.total_games_played === 1) {
-        const ach = awardAchievement(userId, 2);
+        const ach = awardAchievement(userId, 'annie_hall');
         if (ach) newAchievements.push(ach);
     }
     
-    // High Roller achievement
-    if (user.total_score >= 500) {
-        const ach = awardAchievement(userId, 4);
+    // Coffee Break - Play 5 games
+    if (user.total_games_played === 5) {
+        const ach = awardAchievement(userId, 'coffee_break');
         if (ach) newAchievements.push(ach);
     }
     
-    // Arcade Master achievement
-    if (user.level >= 10) {
-        const ach = awardAchievement(userId, 5);
+    // Level achievements
+    if (user.level === 10) {
+        const ach = awardAchievement(userId, 'godfather');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.level === 20) {
+        const ach = awardAchievement(userId, 'godfather_2');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.level === 25) {
+        const ach = awardAchievement(userId, 'manhattan');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.level === 50) {
+        const ach = awardAchievement(userId, 'marvins_room');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.level === 100) {
+        const ach = awardAchievement(userId, 'century');
         if (ach) newAchievements.push(ach);
     }
     
-    // Persistence achievement
-    if (user.total_games_played >= 50) {
-        const ach = awardAchievement(userId, 6);
+    // Score achievements
+    if (user.total_score >= 10000) {
+        const ach = awardAchievement(userId, 'something_gotta_give');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.total_score >= 50000) {
+        const ach = awardAchievement(userId, 'big_score');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.total_score >= 100000) {
+        const ach = awardAchievement(userId, 'mega_score');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.total_score >= 1000000) {
+        const ach = awardAchievement(userId, 'legendary');
+        if (ach) newAchievements.push(ach);
+    }
+    
+    // Game completion achievements
+    if (user.total_games_played === 100) {
+        const ach = awardAchievement(userId, 'father_bride');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.total_games_played === 200) {
+        const ach = awardAchievement(userId, 'father_bride_2');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.total_games_played === 1000) {
+        const ach = awardAchievement(userId, 'amelia');
+        if (ach) newAchievements.push(ach);
+    }
+    
+    // Coin achievements
+    if (user.coins >= 10000) {
+        const ach = awardAchievement(userId, 'hoarder');
+        if (ach) newAchievements.push(ach);
+    }
+    if (user.coins >= 1000000) {
+        const ach = awardAchievement(userId, 'millionaire');
+        if (ach) newAchievements.push(ach);
+    }
+    
+    // XP achievement
+    if (user.xp >= 100000) {
+        const ach = awardAchievement(userId, 'mad_money');
         if (ach) newAchievements.push(ach);
     }
     
@@ -417,12 +481,12 @@ app.post('/api/register', async (req, res) => {
         users[userId] = newUser;
         saveUsers(users);
         
-        // Award "Account Creation" achievement
-        awardAchievement(userId, 1);
+        // Award "Account Creation" achievement (was "First Steps")
+        awardAchievement(userId, 'first_steps');
         
         // Give achievement rewards
-        newUser.xp += 100;
-        newUser.coins += 50;
+        newUser.xp += 5;
+        newUser.coins += 5;
         newUser.level = calculateLevel(newUser.xp);
         saveUsers(users);
 
@@ -515,8 +579,8 @@ app.delete('/api/user/delete', (req, res) => {
         // Destroy session
         req.session.destroy();
 
-        // Send redirect URL
-        res.json({ success: true, message: 'Account deleted', redirect: '/login.html' });
+        // Redirect to main page (index.html)
+        res.json({ success: true, message: 'Account deleted', redirect: '/' });
     } catch (error) {
         console.error('Delete account error:', error);
         res.status(500).json({ error: 'Failed to delete account' });
@@ -920,14 +984,217 @@ app.get('/api/admin/users', (req, res) => {
     }
 });
 
+// Get all badge applications (admin only)
+app.get('/api/admin/applications', (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const users = loadUsers();
+        const currentUser = users[req.session.userId];
+
+        if (!currentUser || !currentUser.is_admin) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        const APPLICATIONS_FILE = path.join(DATA_DIR, 'applications.json');
+        let applications = [];
+        if (fs.existsSync(APPLICATIONS_FILE)) {
+            applications = JSON.parse(fs.readFileSync(APPLICATIONS_FILE, 'utf8'));
+        }
+
+        res.json(applications);
+    } catch (error) {
+        console.error('Admin applications error:', error);
+        res.status(500).json({ error: 'Failed to load applications' });
+    }
+});
+
+// Approve/Reject badge application (admin only)
+app.post('/api/admin/applications/:applicationId', (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const users = loadUsers();
+        const currentUser = users[req.session.userId];
+
+        if (!currentUser || !currentUser.is_admin) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        const { applicationId } = req.params;
+        const { action, reason } = req.body; // action: 'approve' or 'reject'
+
+        const APPLICATIONS_FILE = path.join(DATA_DIR, 'applications.json');
+        let applications = [];
+        if (fs.existsSync(APPLICATIONS_FILE)) {
+            applications = JSON.parse(fs.readFileSync(APPLICATIONS_FILE, 'utf8'));
+        }
+
+        const application = applications.find(app => app.id === applicationId);
+        
+        if (!application) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+
+        if (action === 'approve') {
+            application.status = 'approved';
+            application.approved_at = new Date().toISOString();
+            application.approved_by = currentUser.username;
+
+            // Grant badge to user
+            const user = users[application.user_id];
+            if (user) {
+                if (!user.badges) {
+                    user.badges = [];
+                }
+                user.badges.push({
+                    badge_id: application.item_id,
+                    granted_at: new Date().toISOString()
+                });
+                saveUsers(users);
+            }
+        } else if (action === 'reject') {
+            application.status = 'rejected';
+            application.rejected_at = new Date().toISOString();
+            application.rejected_by = currentUser.username;
+            application.rejection_reason = reason;
+        }
+
+        fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify(applications, null, 2));
+
+        res.json({ success: true, message: `Application ${action}ed` });
+    } catch (error) {
+        console.error('Admin application action error:', error);
+        res.status(500).json({ error: 'Failed to process application' });
+    }
+});
+
 // ==========================================
-// COINS SHOP (Coming Soon)
+// COINS SHOP
 // ==========================================
 
+// Purchase item
+app.post('/api/shop/purchase', (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const { item_id } = req.body;
+        const users = loadUsers();
+        const user = users[req.session.userId];
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Shop items prices
+        const itemPrices = {
+            'premium_badge': 5000,
+            'founder_badge': 10000,
+            'custom_title': 2500,
+            'profile_frame': 3000,
+            'name_color': 1500,
+            'xp_boost': 1000,
+            'coin_boost': 2000,
+            'name_change': 5000
+        };
+
+        const price = itemPrices[item_id];
+        
+        if (!price) {
+            return res.status(400).json({ error: 'Invalid item' });
+        }
+
+        if (user.coins < price) {
+            return res.status(400).json({ error: 'Not enough coins' });
+        }
+
+        // Deduct coins
+        user.coins -= price;
+
+        // Add item to user's inventory
+        if (!user.inventory) {
+            user.inventory = [];
+        }
+        
+        user.inventory.push({
+            item_id,
+            purchased_at: new Date().toISOString()
+        });
+
+        // Apply item effects
+        if (item_id === 'xp_boost') {
+            user.xp_boost_until = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        }
+        if (item_id === 'coin_boost') {
+            user.coin_boost_until = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        }
+
+        saveUsers(users);
+
+        res.json({ success: true, message: 'Item purchased!', remaining_coins: user.coins });
+    } catch (error) {
+        console.error('Purchase error:', error);
+        res.status(500).json({ error: 'Failed to purchase item' });
+    }
+});
+
+// Submit badge application
+app.post('/api/shop/apply', (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const { item_id, discord_invite, member_count, additional_info } = req.body;
+        const users = loadUsers();
+        const user = users[req.session.userId];
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Load applications
+        const APPLICATIONS_FILE = path.join(DATA_DIR, 'applications.json');
+        let applications = [];
+        if (fs.existsSync(APPLICATIONS_FILE)) {
+            applications = JSON.parse(fs.readFileSync(APPLICATIONS_FILE, 'utf8'));
+        }
+
+        // Create application
+        const application = {
+            id: Date.now().toString(),
+            user_id: req.session.userId,
+            username: user.username,
+            email: user.email,
+            item_id,
+            discord_invite,
+            member_count: parseInt(member_count),
+            additional_info,
+            status: 'pending',
+            submitted_at: new Date().toISOString()
+        };
+
+        applications.push(application);
+        fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify(applications, null, 2));
+
+        res.json({ success: true, message: 'Application submitted!' });
+    } catch (error) {
+        console.error('Application error:', error);
+        res.status(500).json({ error: 'Failed to submit application' });
+    }
+});
+
+// Get shop items (for reference)
 app.get('/api/shop/items', (req, res) => {
     res.json({
-        message: 'Coming Soon!',
-        items: []
+        message: 'Shop is open!',
+        note: 'Visit /shop.html to browse items'
     });
 });
 

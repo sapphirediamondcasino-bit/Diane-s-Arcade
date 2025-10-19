@@ -169,7 +169,7 @@ class DianeArcade {
             const data = await response.json();
 
             if (response.ok) {
-                this.showNotification('Registration successful! You earned 100 XP and 50 coins! 🎉', 'success');
+                this.showNotification('Registration successful! You earned 5 XP and 5 coins! 🎉', 'success');
                 this.switchToLogin();
             } else {
                 this.showNotification(data.error || 'Registration failed', 'error');
@@ -287,9 +287,9 @@ class DianeArcade {
 
             if (response.ok) {
                 this.showNotification('Account deleted', 'success');
-                // Redirect to login page
+                // Redirect to main page
                 setTimeout(() => {
-                    window.location.href = '/login.html';
+                    window.location.href = '/';
                 }, 1000);
             } else {
                 this.showNotification(data.error || 'Failed to delete account', 'error');

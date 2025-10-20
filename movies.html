@@ -361,6 +361,76 @@
             transform: scale(1.05);
         }
         
+        /* Custom Video Player Modal */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .video-modal.active {
+            display: flex;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 1400px;
+            position: relative;
+        }
+        
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(5, 5, 16, 0.95);
+            border-radius: 15px;
+            border: 2px solid var(--neon-blue);
+        }
+        
+        .video-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8em;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+        }
+        
+        .close-video {
+            background: var(--neon-pink);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-video:hover {
+            box-shadow: 0 0 40px var(--neon-pink);
+            transform: scale(1.1);
+        }
+        
+        .custom-player {
+            width: 100%;
+            height: 80vh;
+            border: 4px solid var(--neon-blue);
+            border-radius: 20px;
+            box-shadow: 0 0 60px var(--neon-blue);
+            background: #000;
+        }
+        
         .footer {
             text-align: center;
             padding: 40px;
@@ -373,6 +443,7 @@
             .page-title { font-size: 2.5em; }
             .movies-grid { grid-template-columns: 1fr; }
             .pluto-player { height: 400px; }
+            .custom-player { height: 60vh; }
             .nav-bar { flex-direction: column; }
         }
     </style>
@@ -383,11 +454,10 @@
         <div class="nav-links">
             <a href="index.html" class="nav-link">HOME</a>
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
+            <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="bot.html" class="nav-link bot-btn">DIANE BOT 🤖</a>
             <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
-            <a href="TermsofService.html" class="nav-link">TERMS</a>
-            <a href="PrivacyPolicy.html" class="nav-link">PRIVACY</a>
         </div>
     </nav>
     
@@ -411,7 +481,7 @@
             <div class="live-player-section">
                 <div class="live-indicator">
                     <div class="live-dot"></div>
-                    <h2 class="live-title">📡 PLUTO TV LIVE - 24/7 STREAMING</h2>
+                    <h2 class="live-title">🔡 PLUTO TV LIVE - 24/7 STREAMING</h2>
                 </div>
                 <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px; opacity: 0.9;">
                     Watch classic movies LIVE 24/7! No account needed.
@@ -422,25 +492,6 @@
                     allowfullscreen
                     allow="autoplay; encrypted-media"
                     frameborder="0">
-                </iframe>
-            </div>
-
-            <!-- TUBI TV LIVE PLAYER -->
-            <div class="live-player-section" style="border-color: var(--neon-blue); box-shadow: 0 0 60px rgba(0, 243, 255, 0.3);">
-                <div class="live-indicator">
-                    <div class="live-dot" style="background: var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue);"></div>
-                    <h2 class="live-title" style="color: var(--neon-blue); text-shadow: 0 0 20px var(--neon-blue);">📺 TUBI TV - FREE STREAMING</h2>
-                </div>
-                <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px; opacity: 0.9;">
-                    Watch thousands of free movies and TV shows!
-                </p>
-                <iframe 
-                    src="https://tubitv.com/home"
-                    style="width: 100%; height: 600px; border: 4px solid var(--neon-blue); border-radius: 20px; box-shadow: 0 0 40px var(--neon-blue); background: #000;"
-                    allowfullscreen
-                    allow="autoplay; encrypted-media"
-                    frameborder="0"
-                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms">
                 </iframe>
             </div>
 
@@ -460,7 +511,7 @@
             
             <div class="section-header">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Pluto_TV_Logo.svg/512px-Pluto_TV_Logo.svg.png" alt="Pluto TV">
-                <h2>📡 PLUTO TV - 15 FREE MOVIES</h2>
+                <h2>🔡 PLUTO TV - 15 FREE MOVIES</h2>
             </div>
             
             <div class="movies-grid" id="pluto-movies"></div>
@@ -472,15 +523,19 @@
         <p style="font-size: 0.9em; margin-top: 10px;">40+ Movies Streaming Free</p>
     </div>
     
-    <div style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 10000; justify-content: center; align-items: center; padding: 20px;" id="video-modal">
-        <div style="width: 100%; max-width: 1400px; position: relative;">
-            <button onclick="closeVideo()" style="position: absolute; top: -50px; right: 0; background: #ff00ff; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.2em; cursor: pointer; transition: all 0.3s;">✕ CLOSE</button>
-            <iframe id="video-player" src="" style="width: 100%; height: 80vh; border: 4px solid #00f3ff; border-radius: 20px; box-shadow: 0 0 60px #00f3ff;" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    <!-- Custom Video Player Modal -->
+    <div class="video-modal" id="video-modal">
+        <div class="video-container">
+            <div class="video-header">
+                <h2 class="video-title" id="video-title-display">Now Playing</h2>
+                <button class="close-video" onclick="closeVideo()">✕ CLOSE</button>
+            </div>
+            <iframe id="custom-player" class="custom-player" src="" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
         </div>
     </div>
     
     <script>
-        var youtubeMovies = [
+        const youtubeMovies = [
             {title:"The Only Thrill", year:"1997", desc:"Romantic drama spanning decades. Stars Sam Shepard.", url:"https://www.youtube.com/watch?v=AoaiNpsoaIs", videoId:"AoaiNpsoaIs", poster:"https://m.media-amazon.com/images/M/MV5BMTEzNzQ5MTI3NjReQTJeQWpwZ15BbWU3MDM4NTYzMjI@._V1_.jpg"},
             {title:"Smother", year:"2008", desc:"Mother moves in with son. Dark comedy ensues.", url:"https://www.youtube.com/watch?v=P3xcgABiXWM", videoId:"P3xcgABiXWM", poster:"https://m.media-amazon.com/images/M/MV5BMTg5NzMxNDQ4M15BMl5BanBnXkFtZTcwOTI4MDk0MQ@@._V1_.jpg"},
             {title:"The First Wives Club", year:"1996", desc:"Three divorced women get revenge. Comedy gold.", url:"https://www.youtube.com/watch?v=nHA_nB5HT4U", videoId:"nHA_nB5HT4U", poster:"https://m.media-amazon.com/images/M/MV5BMTc3MDcyMzE0M15BMl5BanBnXkFtZTgwNzE3NjM1NjE@._V1_.jpg"},
@@ -492,7 +547,7 @@
             {title:"On Thin Ice", year:"2003", desc:"Widow turns to drug dealing. Powerful drama.", url:"https://www.youtube.com/watch?v=BS7sgDR_BT8", videoId:"BS7sgDR_BT8", poster:"https://m.media-amazon.com/images/M/MV5BMTY2MTMxMzY4M15BMl5BanBnXkFtZTcwNzg0NTIyMQ@@._V1_.jpg"}
         ];
 
-        var tubiMovies = [
+        const tubiMovies = [
             {title:"Baby Boom", year:"1987", desc:"Career woman inherits a baby.", url:"https://tubitv.com/movies/100007410", poster:"https://m.media-amazon.com/images/M/MV5BMTUwNzA2MTg5Nl5BMl5BanBnXkFtZTcwMTQyNDQyNA@@._V1_.jpg"},
             {title:"Annie Hall", year:"1977", desc:"Academy Award-winning romantic comedy.", url:"https://tubitv.com/movies/447858", poster:"https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
             {title:"Maybe I Do", year:"2023", desc:"Parents meet at wedding.", url:"https://tubitv.com/movies/100008877", poster:"https://m.media-amazon.com/images/M/MV5BYzJmYzBkODYtYjc5Yi00ODFhLTlmNGItOThhNTcxZmRhMGU2XkEyXkFqcGdeQXVyMTE0MTY2Mzk2._V1_.jpg"},
@@ -512,7 +567,7 @@
             {title:"Harry and Walter", year:"1976", desc:"Period comedy.", url:"https://tubitv.com/movies/527336", poster:"https://m.media-amazon.com/images/M/MV5BNjE4MjM0Njk0N15BMl5BanBnXkFtZTcwMzI5NDcyMQ@@._V1_.jpg"}
         ];
         
-        var plutoMovies = [
+        const plutoMovies = [
             {title:"The Godfather", year:"1972", desc:"Coppola masterpiece.", url:"https://pluto.tv/en/on-demand/movies/the-godfather-1-1972-1-1", poster:"https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg"},
             {title:"The Godfather Part II", year:"1974", desc:"Epic sequel.", url:"https://pluto.tv/en/on-demand/movies/the-godfather-part-ii-1974-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMWMwMGQzZTItY2JlNC00OWZiLWIyMDctNDk2ZDQ2YjRjMWQ0XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg"},
             {title:"Annie Hall", year:"1977", desc:"Oscar-winning comedy.", url:"https://pluto.tv/en/on-demand/movies/annie-hall-1977-1-1", poster:"https://m.media-amazon.com/images/M/MV5BZDg1OGQ4YzgtM2Y2NS00NjA3LWFjYTctMDRlMDI3NWE1OTUyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
@@ -531,90 +586,99 @@
         ];
         
         function createMovieCard(movie, platform) {
-            var isYoutube = platform === "youtube";
-            var youtubeClass = isYoutube ? "youtube" : "";
-            var platformText = isYoutube ? "YOUTUBE" : (platform === "tubi" ? "TUBI" : "PLUTO TV");
-            var onclick = isYoutube ? "openMovie('" + movie.url + "', '" + movie.videoId + "')" : "openMovie('" + movie.url + "')";
+            const isYoutube = platform === "youtube";
+            const youtubeClass = isYoutube ? "youtube" : "";
+            const platformText = isYoutube ? "YOUTUBE" : (platform === "tubi" ? "TUBI" : "PLUTO TV");
             
-            return '<div class="movie-card ' + youtubeClass + '" onclick="' + onclick + '">' +
-                '<img src="' + movie.poster + '" alt="' + movie.title + '" class="movie-poster" onerror="this.src=\'https://via.placeholder.com/300x380/050510/00f3ff?text=' + movie.title.replace(/ /g, '+') + '\'">' +
-                '<div class="movie-content">' +
-                '<h3>' + movie.title + '</h3>' +
-                '<div class="movie-year">' + movie.year + ' • ' + platformText + '</div>' +
-                '<p>' + movie.desc + '</p>' +
-                '<button class="watch-btn ' + youtubeClass + '">▶ WATCH ON ' + platformText + '</button>' +
-                '</div></div>';
+            return `<div class="movie-card ${youtubeClass}">
+                <img src="${movie.poster}" alt="${movie.title}" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x380/050510/00f3ff?text=${movie.title.replace(/ /g, '+')}'">
+                <div class="movie-content">
+                    <h3>${movie.title}</h3>
+                    <div class="movie-year">${movie.year} • ${platformText}</div>
+                    <p>${movie.desc}</p>
+                    <button class="watch-btn ${youtubeClass}" onclick='openMovie(${JSON.stringify(movie)}, "${platform}")'>▶ WATCH NOW</button>
+                </div>
+            </div>`;
         }
         
         function loadMovies() {
-            var youtubeContainer = document.getElementById("youtube-movies");
-            var tubiContainer = document.getElementById("tubi-movies");
-            var plutoContainer = document.getElementById("pluto-movies");
-            
-            var youtubeHTML = "";
-            for (var i = 0; i < youtubeMovies.length; i++) {
-                youtubeHTML += createMovieCard(youtubeMovies[i], "youtube");
-            }
-            youtubeContainer.innerHTML = youtubeHTML;
-            
-            var tubiHTML = "";
-            for (var i = 0; i < tubiMovies.length; i++) {
-                tubiHTML += createMovieCard(tubiMovies[i], "tubi");
-            }
-            tubiContainer.innerHTML = tubiHTML;
-            
-            var plutoHTML = "";
-            for (var i = 0; i < plutoMovies.length; i++) {
-                plutoHTML += createMovieCard(plutoMovies[i], "pluto");
-            }
-            plutoContainer.innerHTML = plutoHTML;
+            document.getElementById('youtube-movies').innerHTML = youtubeMovies.map(m => createMovieCard(m, 'youtube')).join('');
+            document.getElementById('tubi-movies').innerHTML = tubiMovies.map(m => createMovieCard(m, 'tubi')).join('');
+            document.getElementById('pluto-movies').innerHTML = plutoMovies.map(m => createMovieCard(m, 'pluto')).join('');
         }
         
         function checkLogin() {
-            var userData = localStorage.getItem("arcadeUser");
-            if (userData) {
-                document.getElementById("login-gate").style.display = "none";
-                document.getElementById("movies-content").style.display = "block";
-                loadMovies();
-            } else {
-                document.getElementById("login-gate").style.display = "block";
-                document.getElementById("movies-content").style.display = "none";
-            }
+            fetch('/api/user')
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('login-gate').style.display = 'none';
+                        document.getElementById('movies-content').style.display = 'block';
+                        loadMovies();
+                    } else {
+                        document.getElementById('login-gate').style.display = 'block';
+                        document.getElementById('movies-content').style.display = 'none';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('login-gate').style.display = 'block';
+                    document.getElementById('movies-content').style.display = 'none';
+                });
         }
         
-        function openMovie(url, videoId) {
-            var userData = localStorage.getItem("arcadeUser");
-            if (userData) {
-                userData = JSON.parse(userData);
-                if (!userData.moviesWatched) userData.moviesWatched = [];
-                userData.moviesWatched.push(url);
-                userData.xp = (userData.xp || 0) + 50;
-                userData.coins = (userData.coins || 0) + 10;
-                localStorage.setItem("arcadeUser", JSON.stringify(userData));
+        function openMovie(movie, platform) {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('custom-player');
+            const titleDisplay = document.getElementById('video-title-display');
+            
+            titleDisplay.textContent = `${movie.title} (${movie.year})`;
+            
+            if (platform === 'youtube') {
+                // YouTube embed
+                player.src = `https://www.youtube.com/embed/${movie.videoId}?autoplay=1`;
+            } else if (platform === 'tubi') {
+                // Tubi embed - use direct URL
+                player.src = movie.url;
+            } else if (platform === 'pluto') {
+                // Pluto TV embed - use direct URL
+                player.src = movie.url;
             }
             
-            if (videoId) {
-                showYouTubePlayer(videoId);
-            } else {
-                window.open(url, "_blank");
-            }
-        }
-        
-        function showYouTubePlayer(videoId) {
-            var modal = document.getElementById("video-modal");
-            var player = document.getElementById("video-player");
-            player.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
-            modal.style.display = "flex";
+            modal.classList.add('active');
+            
+            // Award XP and coins for watching
+            awardWatchingReward();
         }
         
         function closeVideo() {
-            var modal = document.getElementById("video-modal");
-            var player = document.getElementById("video-player");
-            modal.style.display = "none";
-            player.src = "";
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('custom-player');
+            modal.classList.remove('active');
+            player.src = '';
         }
+        
+        async function awardWatchingReward() {
+            try {
+                const response = await fetch('/api/user');
+                if (response.ok) {
+                    const user = await response.json();
+                    
+                    // Award 50 XP and 10 coins for watching (handled in backend if you add endpoint)
+                    // For now, just track in frontend
+                    console.log('Movie watched - user should earn rewards');
+                }
+            } catch (error) {
+                console.log('Not logged in');
+            }
+        }
+        
+        // Close video on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeVideo();
+            }
+        });
         
         checkLogin();
     </script>
 </body>
-</html>v
+</html>

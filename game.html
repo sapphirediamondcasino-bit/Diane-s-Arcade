@@ -559,28 +559,13 @@
         </div>
     </div>
     
-    <!-- EMBED CODE SECTION -->
+    <!-- DIANE BOT RECOMMENDATIONS -->
     <div class="embed-section">
         <div class="embed-container">
-            <h2 class="embed-title">📋 SHARE ON DISCORD</h2>
+            <h2 class="embed-title">🤖 DIANE BOT RECOMMENDATIONS</h2>
             <p class="embed-subtitle">
-                Copy the link below to share this game!
+                Share this game on Discord with Diane Bot!
             </p>
-            
-            <div class="embed-input-group">
-                <label class="embed-label">🔗 Direct Game Link:</label>
-                <div class="embed-input-wrapper">
-                    <input 
-                        type="text" 
-                        id="game-url" 
-                        class="embed-input" 
-                        readonly
-                    >
-                    <button class="copy-btn" onclick="copyGameURL()">
-                        📋 COPY
-                    </button>
-                </div>
-            </div>
             
             <div class="embed-input-group">
                 <label class="embed-label">🎮 Discord Bot Command:</label>
@@ -592,34 +577,14 @@
                         readonly
                     >
                     <button class="copy-btn" onclick="copyDiscordCommand()">
-                        📋 COPY
-                    </button>
-                </div>
-            </div>
-            
-            <div class="embed-input-group">
-                <label class="embed-label">📦 HTML Embed Code (for websites):</label>
-                <div class="embed-input-wrapper">
-                    <input 
-                        type="text" 
-                        id="embed-code" 
-                        class="embed-input" 
-                        readonly
-                    >
-                    <button class="copy-btn" onclick="copyEmbedCode()">
-                        📋 COPY
+                        📋 COPY COMMAND
                     </button>
                 </div>
             </div>
             
             <div class="embed-preview">
-                <h3>✨ How It Works:</h3>
-                <ul>
-                    <li>Share the direct link in Discord or anywhere</li>
-                    <li>Use the bot command: <code>/play game:gamename</code></li>
-                    <li>Embed on your website with the HTML code</li>
-                    <li>Scores tracked automatically when logged in</li>
-                </ul>
+                <h3>✨ Diane Bot Suggests You Play Next:</h3>
+                <div id="bot-recommendations" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;"></div>
             </div>
         </div>
     </div>
@@ -700,11 +665,42 @@
             document.getElementById('error-game-name').textContent = currentGame.name;
             document.title = `Playing ${currentGame.name} | Diane Keaton Memorial Arcade`;
             
-            // Set embed URLs
-            const gameURL = `${siteBaseURL}/game.html?game=${gameName}`;
-            document.getElementById('game-url').value = gameURL;
-            document.getElementById('discord-command').value = `/play game:${gameName}`;
-            document.getElementById('embed-code').value = `<iframe src="${gameURL}" width="800" height="600" frameborder="0" allow="fullscreen"></iframe>`;
+            // Set bot command
+            document.getElementById('discord-command').value = `/play ${gameName}`;
+            
+            // Load Diane Bot recommendations
+            const botRecsContainer = document.getElementById('bot-recommendations');
+            (currentGame.related || []).slice(0, 3).forEach(gameId => {
+                const game = games[gameId];
+                if (game) {
+                    const card = document.createElement('div');
+                    card.style.cssText = `
+                        background: rgba(0, 243, 255, 0.1);
+                        border: 2px solid var(--neon-blue);
+                        border-radius: 15px;
+                        padding: 15px;
+                        text-align: center;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                    `;
+                    card.innerHTML = `
+                        <div style="font-size: 2em; margin-bottom: 10px;">${game.name.charAt(0)}</div>
+                        <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; color: var(--neon-blue); margin-bottom: 5px; font-size: 0.9em;">${game.name}</div>
+                        <div style="font-size: 0.85em; opacity: 0.8; margin-bottom: 10px;">${game.desc}</div>
+                        <div style="font-family: 'Orbitron', sans-serif; color: var(--neon-green); font-size: 0.8em;">/play ${gameId}</div>
+                    `;
+                    card.onclick = () => window.location.href = `game.html?game=${gameId}`;
+                    card.onmouseover = () => {
+                        card.style.transform = 'translateY(-5px)';
+                        card.style.boxShadow = '0 10px 30px rgba(0, 243, 255, 0.5)';
+                    };
+                    card.onmouseout = () => {
+                        card.style.transform = 'translateY(0)';
+                        card.style.boxShadow = 'none';
+                    };
+                    botRecsContainer.appendChild(card);
+                }
+            });
             
             // Initialize Ruffle with FULLSCREEN settings
             window.RufflePlayer = window.RufflePlayer || {};
@@ -832,16 +828,8 @@
         }
         
         // COPY FUNCTIONS
-        function copyGameURL() {
-            copyToClipboard('game-url', event.target);
-        }
-        
         function copyDiscordCommand() {
             copyToClipboard('discord-command', event.target);
-        }
-        
-        function copyEmbedCode() {
-            copyToClipboard('embed-code', event.target);
         }
         
         function copyToClipboard(inputId, button) {
@@ -854,7 +842,7 @@
                 button.classList.add('copied');
                 
                 setTimeout(() => {
-                    button.textContent = '📋 COPY';
+                    button.textContent = '📋 COPY COMMAND';
                     button.classList.remove('copied');
                 }, 2000);
             }).catch(err => {
@@ -863,7 +851,7 @@
                 button.textContent = '✅ COPIED!';
                 button.classList.add('copied');
                 setTimeout(() => {
-                    button.textContent = '📋 COPY';
+                    button.textContent = '📋 COPY COMMAND';
                     button.classList.remove('copied');
                 }, 2000);
             });

@@ -231,36 +231,38 @@
             margin-bottom: 15px;
         }
         
-        .profile-bio {
-            font-size: 1.1em;
-            color: var(--neon-blue);
-            margin-bottom: 20px;
-            opacity: 0.8;
-            position: relative;
-            padding: 15px;
-            background: rgba(0, 243, 255, 0.05);
-            border-radius: 15px;
-            border: 2px solid rgba(0, 243, 255, 0.2);
+        .profile-badges {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
         }
         
-        .edit-bio-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 243, 255, 0.2);
+        .badge-icon {
+            font-size: 2em;
+            padding: 8px;
+            background: rgba(0, 243, 255, 0.1);
             border: 2px solid var(--neon-blue);
-            color: var(--neon-blue);
-            border-radius: 20px;
-            padding: 5px 15px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8em;
-            cursor: pointer;
+            border-radius: 12px;
+            cursor: help;
             transition: all 0.3s;
         }
         
-        .edit-bio-btn:hover {
-            background: var(--neon-blue);
-            color: var(--darker);
+        .badge-icon:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+        
+        .admin-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #ffd700, #ff6600);
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            color: #000;
+            margin-left: 15px;
+            box-shadow: 0 0 30px #ffd700;
         }
         
         .profile-level {
@@ -280,6 +282,7 @@
             border-radius: 20px;
             overflow: hidden;
             margin: 20px 0;
+            position: relative;
         }
         
         .xp-bar {
@@ -293,41 +296,19 @@
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             box-shadow: 0 0 30px var(--neon-blue);
+            position: relative;
+            z-index: 2;
         }
         
-        .social-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .social-btn {
-            padding: 12px 30px;
-            background: rgba(0, 243, 255, 0.1);
-            border: 2px solid var(--neon-blue);
-            border-radius: 25px;
-            color: white;
+        .xp-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .social-btn:hover {
-            background: var(--neon-blue);
-            color: var(--darker);
-            box-shadow: 0 0 30px var(--neon-blue);
-            transform: translateY(-3px);
-        }
-        
-        .social-btn.friended {
-            background: var(--neon-green);
-            border-color: var(--neon-green);
-            color: var(--darker);
+            z-index: 3;
+            color: white;
+            text-shadow: 0 0 10px #000;
         }
         
         .profile-stats {
@@ -428,7 +409,7 @@
             opacity: 0.8;
         }
         
-        .achievement-xp {
+        .achievement-rewards {
             margin-top: 10px;
             color: var(--neon-green);
             font-family: 'Orbitron', sans-serif;
@@ -442,50 +423,47 @@
             font-size: 1.5em;
         }
         
-        .scores-table {
-            background: rgba(5, 5, 16, 0.85);
-            border: 3px solid var(--neon-blue);
-            border-radius: 20px;
-            overflow: hidden;
+        .friends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
             margin-bottom: 60px;
         }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        thead {
-            background: rgba(0, 243, 255, 0.2);
-        }
-        
-        th {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            padding: 25px 20px;
-            text-align: left;
-            color: var(--neon-blue);
-        }
-        
-        td {
-            padding: 25px 20px;
-            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
-        }
-        
-        tbody tr:hover {
-            background: rgba(0, 243, 255, 0.05);
-        }
-        
-        .score-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.3em;
-            font-weight: 700;
-            color: var(--neon-green);
-        }
-        
-        .no-scores {
+        .friend-card {
+            background: rgba(5, 5, 16, 0.85);
+            border: 2px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 25px;
             text-align: center;
-            padding: 60px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .friend-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--neon-blue);
+        }
+        
+        .friend-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--neon-blue);
+            margin: 0 auto 15px;
+            object-fit: cover;
+        }
+        
+        .friend-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            color: var(--neon-blue);
+            margin-bottom: 8px;
+        }
+        
+        .friend-level {
+            font-size: 0.9em;
+            opacity: 0.8;
         }
         
         .modal {
@@ -509,7 +487,7 @@
             border: 3px solid var(--neon-blue);
             border-radius: 30px;
             padding: 50px;
-            max-width: 700px;
+            max-width: 900px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -544,20 +522,7 @@
             transform: rotate(90deg) scale(1.1);
         }
         
-        .bio-input {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0, 243, 255, 0.05);
-            border: 2px solid var(--neon-blue);
-            border-radius: 15px;
-            color: white;
-            font-size: 1em;
-            font-family: 'Roboto', sans-serif;
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .avatar-options, .banner-options {
+        .avatar-grid, .banner-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 20px;
@@ -606,6 +571,36 @@
             font-weight: 900;
         }
         
+        .file-upload-section {
+            background: rgba(0, 243, 255, 0.05);
+            border: 2px dashed var(--neon-blue);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .file-upload-section input[type="file"] {
+            display: none;
+        }
+        
+        .upload-label {
+            display: inline-block;
+            padding: 15px 40px;
+            background: var(--neon-blue);
+            color: var(--darker);
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-label:hover {
+            box-shadow: 0 0 30px var(--neon-blue);
+            transform: scale(1.05);
+        }
+        
         .save-btn {
             width: 100%;
             padding: 18px;
@@ -625,6 +620,33 @@
             box-shadow: 0 10px 50px rgba(0, 243, 255, 0.8);
         }
         
+        .notification {
+            position: fixed;
+            bottom: -100px;
+            right: 30px;
+            padding: 20px 30px;
+            background: var(--neon-blue);
+            color: var(--darker);
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            z-index: 20000;
+            transition: bottom 0.3s;
+            box-shadow: 0 0 40px var(--neon-blue);
+        }
+        
+        .notification.show {
+            bottom: 30px;
+        }
+        
+        .notification.error {
+            background: var(--neon-pink);
+        }
+        
+        .notification.success {
+            background: var(--neon-green);
+        }
+        
         @media (max-width: 768px) {
             .profile-header { flex-direction: column; text-align: center; padding: 30px; }
             .avatar-container { margin-top: -120px; }
@@ -638,12 +660,12 @@
         <div class="nav-brand">🎮 MY PROFILE</div>
         <div class="nav-links">
             <a href="index.html" class="nav-link">HOME</a>
-            <a href="shop.html" class="nav-link">Coin Shop</a>
+            <a href="shop.html" class="nav-link">COIN SHOP 🪙</a>
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
             <a href="bot.html" class="nav-link">DIANE BOT 🤖</a>
-            <a href="Settings.html" class="nav-link">Settings ⚙️</a>
+            <a href="Settings.html" class="nav-link">SETTINGS ⚙️</a>
             <button class="nav-link logout-btn" onclick="logout()">LOGOUT</button>
         </div>
     </nav>
@@ -661,27 +683,12 @@
                 <button class="edit-avatar-btn" onclick="openAvatarModal()">✏️</button>
             </div>
             <div class="profile-info">
-                <h1 class="profile-username" id="username">PLAYER</h1>
-                <div class="profile-bio">
-                    <button class="edit-bio-btn" onclick="openBioModal()">✏️</button>
-                    <div id="bio-text">No bio yet!</div>
-                </div>
+                <h1 class="profile-username" id="username">LOADING...</h1>
+                <div class="profile-badges" id="user-badges"></div>
                 <div class="profile-level">⚡ LEVEL <span id="user-level">1</span></div>
                 <div class="xp-bar-container">
-                    <div class="xp-bar" id="xp-bar" style="width: 0%">
-                        <span id="xp-text">0 / 1000 XP</span>
-                    </div>
-                </div>
-                
-                <div class="social-actions">
-                    <button class="social-btn" id="friend-btn" onclick="toggleFriend()">
-                        <span>👥</span>
-                        <span id="friend-text">ADD FRIEND</span>
-                    </button>
-                    <button class="social-btn" onclick="alert('Compare Stats feature coming soon!')">
-                        <span>📊</span>
-                        <span>COMPARE STATS</span>
-                    </button>
+                    <div class="xp-bar" id="xp-bar" style="width: 0%"></div>
+                    <div class="xp-text" id="xp-text">0 / 100 XP</div>
                 </div>
                 
                 <div class="profile-stats">
@@ -694,15 +701,15 @@
                         <div class="stat-label">🎮 Games Played</div>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="stat-coins">100</span>
-                        <div class="stat-label">💰 Coins</div>
+                        <span class="stat-value" id="stat-coins">0</span>
+                        <div class="stat-label">🪙 Coins</div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-value" id="stat-friends">0</span>
                         <div class="stat-label">👥 Friends</div>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="stat-joined">Jan 2025</span>
+                        <span class="stat-value" id="stat-joined">Loading...</span>
                         <div class="stat-label">📅 Member Since</div>
                     </div>
                 </div>
@@ -712,395 +719,482 @@
         <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
         <div class="achievements-grid" id="achievements-container"></div>
         
-        <h2 class="section-title">🎮 MY HIGH SCORES</h2>
-        <div class="scores-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>GAME</th>
-                        <th>SCORE</th>
-                        <th>RANK</th>
-                        <th>DATE</th>
-                    </tr>
-                </thead>
-                <tbody id="scores-tbody"></tbody>
-            </table>
-        </div>
+        <h2 class="section-title">👥 MY FRIENDS</h2>
+        <div class="friends-grid" id="friends-container"></div>
     </div>
 
+    <!-- Avatar Modal -->
     <div class="modal" id="avatar-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal('avatar-modal')">×</button>
             <h2 class="modal-title">CHOOSE AVATAR</h2>
-            <div class="avatar-options" id="avatar-options"></div>
-            <button class="save-btn" onclick="saveAvatar()">SAVE</button>
+            
+            <div class="file-upload-section">
+                <h3 style="margin-bottom: 15px; color: var(--neon-blue);">Upload Custom Image</h3>
+                <input type="file" id="avatar-file-input" accept="image/*" onchange="handleAvatarFileUpload(event)">
+                <label for="avatar-file-input" class="upload-label">📤 UPLOAD IMAGE</label>
+                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 5MB • JPG, PNG, GIF, WEBP</p>
+            </div>
+            
+            <h3 style="text-align: center; margin-bottom: 20px; color: var(--neon-purple);">Or Choose from Presets</h3>
+            <div class="avatar-grid" id="avatar-options"></div>
+            <button class="save-btn" onclick="saveAvatar()">💾 SAVE AVATAR</button>
         </div>
     </div>
 
+    <!-- Banner Modal -->
     <div class="modal" id="banner-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal('banner-modal')">×</button>
             <h2 class="modal-title">CHOOSE BANNER</h2>
-            <div class="banner-options" id="banner-options"></div>
-            <button class="save-btn" onclick="saveBanner()">SAVE</button>
+            
+            <div class="file-upload-section">
+                <h3 style="margin-bottom: 15px; color: var(--neon-blue);">Upload Custom Image</h3>
+                <input type="file" id="banner-file-input" accept="image/*" onchange="handleBannerFileUpload(event)">
+                <label for="banner-file-input" class="upload-label">📤 UPLOAD IMAGE</label>
+                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 5MB • JPG, PNG, GIF, WEBP</p>
+            </div>
+            
+            <h3 style="text-align: center; margin-bottom: 20px; color: var(--neon-purple);">Or Choose from Presets</h3>
+            <div class="banner-grid" id="banner-options"></div>
+            <button class="save-btn" onclick="saveBanner()">💾 SAVE BANNER</button>
         </div>
     </div>
 
-    <div class="modal" id="bio-modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('bio-modal')">×</button>
-            <h2 class="modal-title">EDIT BIO</h2>
-            <textarea class="bio-input" id="bio-input" maxlength="200"></textarea>
-            <p style="text-align: right; margin: 10px 0; opacity: 0.7;">
-                <span id="char-count">0</span>/200
-            </p>
-            <button class="save-btn" onclick="saveBio()">SAVE</button>
-        </div>
-    </div>
-
+    <script src="app.js"></script>
     <script>
-        let userData = JSON.parse(localStorage.getItem('arcadeUser')) || {
-            username: 'Guest',
-            level: 1,
-            xp: 0,
-            coins: 100,
-            achievements: [],
-            gamesPlayed: 0,
-            highScores: {},
-            friends: [],
-            joinDate: new Date().toISOString(),
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=guest',
-            banner: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop',
-            bio: 'No bio yet!'
-        };
-        
+        let currentUser = null;
         let selectedAvatar = null;
         let selectedBanner = null;
+        let uploadedAvatarFile = null;
+        let uploadedBannerFile = null;
         
-        const avatarOptions = [
+        // 50+ Avatar Presets
+        const avatarPresets = [
             'https://api.dicebear.com/7.x/avataaars/svg?seed=felix',
             'https://api.dicebear.com/7.x/avataaars/svg?seed=aneka',
             'https://api.dicebear.com/7.x/avataaars/svg?seed=luna',
             'https://api.dicebear.com/7.x/avataaars/svg?seed=max',
             'https://api.dicebear.com/7.x/avataaars/svg?seed=charlie',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=milo',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=leo',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=shadow',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=tiger',
+            'https://api.dicebear.com/7.x/avataaars/svg?seed=bear',
             'https://api.dicebear.com/7.x/bottts/svg?seed=robot1',
             'https://api.dicebear.com/7.x/bottts/svg?seed=robot2',
-            'https://api.dicebear.com/7.x/personas/svg?seed=person1'
+            'https://api.dicebear.com/7.x/bottts/svg?seed=robot3',
+            'https://api.dicebear.com/7.x/bottts/svg?seed=cyborg',
+            'https://api.dicebear.com/7.x/bottts/svg?seed=android',
+            'https://api.dicebear.com/7.x/personas/svg?seed=person1',
+            'https://api.dicebear.com/7.x/personas/svg?seed=person2',
+            'https://api.dicebear.com/7.x/personas/svg?seed=person3',
+            'https://api.dicebear.com/7.x/personas/svg?seed=person4',
+            'https://api.dicebear.com/7.x/personas/svg?seed=person5',
+            'https://api.dicebear.com/7.x/adventurer/svg?seed=hero1',
+            'https://api.dicebear.com/7.x/adventurer/svg?seed=hero2',
+            'https://api.dicebear.com/7.x/adventurer/svg?seed=hero3',
+            'https://api.dicebear.com/7.x/adventurer/svg?seed=warrior',
+            'https://api.dicebear.com/7.x/adventurer/svg?seed=knight',
+            'https://api.dicebear.com/7.x/big-smile/svg?seed=smile1',
+            'https://api.dicebear.com/7.x/big-smile/svg?seed=smile2',
+            'https://api.dicebear.com/7.x/big-smile/svg?seed=happy',
+            'https://api.dicebear.com/7.x/big-smile/svg?seed=joy',
+            'https://api.dicebear.com/7.x/big-smile/svg?seed=cheerful',
+            'https://api.dicebear.com/7.x/fun-emoji/svg?seed=emoji1',
+            'https://api.dicebear.com/7.x/fun-emoji/svg?seed=emoji2',
+            'https://api.dicebear.com/7.x/fun-emoji/svg?seed=emoji3',
+            'https://api.dicebear.com/7.x/fun-emoji/svg?seed=cool',
+            'https://api.dicebear.com/7.x/fun-emoji/svg?seed=awesome',
+            'https://api.dicebear.com/7.x/lorelei/svg?seed=lorelei1',
+            'https://api.dicebear.com/7.x/lorelei/svg?seed=lorelei2',
+            'https://api.dicebear.com/7.x/lorelei/svg?seed=lorelei3',
+            'https://api.dicebear.com/7.x/miniavs/svg?seed=mini1',
+            'https://api.dicebear.com/7.x/miniavs/svg?seed=mini2',
+            'https://api.dicebear.com/7.x/miniavs/svg?seed=mini3',
+            'https://api.dicebear.com/7.x/pixel-art/svg?seed=pixel1',
+            'https://api.dicebear.com/7.x/pixel-art/svg?seed=pixel2',
+            'https://api.dicebear.com/7.x/pixel-art/svg?seed=retro',
+            'https://api.dicebear.com/7.x/pixel-art/svg?seed=arcade',
+            'https://api.dicebear.com/7.x/pixel-art/svg?seed=8bit',
+            'https://api.dicebear.com/7.x/thumbs/svg?seed=thumb1',
+            'https://api.dicebear.com/7.x/thumbs/svg?seed=thumb2',
+            'https://api.dicebear.com/7.x/identicon/svg?seed=id1',
+            'https://api.dicebear.com/7.x/identicon/svg?seed=id2',
+            'https://api.dicebear.com/7.x/shapes/svg?seed=shape1'
         ];
         
-        const bannerOptions = [
+        // 50+ Banner Presets
+        const bannerPresets = [
             'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop',
             'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&h=400&fit=crop',
             'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=1200&h=400&fit=crop',
-            'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=400&fit=crop'
+            'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1482192505345-5655af888cc4?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1484600899469-230e8d1d59c0?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1488229297570-58520851e868?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1485470733090-0aae1788d5af?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1495954484750-af469f2f9be5?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1506260408121-e353d10b87c7?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1483086431886-3590a88317fe?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1444927714506-8492d94b4e3d?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1478827387698-1527781a4887?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1499346030926-9a72daac6c63?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1504198266287-1659872e6590?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1520637836993-a071674ec67b?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1528183429752-a97d0bf99b5a?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1533460004989-cef01064af7e?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1560015534-cee980ba7e13?w=1200&h=400&fit=crop'
         ];
         
-        const allAchievements = [
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>STARTER ACHIEVEMENTS</p>";
-        'annie_hall': { id: 'annie_hall', name: 'Annie Hall', description: 'Play your first game', icon: '🎬', xp_reward: 10, coins_reward: 5, film: '1977 - Academy Award Winner' },
-        'first_steps': { id: 'first_steps', name: 'First Steps', description: 'Create your arcade profile', icon: '👣', xp_reward: 5, coins_reward: 5, film: 'Welcome to the Arcade' },
-        'coffee_break': { id: 'coffee_break', name: 'Coffee Break', description: 'Play 5 games', icon: '☕', xp_reward: 25, coins_reward: 10, film: "Diane's Favorite Beverage" },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>LEVEL ACHIEVEMENTS</p>";
-        'godfather': { id: 'godfather', name: 'The Godfather', description: 'Reach Level 10', icon: '👑', xp_reward: 50, coins_reward: 25, film: '1972 - Classic Mob Film' },
-        'godfather_2': { id: 'godfather_2', name: 'The Godfather Part II', description: 'Reach Level 20', icon: '🎭', xp_reward: 75, coins_reward: 35, film: '1974 - Epic Sequel' },
-        'manhattan': { id: 'manhattan', name: 'Manhattan', description: 'Reach Level 25', icon: '🏙️', xp_reward: 100, coins_reward: 50, film: '1979 - Woody Allen Classic' },
-        'marvins_room': { id: 'marvins_room', name: "Marvin's Room", description: 'Reach Level 50', icon: '🏠', xp_reward: 250, coins_reward: 100, film: '1996 - Drama with Meryl Streep' },
-        'century': { id: 'century', name: 'Century Club', description: 'Reach Level 100', icon: '💯', xp_reward: 500, coins_reward: 250, film: 'Elite Status' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>SCORE ACHIEVEMENTS</p>";v
-        'something_gotta_give': { id: 'something_gotta_give', name: "Something's Gotta Give", description: 'Score 10,000 points total', icon: '💎', xp_reward: 100, coins_reward: 50, film: '2003 - Romantic Comedy' },
-        'big_score': { id: 'big_score', name: 'Big Score', description: 'Score 50,000 points total', icon: '💰', xp_reward: 200, coins_reward: 100, film: 'High Roller' },
-        'mega_score': { id: 'mega_score', name: 'Mega Score', description: 'Score 100,000 points total', icon: '🌟', xp_reward: 300, coins_reward: 150, film: 'Score Master' },
-        'legendary': { id: 'legendary', name: 'Legendary', description: 'Score 1,000,000 points total', icon: '👑', xp_reward: 1000, coins_reward: 500, film: 'Arcade Legend' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>GAME COMPLETION</p>";
-        'reds': { id: 'reds', name: 'Reds', description: 'Earn 20 achievements', icon: '⭐', xp_reward: 150, coins_reward: 75, film: '1981 - Epic Historical Drama' },
-        'first_wives_club': { id: 'first_wives_club', name: 'First Wives Club', description: 'Complete all games', icon: '💪', xp_reward: 500, coins_reward: 250, film: '1996 - Comedy Classic' },
-        'father_bride': { id: 'father_bride', name: 'Father of the Bride', description: 'Play 100 games', icon: '👰', xp_reward: 300, coins_reward: 150, film: '1991 - Family Comedy' },
-        'father_bride_2': { id: 'father_bride_2', name: 'Father of the Bride Part II', description: 'Play 200 games', icon: '👶', xp_reward: 400, coins_reward: 200, film: '1995 - Family Sequel' },
-        'baby_boom': { id: 'baby_boom', name: 'Baby Boom', description: 'Win 5 games in one day', icon: '🍼', xp_reward: 75, coins_reward: 35, film: '1987 - Comedy Hit' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>EXPLORATION</p>";
-        'manhattan_murder': { id: 'manhattan_murder', name: 'Manhattan Murder Mystery', description: 'Try all 20 games', icon: '🔍', xp_reward: 125, coins_reward: 60, film: '1993 - Mystery Comedy' },
-        'sleeper': { id: 'sleeper', name: 'Sleeper', description: 'Play for 24 hours total', icon: '😴', xp_reward: 200, coins_reward: 100, film: '1973 - Sci-Fi Comedy' },
-        'interiors': { id: 'interiors', name: 'Interiors', description: 'Customize your profile theme', icon: '🖼️', xp_reward: 50, coins_reward: 25, film: '1978 - Bergman-esque Drama' },
-        'night_owl': { id: 'night_owl', name: 'Night Owl', description: 'Play between midnight and 6 AM', icon: '🦉', xp_reward: 50, coins_reward: 25, film: 'Late Night Gaming' },
-        'morning_glory': { id: 'morning_glory', name: 'Morning Glory', description: 'Play before 8 AM', icon: '🌅', xp_reward: 50, coins_reward: 25, film: '2010 - Comedy Drama' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>PERSISTENCE</p>";
-        'love_death': { id: 'love_death', name: 'Love and Death', description: 'Lose 100 times but keep playing', icon: '💀', xp_reward: 50, coins_reward: 25, film: '1975 - Philosophical Comedy' },
-        'play_again_sam': { id: 'play_again_sam', name: 'Play It Again, Sam', description: 'Replay a game 10 times', icon: '🎭', xp_reward: 100, coins_reward: 50, film: '1972 - Romantic Comedy' },
-        'never_give_up': { id: 'never_give_up', name: 'Never Give Up', description: 'Play 7 days in a row', icon: '🔥', xp_reward: 150, coins_reward: 75, film: 'Dedication' },
-        'town_country': { id: 'town_country', name: 'Town & Country', description: 'Play in 2 different locations', icon: '🌆', xp_reward: 75, coins_reward: 35, film: '2001 - Comedy' },
-        
-        document.body.innerHTML += "<p>PERFECTION</p>";
-        'shoot_moon': { id: 'shoot_moon', name: 'Shoot the Moon', description: 'Get a perfect score on any game', icon: '🌙', xp_reward: 300, coins_reward: 150, film: '1982 - Family Drama' },
-        'flawless': { id: 'flawless', name: 'Flawless Victory', description: 'Win without losing once', icon: '✨', xp_reward: 200, coins_reward: 100, film: 'Perfect Performance' },
-        'speed_demon': { id: 'speed_demon', name: 'Speed Demon', description: 'Complete a game in under 5 minutes', icon: '⚡', xp_reward: 150, coins_reward: 75, film: 'Lightning Fast' },
-        'radio_days': { id: 'radio_days', name: 'Radio Days', description: 'Play for 10 hours straight', icon: '📻', xp_reward: 250, coins_reward: 125, film: '1987 - Nostalgic Comedy' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>SOCIAL</p>";
-        'good_mother': { id: 'good_mother', name: 'The Good Mother', description: 'Add 50 friends', icon: '✨', xp_reward: 150, coins_reward: 75, film: '1988 - Drama' },
-        'social_butterfly': { id: 'social_butterfly', name: 'Social Butterfly', description: 'Add 5 friends', icon: '🦋', xp_reward: 100, coins_reward: 50, film: 'Community Member' },
-        'helpful': { id: 'helpful', name: 'Helpful Friend', description: 'Help 10 friends', icon: '🤝', xp_reward: 75, coins_reward: 35, film: 'Supporting Others' },
-        'hanging_up': { id: 'hanging_up', name: 'Hanging Up', description: 'Chat with 25 players', icon: '📞', xp_reward: 100, coins_reward: 50, film: '2000 - Family Comedy' },
-        'book_club': { id: 'book_club', name: 'Book Club', description: 'Join 5 gaming groups', icon: '📚', xp_reward: 125, coins_reward: 60, film: '2018 - Comedy' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>SPECIFIC GAMES</p>";
-        'mars_miner': { id: 'mars_miner', name: 'Mars Miner', description: 'Score 50,000 in MotherLoad', icon: '⛏️', xp_reward: 100, coins_reward: 50, film: 'Martian Master' },
-        'unicorn_master': { id: 'unicorn_master', name: 'Unicorn Master', description: 'Score 100,000 in Robot Unicorn Attack', icon: '🦄', xp_reward: 150, coins_reward: 75, film: 'Always Believe' },
-        'zombie_hunter': { id: 'zombie_hunter', name: 'Zombie Hunter', description: 'Complete all Earn to Die games', icon: '🧟', xp_reward: 200, coins_reward: 100, film: 'Apocalypse Survivor' },
-        'quick_draw': { id: 'quick_draw', name: 'Quick Draw', description: 'Win 10 Gun Blood duels', icon: '🔫', xp_reward: 125, coins_reward: 60, film: 'Western Legend' },
-        'raft_champion': { id: 'raft_champion', name: 'Raft Champion', description: 'Beat both Raft Wars games', icon: '🚣', xp_reward: 150, coins_reward: 75, film: 'Treasure Defender' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>COLLECTION</p>";
-        'collector': { id: 'collector', name: 'Collector', description: 'Unlock 10 achievements', icon: '📚', xp_reward: 75, coins_reward: 35, film: 'Achievement Hunter' },
-        'hoarder': { id: 'hoarder', name: 'Hoarder', description: 'Collect 10,000 coins', icon: '💰', xp_reward: 150, coins_reward: 75, film: 'Wealthy Player' },
-        'millionaire': { id: 'millionaire', name: 'Millionaire', description: 'Collect 1,000,000 coins', icon: '💎', xp_reward: 500, coins_reward: 250, film: 'Rich Beyond Measure' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>TIME-BASED</p>";
-        'weekend_warrior': { id: 'weekend_warrior', name: 'Weekend Warrior', description: 'Play on Saturday and Sunday', icon: '🎮', xp_reward: 50, coins_reward: 25, film: 'Weekend Fun' },
-        'marathon': { id: 'marathon', name: 'Marathon Runner', description: 'Play for 6 hours straight', icon: '🏃', xp_reward: 200, coins_reward: 100, film: 'Endurance Champion' },
-        'daily_player': { id: 'daily_player', name: 'Daily Player', description: 'Play 30 days in a row', icon: '📅', xp_reward: 300, coins_reward: 150, film: 'Committed Gamer' },
-        'five_easy_pieces': { id: 'five_easy_pieces', name: 'Five Easy Pieces', description: 'Win 5 games in a row', icon: '🎲', xp_reward: 125, coins_reward: 60, film: '1970 - Drama Classic' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>RARES</p>";
-        'lucky_seven': { id: 'lucky_seven', name: 'Lucky Seven', description: 'Get exactly 7777 points', icon: '🎰', xp_reward: 250, coins_reward: 125, film: 'Jackpot!' },
-        'easter_egg': { id: 'easter_egg', name: 'Easter Egg Hunter', description: 'Find 10 hidden secrets', icon: '🥚', xp_reward: 200, coins_reward: 100, film: 'Secret Finder' },
-        'diane_fan': { id: 'diane_fan', name: 'Diane Keaton Fan', description: 'View all Diane Keaton info', icon: '💜', xp_reward: 100, coins_reward: 50, film: 'True Fan' },
-        'other_sister': { id: 'other_sister', name: 'The Other Sister', description: 'Help a friend unlock an achievement', icon: '👭', xp_reward: 100, coins_reward: 50, film: '1999 - Drama Comedy' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>COMPETITIVE</p>";
-        'top_ten': { id: 'top_ten', name: 'Top Ten', description: 'Reach top 10 on any leaderboard', icon: '🏆', xp_reward: 200, coins_reward: 100, film: 'Elite Player' },
-        'top_three': { id: 'top_three', name: 'Top Three', description: 'Reach top 3 on any leaderboard', icon: '🥉', xp_reward: 300, coins_reward: 150, film: 'Podium Finish' },
-        'number_one': { id: 'number_one', name: 'Number One', description: 'Reach #1 on any leaderboard', icon: '🥇', xp_reward: 500, coins_reward: 250, film: 'Champion' },
-        'mad_money': { id: 'mad_money', name: 'Mad Money', description: 'Earn 100,000 XP', icon: '💵', xp_reward: 300, coins_reward: 150, film: '2008 - Heist Comedy' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>SPECIAL</p>";
-        'early_bird': { id: 'early_bird', name: 'Early Bird', description: 'Join in the first month', icon: '🐦', xp_reward: 100, coins_reward: 50, film: 'Pioneer' },
-        'veteran': { id: 'veteran', name: 'Veteran', description: 'Account 1 year old', icon: '🎖️', xp_reward: 500, coins_reward: 250, film: 'Long-time Player' },
-        'completionist': { id: 'completionist', name: 'Completionist', description: 'Unlock ALL achievements', icon: '👑', xp_reward: 1000, coins_reward: 500, film: 'Master of the Arcade' },
-        
-        <h2 style="text-align:center; font-weight:bold; margin-top:20px;"<p>MORE DIANE KEATON FILMS</p>";
-        'looking_goodbar': { id: 'looking_goodbar', name: 'Looking for Mr. Goodbar', description: 'Play all candy games', icon: '🍫', xp_reward: 100, coins_reward: 50, film: '1977 - Drama' },
-        'running_mates': { id: 'running_mates', name: 'Running Mates', description: 'Race in 5 games', icon: '🏃', xp_reward: 75, coins_reward: 35, film: '1992 - TV Movie' },
-        'mrs_soffel': { id: 'mrs_soffel', name: 'Mrs. Soffel', description: 'Help 25 friends', icon: '🚗', xp_reward: 125, coins_reward: 60, film: '1984 - Historical Drama' },
-        'because_said_so': { id: 'because_said_so', name: 'Because I Said So', description: 'Customize your profile fully', icon: '🎀', xp_reward: 50, coins_reward: 25, film: '2007 - Rom-Com' },
-        'family_stone': { id: 'family_stone', name: 'The Family Stone', description: 'Play during holidays', icon: '💍', xp_reward: 100, coins_reward: 50, film: '2005 - Holiday Film' },
-        'little_drummer_girl': { id: 'little_drummer_girl', name: 'The Little Drummer Girl', description: 'Get 100 perfect rhythm hits', icon: '🥁', xp_reward: 150, coins_reward: 75, film: '1984 - Thriller' },
-        'mamas_boy': { id: 'mamas_boy', name: "Mama's Boy", description: 'Achieve a 100 game streak', icon: '👩', xp_reward: 200, coins_reward: 100, film: '2007 - Comedy' },
-        'amelia': { id: 'amelia', name: 'Amelia', description: 'Reach 1000 games played', icon: '✈️', xp_reward: 300, coins_reward: 150, film: '2009 - Historical Drama' },
-        'finding_dory': { id: 'finding_dory', name: 'Finding Dory', description: 'Find all hidden Easter eggs', icon: '🐠', xp_reward: 250, coins_reward: 125, film: '2016 - Voice Acting' },
-        'poms': { id: 'poms', name: 'Poms', description: 'Join a team competition', icon: '📣', xp_reward: 150, coins_reward: 75, film: '2019 - Sports Comedy' },
-        'loves_labours_lost': { id: 'loves_labours_lost', name: "Love's Labour's Lost", description: 'Fail a game but try again', icon: '🎪', xp_reward: 50, coins_reward: 25, film: '2000 - Musical' },
-        'hampstead': { id: 'hampstead', name: 'Hampstead', description: 'Play in different game modes', icon: '🏡', xp_reward: 100, coins_reward: 50, film: '2017 - Romantic Comedy' },
-        'crossing_delancey': { id: 'crossing_delancey', name: 'Crossing Delancey', description: 'Cross 50,000 points', icon: '🥖', xp_reward: 150, coins_reward: 75, film: '1988 - Romantic Comedy' },
-        'wildflower': { id: 'wildflower', name: 'Wildflower', description: 'Get a random achievement', icon: '🌸', xp_reward: 75, coins_reward: 35, film: '1991 - TV Movie' },
-        'and_so_it_goes': { id: 'and_so_it_goes', name: 'And So It Goes', description: 'Complete the tutorial', icon: '🎵', xp_reward: 25, coins_reward: 10, film: '2014 - Romantic Comedy' },
-        'ninja_turtles': { id: 'ninja_turtles', name: 'Ninja Turtles', description: 'Beat a boss level', icon: '🐢', xp_reward: 200, coins_reward: 100, film: '2016 - Voice Role' },
-        'china_syndrome': { id: 'china_syndrome', name: 'The China Syndrome', description: 'Survive a difficult challenge', icon: '☢️', xp_reward: 175, coins_reward: 85, film: '1979 - Referenced Film' },
-        'wines_roses': { id: 'wines_roses', name: 'Wines and Roses', description: 'Celebrate 100 wins', icon: '🍷', xp_reward: 200, coins_reward: 100, film: 'Victory Celebration' },
-        'crimes_heart': { id: 'crimes_heart', name: 'Crimes of the Heart', description: 'Form a guild with friends', icon: '❤️', xp_reward: 150, coins_reward: 75, film: '1986 - Drama' },
-        'ladies_night': { id: 'ladies_night', name: "Ladies' Night", description: 'Play with 3 friends simultaneously', icon: '👯', xp_reward: 125, coins_reward: 60, film: 'Social Gaming' },
-        'reunion': { id: 'reunion', name: 'The Reunion', description: 'Return after 30 days away', icon: '🎊', xp_reward: 150, coins_reward: 75, film: 'Welcome Back!' },
-        'unstrung_heroes': { id: 'unstrung_heroes', name: 'Unstrung Heroes', description: 'Unlock 25 achievements', icon: '🦸', xp_reward: 200, coins_reward: 100, film: '1995 - Drama' },
-        'godmothered': { id: 'godmothered', name: 'Godmothered', description: 'Grant a wish in community', icon: '🧚', xp_reward: 100, coins_reward: 50, film: '2020 - Disney Film' },
-        'sextuplets': { id: 'sextuplets', name: 'Sextuplets', description: 'Play 6 different games in one day', icon: '6️⃣', xp_reward: 150, coins_reward: 75, film: 'Multi-Game Master' }
-    };
-        
-        function loadProfile() {
-            document.getElementById('username').textContent = userData.username.toUpperCase();
-            document.getElementById('user-level').textContent = userData.level;
-            document.getElementById('user-avatar').src = userData.avatar;
-            document.getElementById('profile-banner').src = userData.banner;
-            document.getElementById('bio-text').textContent = userData.bio;
-            
-            const unlockedAchievements = userData.achievements.filter(a => a.unlocked).length;
-            document.getElementById('stat-achievements').textContent = unlockedAchievements;
-            document.getElementById('stat-games').textContent = userData.gamesPlayed;
-            document.getElementById('stat-coins').textContent = userData.coins;
-            document.getElementById('stat-friends').textContent = userData.friends ? userData.friends.length : 0;
-            
-            // FIXED: Join date properly formatted
-            const joinDate = new Date(userData.joinDate);
-            const monthYear = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            document.getElementById('stat-joined').textContent = monthYear;
-            
-            const xpForNext = userData.level * 1000;
-            const progress = Math.min((userData.xp / xpForNext) * 100, 100);
-            document.getElementById('xp-bar').style.width = progress + '%';
-            document.getElementById('xp-text').textContent = `${userData.xp} / ${xpForNext} XP`;
-            
-            loadAchievements();
-            loadScores();
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/user');
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                
+                currentUser = await response.json();
+                
+                // Update profile display
+                document.getElementById('username').textContent = currentUser.username.toUpperCase();
+                document.getElementById('user-level').textContent = currentUser.level;
+                document.getElementById('user-avatar').src = currentUser.avatar_url || avatarPresets[0];
+                document.getElementById('profile-banner').src = currentUser.banner_url || bannerPresets[0];
+                
+                // Display badges
+                const badgesContainer = document.getElementById('user-badges');
+                if (currentUser.badges && currentUser.badges.length > 0) {
+                    const badgeIcons = {
+                        'verified_discord': '🔷',
+                        'org_badge': '🏢',
+                        'roblox_badge': '🎮',
+                        'premium_badge': '💎',
+                        'founder_badge': '👑'
+                    };
+                    badgesContainer.innerHTML = currentUser.badges.map(badge => 
+                        `<span class="badge-icon" title="${badge.badge_id}">${badgeIcons[badge.badge_id] || '🏅'}</span>`
+                    ).join('');
+                }
+                
+                // Show admin badge
+                if (currentUser.is_admin) {
+                    badgesContainer.innerHTML += '<span class="admin-badge">👑 ADMIN</span>';
+                }
+                
+                // Update stats
+                document.getElementById('stat-coins').textContent = (currentUser.coins || 0).toLocaleString();
+                document.getElementById('stat-games').textContent = currentUser.total_games_played || 0;
+                document.getElementById('stat-joined').textContent = currentUser.join_date || 'Unknown';
+                
+                // XP Bar
+                const xpNeeded = Math.pow(currentUser.level, 2) * 100;
+                const xpProgress = Math.min(((currentUser.xp % xpNeeded) / xpNeeded) * 100, 100);
+                document.getElementById('xp-bar').style.width = xpProgress + '%';
+                document.getElementById('xp-text').textContent = `${currentUser.xp} / ${xpNeeded} XP`;
+                
+                // Load achievements
+                await loadAchievements();
+                
+                // Load friends
+                await loadFriends();
+                
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+                showNotification('Failed to load profile', 'error');
+            }
         }
         
-        function loadAchievements() {
-            const container = document.getElementById('achievements-container');
-            container.innerHTML = '';
-            allAchievements.forEach(ach => {
-                const userAch = userData.achievements.find(a => a.id === ach.id);
-                const unlocked = userAch && userAch.unlocked;
-                const card = document.createElement('div');
-                card.className = 'achievement-card' + (unlocked ? '' : ' locked');
-                card.innerHTML = `
-                    ${!unlocked ? '<div class="lock-icon">🔒</div>' : ''}
-                    <div class="achievement-icon">${ach.icon}</div>
-                    <div class="achievement-name">${ach.name}</div>
-                    <div class="achievement-desc">${ach.description}</div>
-                    <div class="achievement-xp">+${ach.xp} XP</div>
-                `;
-                container.appendChild(card);
-            });
-        }
-        
-        function loadScores() {
-            const tbody = document.getElementById('scores-tbody');
-            tbody.innerHTML = '';
-            if (Object.keys(userData.highScores).length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="no-scores">
-                            <div>🎮 No high scores yet!</div>
-                            <div style="font-size: 0.9em; margin-top: 10px;">Play some games!</div>
-                        </td>
-                    </tr>
-                `;
-            } else {
-                Object.entries(userData.highScores).forEach(([gameId, data]) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>🎮 ${gameId}</td>
-                        <td><span class="score-value">${data.score.toLocaleString()}</span></td>
-                        <td>#${data.rank || 'N/A'}</td>
-                        <td>${new Date(data.date).toLocaleDateString()}</td>
+        async function loadAchievements() {
+            try {
+                const response = await fetch('/api/user/achievements');
+                const achievements = await response.json();
+                
+                const container = document.getElementById('achievements-container');
+                const unlockedCount = achievements.filter(a => a.unlocked).length;
+                document.getElementById('stat-achievements').textContent = unlockedCount;
+                
+                // Show only first 12 achievements on profile
+                const displayAchievements = achievements.slice(0, 12);
+                
+                container.innerHTML = displayAchievements.map(ach => `
+                    <div class="achievement-card ${ach.unlocked ? '' : 'locked'}">
+                        ${!ach.unlocked ? '<div class="lock-icon">🔒</div>' : ''}
+                        <div class="achievement-icon">${ach.icon}</div>
+                        <div class="achievement-name">${ach.name}</div>
+                        <div class="achievement-desc">${ach.description}</div>
+                        <div class="achievement-rewards">+${ach.xp_reward} XP • +${ach.coins_reward} 🪙</div>
+                        ${ach.unlocked ? `<div style="margin-top: 10px; font-size: 0.8em; opacity: 0.7;">Unlocked ${new Date(ach.unlocked_at).toLocaleDateString()}</div>` : ''}
+                    </div>
+                `).join('');
+                
+                if (achievements.length > 12) {
+                    container.innerHTML += `
+                        <div class="achievement-card" style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(191, 0, 255, 0.1);" onclick="window.location.href='achievements.html'">
+                            <div style="text-align: center;">
+                                <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
+                                <div class="achievement-name">View All Achievements</div>
+                                <div class="achievement-desc">${achievements.length} total achievements</div>
+                            </div>
+                        </div>
                     `;
-                    tbody.appendChild(row);
-                });
+                }
+            } catch (error) {
+                console.error('Failed to load achievements:', error);
+            }
+        }
+        
+        async function loadFriends() {
+            try {
+                const response = await fetch('/api/friends');
+                const friends = await response.json();
+                
+                const container = document.getElementById('friends-container');
+                document.getElementById('stat-friends').textContent = friends.length;
+                
+                if (friends.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 60px; background: rgba(191, 0, 255, 0.1); border: 2px dashed var(--neon-purple); border-radius: 20px;">
+                            <div style="font-size: 4em; margin-bottom: 20px;">👥</div>
+                            <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-purple); margin-bottom: 15px;">No Friends Yet</h3>
+                            <p style="opacity: 0.8;">Add friends to compete and compare stats!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = friends.map(friend => `
+                    <div class="friend-card" onclick="viewProfile('${friend.id}')">
+                        <img src="${friend.avatar_url || avatarPresets[0]}" alt="${friend.username}" class="friend-avatar">
+                        <div class="friend-name">${friend.username}</div>
+                        <div class="friend-level">Level ${friend.level}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load friends:', error);
             }
         }
         
         function openAvatarModal() {
             const modal = document.getElementById('avatar-modal');
             const container = document.getElementById('avatar-options');
-            container.innerHTML = '';
-            avatarOptions.forEach(url => {
-                const option = document.createElement('div');
-                option.className = 'option-item';
-                if (userData.avatar === url) option.classList.add('selected');
-                option.innerHTML = `<img src="${url}" alt="Avatar">`;
-                option.onclick = () => {
-                    selectedAvatar = url;
-                    document.querySelectorAll('#avatar-options .option-item').forEach(el => el.classList.remove('selected'));
-                    option.classList.add('selected');
-                };
-                container.appendChild(option);
-            });
+            
+            container.innerHTML = avatarPresets.map((url, index) => `
+                <div class="option-item ${currentUser.avatar_url === url ? 'selected' : ''}" onclick="selectAvatar('${url}')">
+                    <img src="${url}" alt="Avatar ${index + 1}">
+                </div>
+            `).join('');
+            
             modal.classList.add('active');
-        }
-        
-        function saveAvatar() {
-            if (selectedAvatar) {
-                userData.avatar = selectedAvatar;
-                document.getElementById('user-avatar').src = selectedAvatar;
-                localStorage.setItem('arcadeUser', JSON.stringify(userData));
-                closeModal('avatar-modal');
-                alert('✅ Avatar updated!');
-            }
         }
         
         function openBannerModal() {
             const modal = document.getElementById('banner-modal');
             const container = document.getElementById('banner-options');
-            container.innerHTML = '';
-            bannerOptions.forEach(url => {
-                const option = document.createElement('div');
-                option.className = 'option-item';
-                if (userData.banner === url) option.classList.add('selected');
-                option.innerHTML = `<img src="${url}" alt="Banner">`;
-                option.onclick = () => {
-                    selectedBanner = url;
-                    document.querySelectorAll('#banner-options .option-item').forEach(el => el.classList.remove('selected'));
-                    option.classList.add('selected');
-                };
-                container.appendChild(option);
-            });
+            
+            container.innerHTML = bannerPresets.map((url, index) => `
+                <div class="option-item ${currentUser.banner_url === url ? 'selected' : ''}" onclick="selectBanner('${url}')">
+                    <img src="${url}" alt="Banner ${index + 1}">
+                </div>
+            `).join('');
+            
             modal.classList.add('active');
         }
         
-        function saveBanner() {
-            if (selectedBanner) {
-                userData.banner = selectedBanner;
-                document.getElementById('profile-banner').src = selectedBanner;
-                localStorage.setItem('arcadeUser', JSON.stringify(userData));
+        function selectAvatar(url) {
+            selectedAvatar = url;
+            uploadedAvatarFile = null;
+            document.querySelectorAll('#avatar-options .option-item').forEach(el => el.classList.remove('selected'));
+            event.target.closest('.option-item').classList.add('selected');
+        }
+        
+        function selectBanner(url) {
+            selectedBanner = url;
+            uploadedBannerFile = null;
+            document.querySelectorAll('#banner-options .option-item').forEach(el => el.classList.remove('selected'));
+            event.target.closest('.option-item').classList.add('selected');
+        }
+        
+        function handleAvatarFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('File too large! Max 5MB', 'error');
+                return;
+            }
+            
+            uploadedAvatarFile = file;
+            selectedAvatar = null;
+            document.querySelectorAll('#avatar-options .option-item').forEach(el => el.classList.remove('selected'));
+            showNotification('File selected! Click SAVE to upload', 'success');
+        }
+        
+        function handleBannerFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('File too large! Max 5MB', 'error');
+                return;
+            }
+            
+            uploadedBannerFile = file;
+            selectedBanner = null;
+            document.querySelectorAll('#banner-options .option-item').forEach(el => el.classList.remove('selected'));
+            showNotification('File selected! Click SAVE to upload', 'success');
+        }
+        
+        async function saveAvatar() {
+            try {
+                if (uploadedAvatarFile) {
+                    // Upload custom file
+                    const formData = new FormData();
+                    formData.append('avatar', uploadedAvatarFile);
+                    
+                    const response = await fetch('/api/user/avatar', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) throw new Error('Upload failed');
+                    
+                    const data = await response.json();
+                    currentUser.avatar_url = data.avatar_url;
+                } else if (selectedAvatar) {
+                    // Use preset - save URL directly
+                    const response = await fetch('/api/user/avatar-preset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ avatar_url: selectedAvatar })
+                    });
+                    
+                    if (!response.ok) throw new Error('Save failed');
+                    
+                    currentUser.avatar_url = selectedAvatar;
+                } else {
+                    showNotification('Please select an avatar or upload a file', 'error');
+                    return;
+                }
+                
+                document.getElementById('user-avatar').src = currentUser.avatar_url;
+                closeModal('avatar-modal');
+                showNotification('Avatar updated!', 'success');
+            } catch (error) {
+                console.error('Avatar save error:', error);
+                showNotification('Failed to save avatar', 'error');
+            }
+        }
+        
+        async function saveBanner() {
+            try {
+                if (uploadedBannerFile) {
+                    // Upload custom file
+                    const formData = new FormData();
+                    formData.append('banner', uploadedBannerFile);
+                    
+                    const response = await fetch('/api/user/banner', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) throw new Error('Upload failed');
+                    
+                    const data = await response.json();
+                    currentUser.banner_url = data.banner_url;
+                } else if (selectedBanner) {
+                    // Use preset - save URL directly
+                    const response = await fetch('/api/user/banner-preset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ banner_url: selectedBanner })
+                    });
+                    
+                    if (!response.ok) throw new Error('Save failed');
+                    
+                    currentUser.banner_url = selectedBanner;
+                } else {
+                    showNotification('Please select a banner or upload a file', 'error');
+                    return;
+                }
+                
+                document.getElementById('profile-banner').src = currentUser.banner_url;
                 closeModal('banner-modal');
-                alert('✅ Banner updated!');
+                showNotification('Banner updated!', 'success');
+            } catch (error) {
+                console.error('Banner save error:', error);
+                showNotification('Failed to save banner', 'error');
             }
         }
         
-        function openBioModal() {
-            document.getElementById('bio-modal').classList.add('active');
-            document.getElementById('bio-input').value = userData.bio;
-            updateCharCount();
+        function viewProfile(userId) {
+            // TODO: View other user's profile
+            showNotification('Viewing other profiles coming soon!', 'info');
         }
-        
-        function saveBio() {
-            const bioText = document.getElementById('bio-input').value.trim();
-            userData.bio = bioText || 'No bio yet!';
-            document.getElementById('bio-text').textContent = userData.bio;
-            localStorage.setItem('arcadeUser', JSON.stringify(userData));
-            closeModal('bio-modal');
-        }
-        
-        function updateCharCount() {
-            const input = document.getElementById('bio-input');
-            const count = document.getElementById('char-count');
-            if (input && count) {
-                count.textContent = input.value.length;
-            }
-        }
-        
-        function toggleFriend() {
-            if (!userData.friends) userData.friends = [];
-            const btn = document.getElementById('friend-btn');
-            const text = document.getElementById('friend-text');
-            
-            if (btn.classList.contains('friended')) {
-                btn.classList.remove('friended');
-                text.textContent = 'ADD FRIEND';
-                userData.friends = userData.friends.filter(f => f !== 'viewingUser');
-            } else {
-                btn.classList.add('friended');
-                text.textContent = '✓ FRIENDS';
-                userData.friends.push('viewingUser');
-            }
-            
-            document.getElementById('stat-friends').textContent = userData.friends.length;
-            localStorage.setItem('arcadeUser', JSON.stringify(userData));
-        }
-        
-        document.getElementById('bio-input')?.addEventListener('input', updateCharCount);
         
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
             selectedAvatar = null;
             selectedBanner = null;
+            uploadedAvatarFile = null;
+            uploadedBannerFile = null;
         }
         
-        function logout() {
-            if (confirm('Logout?')) {
-                localStorage.removeItem('isLoggedIn');
-                window.location.href = 'login.html';
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
             }
         }
         
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
-            }
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
         }
         
+        // Load profile on page load
         loadProfile();
     </script>
 </body>

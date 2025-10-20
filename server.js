@@ -23,9 +23,8 @@ const PORT = process.env.PORT || 3000;
 
 // Admin emails - Add your admin emails here
 const ADMIN_EMAILS = [
-    'tannerkurrasch@gmail.com',
-    'kurraschgamingmerchstore@gmail.com',
-    'gamekillerszone@gmail.com'// ADD YOUR ADMIN EMAIL HERE
+    'admin@dianesarcade.com',
+    'your-email@example.com' // ADD YOUR ADMIN EMAIL HERE
 ];
 
 // ==========================================
@@ -1311,6 +1310,39 @@ app.get('/api/shop/items', (req, res) => {
         message: 'Shop is open!',
         note: 'Visit /shop.html to browse items'
     });
+});
+
+// Report broken game
+app.post('/api/report-broken-game', (req, res) => {
+    try {
+        const { game_id, game_name, game_file, user_agent, timestamp } = req.body;
+        
+        const REPORTS_FILE = path.join(DATA_DIR, 'broken_games.json');
+        let reports = [];
+        
+        if (fs.existsSync(REPORTS_FILE)) {
+            reports = JSON.parse(fs.readFileSync(REPORTS_FILE, 'utf8'));
+        }
+        
+        // Add new report
+        reports.push({
+            game_id,
+            game_name,
+            game_file,
+            user_agent,
+            timestamp,
+            status: 'pending'
+        });
+        
+        fs.writeFileSync(REPORTS_FILE, JSON.stringify(reports, null, 2));
+        
+        console.log(`🚨 Broken game reported: ${game_name} (${game_id})`);
+        
+        res.json({ success: true, message: 'Report received' });
+    } catch (error) {
+        console.error('Report error:', error);
+        res.status(500).json({ error: 'Failed to submit report' });
+    }
 });
 
 // ==========================================

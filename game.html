@@ -32,10 +32,8 @@
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: 
                 linear-gradient(90deg, transparent 49%, rgba(0, 243, 255, 0.05) 50%, transparent 51%),
                 linear-gradient(0deg, transparent 49%, rgba(0, 243, 255, 0.05) 50%, transparent 51%);
@@ -74,157 +72,13 @@
             letter-spacing: 2px;
         }
         
-        .back-btn {
-            font-family: 'Orbitron', sans-serif;
-            padding: 10px 25px;
-            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
-            color: white;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: 900;
-            font-size: 0.9em;
-            letter-spacing: 2px;
-            transition: all 0.3s;
-            box-shadow: 0 0 25px var(--neon-purple);
-            border: none;
-            cursor: pointer;
-        }
-        
-        .back-btn:hover {
-            box-shadow: 0 0 50px var(--neon-purple);
-            transform: scale(1.05);
-        }
-        
-        /* FULLSCREEN GAME CONTAINER */
-        .game-container {
-            width: 100%;
-            height: calc(100vh - 70px);
+        .top-bar-buttons {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-            position: relative;
-            background: #000;
-        }
-        
-        #game {
-            width: 100%;
-            height: 100%;
-            border: 4px solid var(--neon-blue);
-            border-radius: 10px;
-            box-shadow: 
-                0 0 60px rgba(0, 243, 255, 0.6),
-                inset 0 0 60px rgba(0, 243, 255, 0.1);
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        /* Make Ruffle player fill container */
-        #game ruffle-player {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 100;
-        }
-        
-        .loading-spinner {
-            width: 80px;
-            height: 80px;
-            border: 6px solid rgba(0, 243, 255, 0.2);
-            border-top: 6px solid var(--neon-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 30px;
-            box-shadow: 0 0 40px var(--neon-blue);
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Playing Game | Diane Keaton Memorial Arcade</title>
-    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-purple: #bf00ff;
-            --neon-pink: #ff00ff;
-            --neon-green: #39ff14;
-            --dark-bg: #050510;
-            --darker: #020208;
-        }
-        
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: var(--dark-bg);
-            color: white;
-            overflow-x: hidden;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(90deg, transparent 49%, rgba(0, 243, 255, 0.05) 50%, transparent 51%),
-                linear-gradient(0deg, transparent 49%, rgba(0, 243, 255, 0.05) 50%, transparent 51%);
-            background-size: 50px 50px;
-            z-index: -1;
-            animation: gridMove 20s linear infinite;
-        }
-        
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-        
-        .top-bar {
-            background: rgba(5, 5, 16, 0.98);
-            backdrop-filter: blur(30px);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid var(--neon-blue);
-            box-shadow: 0 5px 40px rgba(0, 243, 255, 0.4);
-            z-index: 1000;
-            position: sticky;
-            top: 0;
-            flex-wrap: wrap;
             gap: 15px;
+            flex-wrap: wrap;
         }
         
-        .game-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5em;
-            font-weight: 900;
-            color: var(--neon-blue);
-            text-shadow: 0 0 30px var(--neon-blue);
-            letter-spacing: 2px;
-        }
-        
-        .back-btn {
+        .back-btn, .embed-btn {
             font-family: 'Orbitron', sans-serif;
             padding: 10px 25px;
             background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
@@ -240,37 +94,18 @@
             cursor: pointer;
         }
         
-        .back-btn:hover {
+        .back-btn:hover, .embed-btn:hover {
             box-shadow: 0 0 50px var(--neon-purple);
             transform: scale(1.05);
         }
         
-        .xp-notification {
-            position: fixed;
-            top: 80px;
-            right: 30px;
-            padding: 20px 30px;
+        .embed-btn {
             background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
-            color: white;
-            border-radius: 15px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 1.2em;
-            z-index: 10000;
-            box-shadow: 0 0 40px var(--neon-green);
-            animation: slideIn 0.5s ease;
-            display: none;
+            box-shadow: 0 0 25px var(--neon-green);
         }
         
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .embed-btn:hover {
+            box-shadow: 0 0 50px var(--neon-green);
         }
         
         .game-container {
@@ -373,21 +208,198 @@
             text-shadow: 0 0 30px var(--neon-pink);
         }
         
+        .error-message p {
+            font-size: 1.3em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        /* EMBED MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(5, 5, 16, 0.98);
+            border: 3px solid var(--neon-green);
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 0 80px var(--neon-green);
+        }
+        
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            color: var(--neon-green);
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 0 0 30px var(--neon-green);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--neon-pink);
+            border: none;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-modal:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 0 40px var(--neon-pink);
+        }
+        
+        .embed-section {
+            background: rgba(0, 243, 255, 0.05);
+            border: 2px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .embed-section h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        
+        .embed-code-box {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--neon-purple);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .embed-code {
+            font-family: 'Courier New', monospace;
+            color: var(--neon-green);
+            font-size: 0.9em;
+            line-height: 1.8;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.8em;
+        }
+        
+        .copy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+        
+        .copy-btn.copied {
+            background: var(--neon-green);
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+        
+        .embed-preview {
+            background: rgba(57, 255, 20, 0.05);
+            border: 2px solid var(--neon-green);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .embed-preview h4 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-green);
+            margin-bottom: 10px;
+        }
+        
+        .embed-preview ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .embed-preview li {
+            padding: 5px 0;
+            opacity: 0.9;
+        }
+        
+        .embed-preview li::before {
+            content: '✓ ';
+            color: var(--neon-green);
+            font-weight: 900;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: -100px;
+            right: 30px;
+            padding: 20px 30px;
+            background: var(--neon-green);
+            color: var(--darker);
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            z-index: 20000;
+            transition: bottom 0.3s;
+            box-shadow: 0 0 40px var(--neon-green);
+        }
+        
+        .notification.show {
+            bottom: 30px;
+        }
+        
         @media (max-width: 768px) {
-            .game-container {
-                height: calc(100vh - 100px);
-            }
+            .game-title { font-size: 1.2em; }
+            .game-container { height: calc(100vh - 100px); }
+            .modal-content { padding: 30px 20px; }
         }
     </style>
 </head>
 <body>
     <div class="top-bar">
         <div class="game-title" id="game-title">LOADING GAME...</div>
-        <a href="index.html" class="back-btn">← BACK</a>
-    </div>
-    
-    <div class="xp-notification" id="xp-notification">
-        🎮 +50 XP | +10 🪙 Coins
+        <div class="top-bar-buttons">
+            <button class="embed-btn" onclick="openEmbedModal()">🔗 EMBED CODE</button>
+            <a href="index.html" class="back-btn">← BACK</a>
+        </div>
     </div>
     
     <div class="game-container">
@@ -399,17 +411,64 @@
         <div id="game"></div>
         
         <div class="error-message" id="error-msg">
-            <h2>⚠️ OH DEAR...</h2>
-            <p style="font-size: 1.3em; line-height: 1.6; margin-bottom: 20px;">
-                The game file couldn't be loaded. It might be missing or temporarily unavailable.
-            </p>
+            <h2>⚠️ GAME ERROR</h2>
+            <p>The game couldn't be loaded. The file may be missing or corrupted.</p>
             <p style="font-size: 0.95em; opacity: 0.8; margin-top: 20px;">
                 Game: <strong id="error-game-name">Unknown</strong><br>
                 Error: Flash SWF file failed to load
             </p>
             <div style="margin-top: 30px;">
                 <button class="back-btn" onclick="location.reload()">🔄 TRY AGAIN</button>
-                <a href="index.html" class="back-btn" style="margin-left: 15px;">← BACK TO ARCADE</a>
+                <a href="index.html" class="back-btn">← BACK TO ARCADE</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- EMBED MODAL -->
+    <div class="modal" id="embed-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeEmbedModal()">×</button>
+            <h2 class="modal-title">🔗 EMBED THIS GAME</h2>
+            <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em; opacity: 0.9;">
+                Use this code to embed <strong id="embed-game-name">this game</strong> on your website!
+            </p>
+            
+            <!-- IFRAME EMBED -->
+            <div class="embed-section">
+                <h3>📦 iFrame Embed</h3>
+                <p style="opacity: 0.8; margin-bottom: 15px;">Best for websites and blogs</p>
+                <div class="embed-code-box">
+                    <button class="copy-btn" onclick="copyCode('iframe-code')">📋 COPY</button>
+                    <code class="embed-code" id="iframe-code"></code>
+                </div>
+                <div class="embed-preview">
+                    <h4>✓ Features:</h4>
+                    <ul>
+                        <li>Responsive design</li>
+                        <li>Fullscreen support</li>
+                        <li>Works on all platforms</li>
+                        <li>Powered by Diane's Arcade</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- DIRECT LINK -->
+            <div class="embed-section">
+                <h3>🔗 Direct Link</h3>
+                <p style="opacity: 0.8; margin-bottom: 15px;">Share this link anywhere</p>
+                <div class="embed-code-box">
+                    <button class="copy-btn" onclick="copyCode('direct-link')">📋 COPY</button>
+                    <code class="embed-code" id="direct-link"></code>
+                </div>
+            </div>
+            
+            <!-- KURRASCH SYSTEMS INFO -->
+            <div class="embed-section" style="background: rgba(255, 215, 0, 0.1); border-color: var(--neon-gold);">
+                <h3 style="color: var(--neon-gold);">🏢 For Kurrasch Systems Studio</h3>
+                <p style="opacity: 0.9; line-height: 1.6;">
+                    This embed code is perfect for the <strong>Kurrasch Systems Studio mini arcade</strong>!<br>
+                    All games are served from Diane's Memorial Arcade and tracked centrally.
+                </p>
             </div>
         </div>
     </div>
@@ -417,6 +476,7 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const gameName = urlParams.get('game');
+        const siteBaseURL = window.location.origin + window.location.pathname.replace('game.html', '');
         
         const games = {
             'motherload': { name: 'MOTHERLOAD', file: '1269 - MotherLoad.swf' },
@@ -432,52 +492,14 @@
             'EarntoDie2016': { name: 'EARN TO DIE 2016', file: 'Earn to Die 2016.swf' },
             'EarntoDiePart2': { name: 'EARN TO DIE PART 2', file: 'Earn to Die Part 2.swf' },
             'bushshootout': { name: 'BUSH SHOOTOUT', file: '1452__bushshootout_game.swf' },
-            'candymachine': { name: 'CANDY MACHINE DELUXE', file: 'flash_candymachinedeluxe.swf' },
+            'candymachine': { name: 'CANDY MACHINE', file: 'flash_candymachinedeluxe.swf' },
             'jawbreaker': { name: 'JAWBREAKER', file: 'jawbreaker.swf' },
             'gold01': { name: 'GOLD MINER', file: 'gold01.swf' },
             'tomandjerrybowling': { name: 'TOM & JERRY BOWLING', file: 'tomandjerrybowling.swf' },
             'hive-hero': { name: 'HIVE HERO', file: 'hive-hero.swf' },
             'tj_trapomatic': { name: 'TJ TRAPOMATIC', file: 'tj_trapomatic.swf' },
-            'britney_brawl_featuring_bill_vs_britney': { name: 'BRITNEY BRAWL', file: 'britney_brawl_featuring_bill_vs_britney.swf' },
-            'bush_vs_kerry': { name: 'BUSH VS KERRY', file: 'bush_vs_kerry.swf' },
-            'TheSimpsonsPac-Man': { name: 'SIMPSONS PAC-MAN', file: 'TheSimpsonsPac-Man.swf' },
-            'the_simpsons_in_homers_beer_run': { name: 'HOMER BEER RUN', file: 'the_simpsons_in_homers_beer_run.swf' },
-            'SpongeBob_bcbowling': { name: 'SPONGEBOB BOWLING', file: 'SpongeBob_bcbowling.swf' },
-            'SnowLine': { name: 'SNOW LINE', file: 'SnowLine.swf' },
-            'snowline2': { name: 'SNOW LINE 2', file: 'snowline2.swf' },
-            'simpsons_the_ball_of_death': { name: 'BALL OF DEATH', file: 'simpsons_the_ball_of_death.swf' },
-            'simpsons_magic_ball': { name: 'SIMPSONS MAGIC BALL', file: 'simpsons_magic_ball.swf' },
-            'BattleBowlers': { name: 'BATTLE BOWLERS', file: 'BattleBowlers.swf' },
             'rickandmorty': { name: 'RICK AND MORTY', file: 'Rick-and-Morty.swf' }
         };
-        
-        // XP TRACKING FUNCTION
-        function addGameXP() {
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
-            if (!user) {
-                console.log('No user profile found - create profile to earn XP!');
-                return;
-            }
-            
-            const XP_PER_GAME = 50;
-            const COINS_PER_GAME = 10;
-            
-            user.xp = (user.xp || 0) + XP_PER_GAME;
-            user.coins = (user.coins || 0) + COINS_PER_GAME;
-            user.gamesPlayed = (user.gamesPlayed || 0) + 1;
-            user.level = Math.floor(Math.sqrt(user.xp / 100)) + 1;
-            
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            
-            // Show XP notification
-            const notification = document.getElementById('xp-notification');
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000);
-            
-            console.log(`✅ +${XP_PER_GAME} XP, +${COINS_PER_GAME} Coins! Level: ${user.level}`);
-        }
         
         // LOAD GAME
         if (gameName && games[gameName]) {
@@ -486,7 +508,7 @@
             document.getElementById('error-game-name').textContent = currentGame.name;
             document.title = `Playing ${currentGame.name} | Diane Keaton Memorial Arcade`;
             
-            // Initialize Ruffle with FULLSCREEN settings
+            // Initialize Ruffle
             window.RufflePlayer = window.RufflePlayer || {};
             window.RufflePlayer.config = {
                 "autoplay": "on",
@@ -496,12 +518,7 @@
                 "warnOnUnsupportedContent": false,
                 "contextMenu": false,
                 "quality": "high",
-                "scale": "showAll",
-                "upgradeToHttps": false,
-                "maxExecutionDuration": 15,
-                "logLevel": "warn",
-                "width": "100%",
-                "height": "100%"
+                "scale": "showAll"
             };
             
             const ruffle = window.RufflePlayer.newest();
@@ -512,14 +529,13 @@
             player.style.width = "100%";
             player.style.height = "100%";
             
-            // Load game with XP tracking
             player.load(`games/${currentGame.file}`)
                 .then(() => {
                     console.log('✅ Game loaded successfully');
                     document.getElementById('loading').style.display = 'none';
                     
-                    // 🎮 AWARD XP FOR PLAYING GAME
-                    addGameXP();
+                    // TRACK GAME PLAYED - ADD XP
+                    trackGamePlayed(gameName);
                 })
                 .catch(error => {
                     console.error('❌ Error loading game:', error);
@@ -536,13 +552,12 @@
                     showGameError(currentGame.name, 'Game loading timeout');
                 }
             }, 10000);
-            
         } else {
             document.getElementById('loading').innerHTML = `
                 <div style="font-family: Orbitron; font-size: 2em; color: #ff00ff; text-align: center;">
                     ⚠️ GAME NOT FOUND
                 </div>
-                <a href="index.html" class="back-btn" style="margin-top: 30px; display: inline-block;">← BACK TO ARCADE</a>
+                <a href="index.html" class="back-btn" style="margin-top: 30px;">← BACK TO ARCADE</a>
             `;
         }
         
@@ -552,6 +567,88 @@
             document.getElementById('error-msg').style.display = 'block';
             console.error(`Game Error: ${gameName} - ${errorMessage}`);
         }
+        
+        // TRACK GAME PLAYED - ADD XP TO USER
+        function trackGamePlayed(gameId) {
+            try {
+                const user = JSON.parse(localStorage.getItem('arcadeUser'));
+                if (!user) return;
+                
+                // Add 50 XP for playing a game
+                user.xp = (user.xp || 0) + 50;
+                user.gamesPlayed = (user.gamesPlayed || 0) + 1;
+                user.level = Math.floor(Math.sqrt(user.xp / 100)) + 1;
+                
+                // Track this specific game
+                if (!user.gamesHistory) user.gamesHistory = {};
+                user.gamesHistory[gameId] = (user.gamesHistory[gameId] || 0) + 1;
+                
+                localStorage.setItem('arcadeUser', JSON.stringify(user));
+                console.log(`✅ Tracked game: ${gameId} (+50 XP)`);
+            } catch (error) {
+                console.error('Failed to track game:', error);
+            }
+        }
+        
+        // EMBED MODAL FUNCTIONS
+        function openEmbedModal() {
+            if (!gameName || !games[gameName]) return;
+            
+            const currentGame = games[gameName];
+            const gameURL = `${window.location.origin}${window.location.pathname}?game=${gameName}`;
+            
+            document.getElementById('embed-game-name').textContent = currentGame.name;
+            
+            // Generate iframe embed code
+            const iframeCode = `<iframe src="${gameURL}" width="800" height="600" frameborder="0" allowfullscreen style="border: 3px solid #00f3ff; border-radius: 10px;"></iframe>`;
+            document.getElementById('iframe-code').textContent = iframeCode;
+            
+            // Direct link
+            document.getElementById('direct-link').textContent = gameURL;
+            
+            document.getElementById('embed-modal').classList.add('active');
+        }
+        
+        function closeEmbedModal() {
+            document.getElementById('embed-modal').classList.remove('active');
+        }
+        
+        function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                btn.textContent = '✓ COPIED!';
+                btn.classList.add('copied');
+                
+                showNotification('Copied to clipboard!');
+                
+                setTimeout(() => {
+                    btn.textContent = '📋 COPY';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                showNotification('Copy failed - try selecting the text manually');
+            });
+        }
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeEmbedModal();
+        });
     </script>
 </body>
 </html>

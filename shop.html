@@ -127,6 +127,29 @@
             text-shadow: 0 0 30px var(--neon-gold);
         }
         
+        .earn-coins-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .earn-coins-link a {
+            color: var(--neon-green);
+            text-decoration: none;
+            padding: 10px 25px;
+            border: 2px solid var(--neon-green);
+            border-radius: 20px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .earn-coins-link a:hover {
+            background: var(--neon-green);
+            color: var(--darker);
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+        
         .shop-categories {
             display: flex;
             justify-content: center;
@@ -184,17 +207,17 @@
         
         .shop-item.owned {
             border-color: var(--neon-green);
-            background: rgba(57, 255, 20, 0.05);
+            background: rgba(57, 255, 20, 0.1);
         }
         
         .owned-badge {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;
+            right: 15px;
             background: var(--neon-green);
             color: var(--darker);
             padding: 5px 15px;
-            border-radius: 20px;
+            border-radius: 15px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             font-size: 0.8em;
@@ -252,6 +275,11 @@
             cursor: not-allowed;
         }
         
+        .buy-btn.owned {
+            background: var(--neon-green);
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+        
         .notification {
             position: fixed;
             bottom: -100px;
@@ -273,10 +301,100 @@
         
         .notification.error {
             background: var(--neon-pink);
+            color: white;
         }
         
         .notification.success {
             background: var(--neon-green);
+        }
+        
+        /* Confirmation Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(5, 5, 16, 0.98);
+            border: 3px solid var(--neon-blue);
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 0 80px var(--neon-blue);
+        }
+        
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px var(--neon-blue);
+        }
+        
+        .modal-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        .modal-text {
+            font-size: 1.2em;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .modal-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            color: var(--darker);
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+        
+        .modal-btn-confirm:hover {
+            box-shadow: 0 0 50px var(--neon-green);
+            transform: scale(1.05);
+        }
+        
+        .modal-btn-cancel {
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            color: white;
+            box-shadow: 0 0 30px var(--neon-pink);
+        }
+        
+        .modal-btn-cancel:hover {
+            box-shadow: 0 0 50px var(--neon-pink);
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -295,6 +413,10 @@
         <h1 class="page-title">🪙 COIN SHOP 🪙</h1>
         <div class="coin-balance">Your Balance: <span id="coin-balance">0</span> 🪙</div>
         
+        <div class="earn-coins-link">
+            <a href="index.html">🎮 Play games to earn coins! +10 coins per game</a>
+        </div>
+        
         <div class="shop-categories">
             <button class="category-btn active" onclick="filterCategory('all')">ALL ITEMS</button>
             <button class="category-btn" onclick="filterCategory('badges')">BADGES</button>
@@ -305,53 +427,194 @@
         <div class="shop-grid" id="shop-items"></div>
     </div>
     
+    <!-- Purchase Confirmation Modal -->
+    <div class="modal" id="purchase-modal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modal-icon">🛒</div>
+            <h2 class="modal-title" id="modal-title">Confirm Purchase</h2>
+            <p class="modal-text" id="modal-text">Are you sure you want to buy this item?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-confirm" onclick="confirmPurchase()">✓ BUY NOW</button>
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">✕ CANCEL</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
-        const shopItems = [
-            // BADGES
+        const SHOP_ITEMS = [
+            // APPLICATION BADGES (FREE - REQUIRES APPROVAL)
             {
                 id: 'verified_discord',
                 name: 'Verified Discord Badge',
-                description: 'Show you\'re a verified Discord community leader!',
+                description: 'Show you\'re a verified Discord community leader! (Application Required)',
                 icon: '🔷',
-                price: 0,
+                price: 'APPLICATION',
                 category: 'badges',
-                type: 'free'
+                type: 'application'
             },
             {
                 id: 'org_badge',
                 name: 'Organization Badge',
-                description: 'Official badge for gaming organizations and teams',
+                description: 'Official badge for gaming organizations and teams (Application Required)',
                 icon: '🏢',
-                price: 0,
+                price: 'APPLICATION',
                 category: 'badges',
-                type: 'free'
+                type: 'application'
             },
             {
                 id: 'roblox_badge',
                 name: 'Roblox Developer Badge',
-                description: 'For Roblox game developers and creators',
+                description: 'For Roblox game developers and creators (Application Required)',
                 icon: '🎮',
-                price: 0,
+                price: 'APPLICATION',
                 category: 'badges',
-                type: 'free'
+                type: 'application'
+            },
+            
+            // PURCHASABLE BADGES
+            {
+                id: 'early_supporter',
+                name: 'Early Supporter Badge',
+                description: 'Support the arcade in its early days!',
+                icon: '🌟',
+                price: 500,
+                category: 'badges',
+                type: 'badge'
             },
             {
-                id: 'premium_badge',
-                name: 'Premium Badge',
-                description: 'Show your support with a shiny premium badge!',
+                id: 'arcade_champion',
+                name: 'Arcade Champion',
+                description: 'Show your dedication to classic gaming',
+                icon: '🏆',
+                price: 1000,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'movie_buff',
+                name: 'Movie Buff Badge',
+                description: 'For true Diane Keaton film enthusiasts',
+                icon: '🎬',
+                price: 750,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'premium_member',
+                name: 'Premium Member',
+                description: 'Show your premium support with style!',
                 icon: '💎',
+                price: 2000,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'og_player',
+                name: 'OG Player Badge',
+                description: 'For the original arcade veterans',
+                icon: '👑',
+                price: 3000,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'legend_status',
+                name: 'Legend Status',
+                description: 'Become a true arcade legend!',
+                icon: '⭐',
                 price: 5000,
                 category: 'badges',
-                type: 'purchase'
+                type: 'badge'
             },
             {
-                id: 'founder_badge',
-                name: 'Founder Badge',
-                description: 'Limited edition badge for early supporters',
-                icon: '👑',
+                id: 'mega_supporter',
+                name: 'Mega Supporter',
+                description: 'Ultimate support badge for the arcade',
+                icon: '💪',
                 price: 10000,
                 category: 'badges',
-                type: 'purchase'
+                type: 'badge'
+            },
+            {
+                id: 'diamond_tier',
+                name: 'Diamond Tier',
+                description: 'Exclusive diamond tier badge',
+                icon: '💠',
+                price: 15000,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'hall_of_fame',
+                name: 'Hall of Fame',
+                description: 'Join the arcade hall of fame!',
+                icon: '🏛️',
+                price: 25000,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'master_gamer',
+                name: 'Master Gamer',
+                description: 'Prove your gaming mastery',
+                icon: '🎯',
+                price: 5000,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'speed_runner',
+                name: 'Speed Runner',
+                description: 'For the fastest players',
+                icon: '⚡',
+                price: 3500,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'achievement_hunter',
+                name: 'Achievement Hunter',
+                description: 'Dedicated achievement collector',
+                icon: '🎖️',
+                price: 4000,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'high_roller',
+                name: 'High Roller',
+                description: 'Big spender in the arcade',
+                icon: '🎰',
+                price: 8000,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'night_owl',
+                name: 'Night Owl',
+                description: 'For late night gaming sessions',
+                icon: '🦉',
+                price: 1500,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'weekend_warrior',
+                name: 'Weekend Warrior',
+                description: 'Weekend gaming dedication',
+                icon: '🛡️',
+                price: 1500,
+                category: 'badges',
+                type: 'badge'
+            },
+            {
+                id: 'social_butterfly',
+                name: 'Social Butterfly',
+                description: 'Active community member',
+                icon: '🦋',
+                price: 2500,
+                category: 'badges',
+                type: 'badge'
             },
             
             // COSMETICS
@@ -360,27 +623,45 @@
                 name: 'Custom Profile Title',
                 description: 'Add a custom title to your profile',
                 icon: '✨',
-                price: 2500,
+                price: 1500,
                 category: 'cosmetics',
-                type: 'purchase'
+                type: 'cosmetic'
             },
             {
                 id: 'profile_frame',
                 name: 'Animated Profile Frame',
                 description: 'Glowing animated frame for your avatar',
                 icon: '🖼️',
-                price: 3000,
+                price: 2500,
                 category: 'cosmetics',
-                type: 'purchase'
+                type: 'cosmetic'
             },
             {
                 id: 'name_color',
                 name: 'Colored Username',
                 description: 'Change your username color',
                 icon: '🌈',
-                price: 1500,
+                price: 1000,
                 category: 'cosmetics',
-                type: 'purchase'
+                type: 'cosmetic'
+            },
+            {
+                id: 'neon_trail',
+                name: 'Neon Trail Effect',
+                description: 'Leave a neon trail on your profile',
+                icon: '✨',
+                price: 3000,
+                category: 'cosmetics',
+                type: 'cosmetic'
+            },
+            {
+                id: 'particle_effects',
+                name: 'Particle Effects',
+                description: 'Add particle effects to your profile',
+                icon: '💫',
+                price: 4000,
+                category: 'cosmetics',
+                type: 'cosmetic'
             },
             
             // PERKS
@@ -389,81 +670,129 @@
                 name: 'XP Boost (24h)',
                 description: 'Earn 2x XP for 24 hours!',
                 icon: '⚡',
-                price: 1000,
+                price: 500,
                 category: 'perks',
-                type: 'purchase'
+                type: 'consumable'
             },
             {
                 id: 'coin_boost',
                 name: 'Coin Boost (7 days)',
                 description: 'Earn 1.5x coins for a week',
                 icon: '💰',
-                price: 2000,
+                price: 1000,
                 category: 'perks',
-                type: 'purchase'
+                type: 'consumable'
+            },
+            {
+                id: 'level_boost',
+                name: 'Instant Level Up',
+                description: 'Gain one full level instantly!',
+                icon: '🚀',
+                price: 3000,
+                category: 'perks',
+                type: 'consumable'
+            },
+            {
+                id: 'mega_xp_boost',
+                name: 'Mega XP Boost (7 days)',
+                description: 'Earn 3x XP for a whole week!',
+                icon: '⚡',
+                price: 2500,
+                category: 'perks',
+                type: 'consumable'
+            },
+            {
+                id: 'coin_pack_small',
+                name: 'Small Coin Pack',
+                description: 'Get 500 bonus coins instantly',
+                icon: '🪙',
+                price: 250,
+                category: 'perks',
+                type: 'consumable'
+            },
+            {
+                id: 'coin_pack_large',
+                name: 'Large Coin Pack',
+                description: 'Get 2000 bonus coins instantly',
+                icon: '💰',
+                price: 800,
+                category: 'perks',
+                type: 'consumable'
             }
         ];
         
         let currentCategory = 'all';
         let userCoins = 0;
-        let userBadges = [];
+        let currentUser = null;
+        let selectedItem = null;
         
-        function loadShop() {
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
-            
+        // LOAD USER DATA
+        function loadUser() {
+            const user = localStorage.getItem('arcadeUser');
             if (!user) {
-                alert('Please create a profile first!');
-                window.location.href = 'profile.html';
+                window.location.href = 'index.html';
                 return;
             }
-            
-            userCoins = user.coins || 0;
-            userBadges = user.badges || [];
+            currentUser = JSON.parse(user);
+            userCoins = currentUser.coins || 0;
             document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
-            
-            renderShop();
         }
         
+        function saveUser() {
+            localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+        }
+        
+        // CHECK IF USER OWNS ITEM
+        function ownsItem(itemId) {
+            if (!currentUser.inventory) currentUser.inventory = [];
+            if (!currentUser.badges) currentUser.badges = [];
+            
+            return currentUser.inventory.includes(itemId) || currentUser.badges.includes(itemId);
+        }
+        
+        // RENDER SHOP
         function renderShop() {
             const container = document.getElementById('shop-items');
             container.innerHTML = '';
             
             const filteredItems = currentCategory === 'all' 
-                ? shopItems 
-                : shopItems.filter(item => item.category === currentCategory);
+                ? SHOP_ITEMS 
+                : SHOP_ITEMS.filter(item => item.category === currentCategory);
             
             filteredItems.forEach(item => {
                 const card = document.createElement('div');
-                card.className = 'shop-item';
-                
-                const owned = userBadges.includes(item.id);
-                if (owned) card.classList.add('owned');
-                
+                const owned = ownsItem(item.id);
                 const canAfford = userCoins >= item.price;
-                const priceDisplay = item.price === 0 ? 'FREE' : `${item.price.toLocaleString()} 🪙`;
                 
-                let buttonHTML = '';
-                if (owned) {
-                    buttonHTML = `<button class="buy-btn" disabled>OWNED ✓</button>`;
-                } else if (item.type === 'free') {
-                    buttonHTML = `<button class="buy-btn" onclick="claimFree('${item.id}')">CLAIM FREE</button>`;
-                } else {
-                    buttonHTML = `<button class="buy-btn" onclick="purchaseItem('${item.id}')" ${!canAfford ? 'disabled' : ''}>BUY NOW</button>`;
-                }
+                card.className = 'shop-item' + (owned ? ' owned' : '');
+                
+                const isApplication = item.type === 'application';
+                const priceDisplay = isApplication ? 'FREE - APPLICATION' : `${item.price.toLocaleString()} 🪙`;
+                const buttonText = owned ? '✓ OWNED' : 
+                                   isApplication ? '📝 APPLY' :
+                                   canAfford ? '🛒 BUY NOW' : '🔒 NOT ENOUGH COINS';
                 
                 card.innerHTML = `
-                    ${owned ? '<div class="owned-badge">OWNED</div>' : ''}
+                    ${owned ? '<div class="owned-badge">✓ OWNED</div>' : ''}
+                    ${isApplication ? '<div style="position: absolute; top: 15px; left: 15px; background: var(--neon-green); color: var(--darker); padding: 5px 15px; border-radius: 15px; font-family: \'Orbitron\', sans-serif; font-weight: 900; font-size: 0.8em;">FREE</div>' : ''}
                     <div class="item-icon">${item.icon}</div>
                     <div class="item-name">${item.name}</div>
                     <div class="item-description">${item.description}</div>
                     <div class="item-price">${priceDisplay}</div>
-                    ${buttonHTML}
+                    <button 
+                        class="buy-btn ${owned ? 'owned' : ''}" 
+                        onclick='${isApplication ? "openApplicationPage()" : `openPurchaseModal(${JSON.stringify(item)})`}' 
+                        ${owned || (!isApplication && !canAfford) ? 'disabled' : ''}
+                    >
+                        ${buttonText}
+                    </button>
                 `;
                 
                 container.appendChild(card);
             });
         }
         
+        // FILTER CATEGORIES
         function filterCategory(category) {
             currentCategory = category;
             document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
@@ -471,48 +800,112 @@
             renderShop();
         }
         
-        function claimFree(itemId) {
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
-            
-            if (!user.badges) user.badges = [];
-            
-            if (user.badges.includes(itemId)) {
-                showNotification('You already own this badge!', 'error');
-                return;
-            }
-            
-            user.badges.push(itemId);
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            
-            showNotification('Badge claimed! 🎉', 'success');
-            loadShop();
+        // OPEN PURCHASE MODAL
+        function openPurchaseModal(item) {
+            selectedItem = item;
+            document.getElementById('modal-icon').textContent = item.icon;
+            document.getElementById('modal-title').textContent = `Buy ${item.name}?`;
+            document.getElementById('modal-text').textContent = `
+                Price: ${item.price.toLocaleString()} 🪙
+                Your balance: ${userCoins.toLocaleString()} 🪙
+                After purchase: ${(userCoins - item.price).toLocaleString()} 🪙
+            `;
+            document.getElementById('purchase-modal').classList.add('active');
         }
         
-        function purchaseItem(itemId) {
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
-            const item = shopItems.find(i => i.id === itemId);
-            
-            if (!user.badges) user.badges = [];
-            
-            if (user.badges.includes(itemId)) {
-                showNotification('You already own this!', 'error');
-                return;
-            }
-            
-            if (user.coins < item.price) {
-                showNotification('Not enough coins! Play more games to earn coins.', 'error');
-                return;
-            }
-            
-            // Deduct coins and add badge
-            user.coins -= item.price;
-            user.badges.push(itemId);
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            
-            showNotification(`${item.name} purchased! 🎉`, 'success');
-            loadShop();
+        function closeModal() {
+            document.getElementById('purchase-modal').classList.remove('active');
+            selectedItem = null;
         }
         
+        // CONFIRM PURCHASE
+        function confirmPurchase() {
+            if (!selectedItem) return;
+            
+            // Check if can afford
+            if (userCoins < selectedItem.price) {
+                showNotification('Not enough coins!', 'error');
+                closeModal();
+                return;
+            }
+            
+            // Deduct coins
+            currentUser.coins = userCoins - selectedItem.price;
+            userCoins = currentUser.coins;
+            
+            // Add item to inventory
+            if (selectedItem.type === 'badge') {
+                if (!currentUser.badges) currentUser.badges = [];
+                currentUser.badges.push(selectedItem.id);
+            } else {
+                if (!currentUser.inventory) currentUser.inventory = [];
+                currentUser.inventory.push(selectedItem.id);
+            }
+            
+            // Apply consumable effects
+            if (selectedItem.type === 'consumable') {
+                applyConsumable(selectedItem.id);
+            }
+            
+            // Save user
+            saveUser();
+            
+            // Update display
+            document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
+            renderShop();
+            closeModal();
+            
+            showNotification(`✓ Purchased ${selectedItem.name}!`, 'success');
+        }
+        
+        // APPLY CONSUMABLE EFFECTS
+        function applyConsumable(itemId) {
+            const now = new Date().getTime();
+            
+            if (!currentUser.activeBoosts) currentUser.activeBoosts = {};
+            
+            switch(itemId) {
+                case 'xp_boost':
+                    currentUser.activeBoosts.xp = now + (24 * 60 * 60 * 1000); // 24 hours
+                    showNotification('XP Boost active for 24 hours!', 'success');
+                    break;
+                case 'coin_boost':
+                    currentUser.activeBoosts.coins = now + (7 * 24 * 60 * 60 * 1000); // 7 days
+                    showNotification('Coin Boost active for 7 days!', 'success');
+                    break;
+                case 'level_boost':
+                    currentUser.level = (currentUser.level || 1) + 1;
+                    currentUser.xp = Math.pow(currentUser.level, 2) * 100; // Set XP to start of new level
+                    showNotification('Level Up! You are now level ' + currentUser.level, 'success');
+                    break;
+                case 'mega_xp_boost':
+                    currentUser.activeBoosts.megaXP = now + (7 * 24 * 60 * 60 * 1000); // 7 days
+                    showNotification('Mega XP Boost active for 7 days!', 'success');
+                    break;
+                case 'coin_pack_small':
+                    currentUser.coins = (currentUser.coins || 0) + 500;
+                    userCoins = currentUser.coins;
+                    document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
+                    showNotification('Received 500 bonus coins!', 'success');
+                    break;
+                case 'coin_pack_large':
+                    currentUser.coins = (currentUser.coins || 0) + 2000;
+                    userCoins = currentUser.coins;
+                    document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
+                    showNotification('Received 2000 bonus coins!', 'success');
+                    break;
+            }
+            
+            saveUser();
+        }
+        
+        // OPEN APPLICATION PAGE (for verified badges)
+        function openApplicationPage() {
+            showNotification('Application system coming soon! Contact admin on Discord.', 'info');
+            // Future: Link to application form or Discord
+        }
+        
+        // NOTIFICATIONS
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
@@ -526,7 +919,14 @@
             }, 4000);
         }
         
-        loadShop();
+        // CLOSE MODAL ON ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+        
+        // INITIALIZE
+        loadUser();
+        renderShop();
     </script>
 </body>
 </html>

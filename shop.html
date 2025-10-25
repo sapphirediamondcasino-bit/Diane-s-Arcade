@@ -182,12 +182,22 @@
             background: rgba(0, 243, 255, 0.1);
         }
         
-        .shop-item.special {
-            border-color: var(--neon-gold);
+        .shop-item.owned {
+            border-color: var(--neon-green);
+            background: rgba(57, 255, 20, 0.05);
         }
         
-        .shop-item.special:hover {
-            box-shadow: 0 0 50px var(--neon-gold);
+        .owned-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--neon-green);
+            color: var(--darker);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 0.8em;
         }
         
         .item-icon {
@@ -240,121 +250,6 @@
         .buy-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
-        }
-        
-        .apply-btn {
-            background: linear-gradient(135deg, var(--neon-gold), var(--neon-green));
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-        }
-        
-        .apply-btn:hover {
-            box-shadow: 0 0 50px var(--neon-gold);
-        }
-        
-        .special-badge {
-            position: absolute;
-            top: -15px;
-            right: 20px;
-            background: var(--neon-gold);
-            color: var(--darker);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 0.8em;
-        }
-        
-        .requirements {
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px solid var(--neon-gold);
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            text-align: left;
-            font-size: 0.9em;
-        }
-        
-        .requirements h4 {
-            color: var(--neon-gold);
-            margin-bottom: 10px;
-            font-family: 'Orbitron', sans-serif;
-        }
-        
-        .requirements ul {
-            margin-left: 20px;
-        }
-        
-        .requirements li {
-            margin: 5px 0;
-        }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--darker);
-            border: 3px solid var(--neon-blue);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 0 60px var(--neon-blue);
-        }
-        
-        .modal h2 {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--neon-gold);
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0, 243, 255, 0.1);
-            border: 2px solid var(--neon-blue);
-            border-radius: 10px;
-            color: white;
-            font-family: 'Roboto', sans-serif;
-            font-size: 1em;
-        }
-        
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        .close-modal {
-            color: var(--neon-pink);
-            font-size: 2em;
-            float: right;
-            cursor: pointer;
-            line-height: 1;
         }
         
         .notification {
@@ -410,30 +305,6 @@
         <div class="shop-grid" id="shop-items"></div>
     </div>
     
-    <!-- Application Modal -->
-    <div class="modal" id="application-modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h2 id="modal-title">Apply for Badge</h2>
-            <form id="application-form">
-                <div class="form-group">
-                    <label>Discord Server Invite Link:</label>
-                    <input type="url" name="discord_invite" required placeholder="https://discord.gg/...">
-                </div>
-                <div class="form-group">
-                    <label>Server Member Count:</label>
-                    <input type="number" name="member_count" required placeholder="e.g., 500">
-                </div>
-                <div class="form-group">
-                    <label>Additional Information:</label>
-                    <textarea name="additional_info" placeholder="Tell us about your community..."></textarea>
-                </div>
-                <button type="submit" class="buy-btn">SUBMIT APPLICATION</button>
-            </form>
-        </div>
-    </div>
-    
-    <script src="app.js"></script>
     <script>
         const shopItems = [
             // BADGES
@@ -442,44 +313,27 @@
                 name: 'Verified Discord Badge',
                 description: 'Show you\'re a verified Discord community leader!',
                 icon: '🔷',
-                price: 'FREE',
+                price: 0,
                 category: 'badges',
-                type: 'application',
-                requirements: [
-                    'Discord server with 100+ members',
-                    'Active community (messages daily)',
-                    'Server invite link required'
-                ]
+                type: 'free'
             },
             {
                 id: 'org_badge',
                 name: 'Organization Badge',
                 description: 'Official badge for gaming organizations and teams',
                 icon: '🏢',
-                price: 'FREE',
+                price: 0,
                 category: 'badges',
-                type: 'application',
-                requirements: [
-                    'Discord server with 500+ members',
-                    'Established organization (6+ months)',
-                    'Proof of organization status',
-                    'Admin approval required'
-                ]
+                type: 'free'
             },
             {
                 id: 'roblox_badge',
                 name: 'Roblox Developer Badge',
                 description: 'For Roblox game developers and creators',
                 icon: '🎮',
-                price: 'FREE',
+                price: 0,
                 category: 'badges',
-                type: 'application',
-                requirements: [
-                    'Published Roblox game',
-                    'Discord server with Roblox community',
-                    'Link to your Roblox profile',
-                    'Game with 1000+ visits'
-                ]
+                type: 'free'
             },
             {
                 id: 'premium_badge',
@@ -547,33 +401,25 @@
                 price: 2000,
                 category: 'perks',
                 type: 'purchase'
-            },
-            {
-                id: 'name_change',
-                name: 'Username Change',
-                description: 'Change your username one time',
-                icon: '📝',
-                price: 5000,
-                category: 'perks',
-                type: 'purchase'
             }
         ];
         
         let currentCategory = 'all';
         let userCoins = 0;
+        let userBadges = [];
         
-        async function loadShop() {
-            // Get user's coin balance
-            try {
-                const response = await fetch('/api/user');
-                if (response.ok) {
-                    const user = await response.json();
-                    userCoins = user.coins || 0;
-                    document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
-                }
-            } catch (error) {
-                console.error('Failed to load user data:', error);
+        function loadShop() {
+            const user = JSON.parse(localStorage.getItem('arcadeUser'));
+            
+            if (!user) {
+                alert('Please create a profile first!');
+                window.location.href = 'profile.html';
+                return;
             }
+            
+            userCoins = user.coins || 0;
+            userBadges = user.badges || [];
+            document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
             
             renderShop();
         }
@@ -589,36 +435,27 @@
             filteredItems.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'shop-item';
-                if (item.type === 'application') card.classList.add('special');
                 
-                const canAfford = typeof item.price === 'number' && userCoins >= item.price;
-                const priceDisplay = typeof item.price === 'number' ? `${item.price.toLocaleString()} 🪙` : item.price;
+                const owned = userBadges.includes(item.id);
+                if (owned) card.classList.add('owned');
+                
+                const canAfford = userCoins >= item.price;
+                const priceDisplay = item.price === 0 ? 'FREE' : `${item.price.toLocaleString()} 🪙`;
                 
                 let buttonHTML = '';
-                if (item.type === 'application') {
-                    buttonHTML = `<button class="buy-btn apply-btn" onclick="openApplication('${item.id}')">APPLY NOW</button>`;
+                if (owned) {
+                    buttonHTML = `<button class="buy-btn" disabled>OWNED ✓</button>`;
+                } else if (item.type === 'free') {
+                    buttonHTML = `<button class="buy-btn" onclick="claimFree('${item.id}')">CLAIM FREE</button>`;
                 } else {
                     buttonHTML = `<button class="buy-btn" onclick="purchaseItem('${item.id}')" ${!canAfford ? 'disabled' : ''}>BUY NOW</button>`;
                 }
                 
-                let requirementsHTML = '';
-                if (item.requirements) {
-                    requirementsHTML = `
-                        <div class="requirements">
-                            <h4>Requirements:</h4>
-                            <ul>
-                                ${item.requirements.map(req => `<li>${req}</li>`).join('')}
-                            </ul>
-                        </div>
-                    `;
-                }
-                
                 card.innerHTML = `
-                    ${item.type === 'application' ? '<div class="special-badge">APPLICATION</div>' : ''}
+                    ${owned ? '<div class="owned-badge">OWNED</div>' : ''}
                     <div class="item-icon">${item.icon}</div>
                     <div class="item-name">${item.name}</div>
                     <div class="item-description">${item.description}</div>
-                    ${requirementsHTML}
                     <div class="item-price">${priceDisplay}</div>
                     ${buttonHTML}
                 `;
@@ -634,70 +471,47 @@
             renderShop();
         }
         
-        function openApplication(itemId) {
+        function claimFree(itemId) {
+            const user = JSON.parse(localStorage.getItem('arcadeUser'));
+            
+            if (!user.badges) user.badges = [];
+            
+            if (user.badges.includes(itemId)) {
+                showNotification('You already own this badge!', 'error');
+                return;
+            }
+            
+            user.badges.push(itemId);
+            localStorage.setItem('arcadeUser', JSON.stringify(user));
+            
+            showNotification('Badge claimed! 🎉', 'success');
+            loadShop();
+        }
+        
+        function purchaseItem(itemId) {
+            const user = JSON.parse(localStorage.getItem('arcadeUser'));
             const item = shopItems.find(i => i.id === itemId);
-            document.getElementById('modal-title').textContent = `Apply for ${item.name}`;
-            document.getElementById('application-modal').classList.add('active');
-            document.getElementById('application-form').dataset.itemId = itemId;
-        }
-        
-        function closeModal() {
-            document.getElementById('application-modal').classList.remove('active');
-        }
-        
-        async function purchaseItem(itemId) {
-            try {
-                const response = await fetch('/api/shop/purchase', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ item_id: itemId })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showNotification('Purchase successful! 🎉', 'success');
-                    loadShop(); // Refresh shop
-                } else {
-                    showNotification(data.error || 'Purchase failed', 'error');
-                }
-            } catch (error) {
-                showNotification('Failed to purchase item', 'error');
-            }
-        }
-        
-        document.getElementById('application-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const itemId = e.target.dataset.itemId;
             
-            const application = {
-                item_id: itemId,
-                discord_invite: formData.get('discord_invite'),
-                member_count: formData.get('member_count'),
-                additional_info: formData.get('additional_info')
-            };
+            if (!user.badges) user.badges = [];
             
-            try {
-                const response = await fetch('/api/shop/apply', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(application)
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showNotification('Application submitted! We\'ll review it soon. 🎉', 'success');
-                    closeModal();
-                    e.target.reset();
-                } else {
-                    showNotification(data.error || 'Application failed', 'error');
-                }
-            } catch (error) {
-                showNotification('Failed to submit application', 'error');
+            if (user.badges.includes(itemId)) {
+                showNotification('You already own this!', 'error');
+                return;
             }
-        });
+            
+            if (user.coins < item.price) {
+                showNotification('Not enough coins! Play more games to earn coins.', 'error');
+                return;
+            }
+            
+            // Deduct coins and add badge
+            user.coins -= item.price;
+            user.badges.push(itemId);
+            localStorage.setItem('arcadeUser', JSON.stringify(user));
+            
+            showNotification(`${item.name} purchased! 🎉`, 'success');
+            loadShop();
+        }
         
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');

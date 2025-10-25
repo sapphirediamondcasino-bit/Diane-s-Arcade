@@ -107,77 +107,6 @@
             padding: 0 40px;
         }
         
-        .login-prompt {
-            text-align: center;
-            padding: 100px 40px;
-            background: rgba(5, 5, 16, 0.95);
-            border: 3px solid var(--neon-blue);
-            border-radius: 30px;
-            box-shadow: 0 0 60px rgba(0, 243, 255, 0.4);
-        }
-        
-        .login-prompt h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3em;
-            color: var(--neon-blue);
-            margin-bottom: 30px;
-        }
-        
-        .login-form {
-            max-width: 500px;
-            margin: 40px auto;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-            text-align: left;
-        }
-        
-        .form-label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.1em;
-            color: var(--neon-purple);
-            margin-bottom: 10px;
-            display: block;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 15px 20px;
-            background: rgba(0, 243, 255, 0.1);
-            border: 2px solid var(--neon-blue);
-            border-radius: 15px;
-            color: white;
-            font-size: 1em;
-            font-family: 'Roboto', sans-serif;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: var(--neon-purple);
-            box-shadow: 0 0 20px var(--neon-purple);
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border: none;
-            border-radius: 50px;
-            color: white;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 50px rgba(0, 243, 255, 0.8);
-        }
-        
         .profile-banner {
             position: relative;
             height: 300px;
@@ -186,11 +115,6 @@
             overflow: hidden;
             border: 3px solid var(--neon-blue);
             border-bottom: none;
-            cursor: pointer;
-        }
-        
-        .profile-banner:hover .upload-overlay {
-            opacity: 1;
         }
         
         .banner-image {
@@ -199,22 +123,36 @@
             object-fit: cover;
         }
         
-        .upload-overlay {
+        .banner-overlay {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent, rgba(5, 5, 16, 0.8));
+        }
+        
+        .edit-banner-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 12px 30px;
             background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--neon-blue);
+            border-radius: 25px;
+            color: white;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5em;
-            color: var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .edit-banner-btn:hover {
+            background: var(--neon-blue);
+            color: var(--darker);
+            box-shadow: 0 0 30px var(--neon-blue);
         }
         
         .profile-header {
@@ -236,11 +174,6 @@
         .avatar-container {
             position: relative;
             margin-top: -80px;
-            cursor: pointer;
-        }
-        
-        .avatar-container:hover .avatar-upload-overlay {
-            opacity: 1;
         }
         
         .profile-avatar {
@@ -254,28 +187,33 @@
             background: var(--darker);
         }
         
-        .avatar-upload-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-family: 'Orbitron', sans-serif;
-            color: var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue);
-            font-size: 1.2em;
-        }
-        
         @keyframes avatarGlow {
             0%, 100% { box-shadow: 0 0 60px var(--neon-blue); }
             50% { box-shadow: 0 0 100px var(--neon-blue), 0 0 140px var(--neon-purple); }
+        }
+        
+        .edit-avatar-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--neon-blue);
+            border: 3px solid var(--darker);
+            color: var(--darker);
+            font-size: 1.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .edit-avatar-btn:hover {
+            background: var(--neon-purple);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px var(--neon-purple);
         }
         
         .profile-info {
@@ -299,49 +237,77 @@
             gap: 15px;
             margin: 20px 0;
             flex-wrap: wrap;
-        }
-        
-        .badge {
-            background: rgba(255, 215, 0, 0.1);
-            border: 2px solid var(--neon-gold);
+            padding: 20px;
+            background: rgba(0, 243, 255, 0.05);
+            border: 2px solid var(--neon-blue);
             border-radius: 15px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            color: var(--neon-gold);
-            text-shadow: 0 0 15px var(--neon-gold);
-            animation: badgeGlow 2s ease infinite;
         }
         
-        @keyframes badgeGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); }
+        .badge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background: rgba(191, 0, 255, 0.1);
+            border: 2px solid var(--neon-purple);
+            border-radius: 12px;
+            cursor: help;
+            transition: all 0.3s;
+            min-width: 80px;
+        }
+        
+        .badge-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px var(--neon-purple);
         }
         
         .badge-icon {
-            font-size: 1.5em;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .badge-name {
+            font-size: 0.7em;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-purple);
+            text-align: center;
         }
         
         .no-badges {
-            background: rgba(191, 0, 255, 0.1);
-            border: 2px dashed var(--neon-purple);
-            border-radius: 15px;
-            padding: 20px;
+            width: 100%;
             text-align: center;
-            color: var(--neon-purple);
+            padding: 30px;
+            opacity: 0.7;
         }
         
-        .shop-link {
-            color: var(--neon-pink);
+        .buy-badges-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 25px;
+            background: linear-gradient(135deg, var(--neon-gold), var(--neon-green));
+            color: var(--darker);
             text-decoration: none;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
             font-weight: 700;
+            transition: all 0.3s;
         }
         
-        .shop-link:hover {
-            text-shadow: 0 0 15px var(--neon-pink);
+        .buy-badges-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--neon-gold);
+        }
+        
+        .admin-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #ffd700, #ff6600);
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            color: #000;
+            margin-left: 15px;
+            box-shadow: 0 0 30px #ffd700;
         }
         
         .profile-level {
@@ -369,19 +335,25 @@
             background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
             border-radius: 20px;
             transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
             box-shadow: 0 0 30px var(--neon-blue);
+            position: relative;
+            z-index: 2;
         }
         
         .xp-text {
             position: absolute;
             width: 100%;
             text-align: center;
-            line-height: 40px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
+            z-index: 3;
             color: white;
             text-shadow: 0 0 10px #000;
-            top: 0;
         }
         
         .profile-stats {
@@ -440,9 +412,15 @@
             padding: 30px;
             text-align: center;
             transition: all 0.3s;
+            position: relative;
         }
         
-        .achievement-card:hover {
+        .achievement-card.locked {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+        
+        .achievement-card:not(.locked):hover {
             transform: scale(1.05);
             box-shadow: 0 0 50px var(--neon-purple);
         }
@@ -460,14 +438,156 @@
             margin-bottom: 10px;
         }
         
-        input[type="file"] {
+        .achievement-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content {
+            background: rgba(5, 5, 16, 0.98);
+            border: 3px solid var(--neon-blue);
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            font-weight: 900;
+            color: var(--neon-blue);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--neon-pink);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-modal:hover {
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        .file-upload-section {
+            background: rgba(0, 243, 255, 0.05);
+            border: 2px dashed var(--neon-blue);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .file-upload-section input[type="file"] {
+            display: none;
+        }
+        
+        .upload-label {
+            display: inline-block;
+            padding: 15px 40px;
+            background: var(--neon-blue);
+            color: var(--darker);
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-label:hover {
+            box-shadow: 0 0 30px var(--neon-blue);
+            transform: scale(1.05);
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            margin-top: 20px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 10px;
+        }
+        
+        .save-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 50px rgba(0, 243, 255, 0.8);
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: -100px;
+            right: 30px;
+            padding: 20px 30px;
+            background: var(--neon-blue);
+            color: var(--darker);
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            z-index: 20000;
+            transition: bottom 0.3s;
+            box-shadow: 0 0 40px var(--neon-blue);
+        }
+        
+        .notification.show {
+            bottom: 30px;
+        }
+        
+        .notification.error {
+            background: var(--neon-pink);
+            color: white;
+        }
+        
+        .notification.success {
+            background: var(--neon-green);
         }
         
         @media (max-width: 768px) {
             .profile-header { flex-direction: column; text-align: center; padding: 30px; }
             .avatar-container { margin-top: -120px; }
             .profile-username { font-size: 2em; }
+            .achievements-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -480,320 +600,472 @@
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <button class="nav-link logout-btn" onclick="logout()" style="display:none;" id="logout-btn">LOGOUT</button>
+            <a href="Settings.html" class="nav-link">SETTINGS ⚙️</a>
+            <button class="nav-link logout-btn" onclick="logout()">LOGOUT</button>
         </div>
     </nav>
     
     <div class="container">
-        <!-- Login/Signup Form -->
-        <div class="login-prompt" id="login-section">
-            <h2>🎮 CREATE YOUR PROFILE</h2>
-            <p style="font-size: 1.2em; margin-bottom: 40px;">Join Diane's Arcade and start your journey!</p>
-            
-            <div class="login-form">
-                <div class="form-group">
-                    <label class="form-label">Username</label>
-                    <input type="text" class="form-input" id="username-input" placeholder="Choose a username" maxlength="20">
+        <div class="profile-banner">
+            <img src="" alt="Banner" class="banner-image" id="profile-banner">
+            <div class="banner-overlay"></div>
+            <button class="edit-banner-btn" onclick="openBannerModal()">✏️ CHANGE BANNER</button>
+        </div>
+        
+        <div class="profile-header">
+            <div class="avatar-container">
+                <img src="" alt="Avatar" class="profile-avatar" id="user-avatar">
+                <button class="edit-avatar-btn" onclick="openAvatarModal()">✏️</button>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-username" id="username">LOADING...</h1>
+                
+                <!-- BADGES SECTION -->
+                <div class="profile-badges" id="user-badges">
+                    <div class="no-badges">
+                        <p>No badges yet!</p>
+                        <a href="shop.html" class="buy-badges-link">🪙 BUY BADGES IN SHOP</a>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Email (Optional)</label>
-                    <input type="email" class="form-input" id="email-input" placeholder="your@email.com">
+                
+                <div class="profile-level">⚡ LEVEL <span id="user-level">1</span></div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar" id="xp-bar" style="width: 0%"></div>
+                    <div class="xp-text" id="xp-text">0 / 100 XP</div>
                 </div>
-                <button class="btn" onclick="createProfile()">🚀 CREATE PROFILE</button>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-achievements">0</span>
+                        <div class="stat-label">🏆 Achievements</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-games">0</span>
+                        <div class="stat-label">🎮 Games Played</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-movies">0</span>
+                        <div class="stat-label">🎬 Movies Watched</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-coins">0</span>
+                        <div class="stat-label">🪙 Coins</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-xp">0</span>
+                        <div class="stat-label">✨ Total XP</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-joined">Loading...</span>
+                        <div class="stat-label">📅 Member Since</div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <!-- Profile Display -->
-        <div id="profile-section" style="display:none;">
-            <div class="profile-banner" onclick="uploadBanner()">
-                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop" alt="Banner" class="banner-image" id="profile-banner">
-                <div class="upload-overlay">📷 CLICK TO CHANGE BANNER</div>
-            </div>
-            <input type="file" id="banner-upload" accept="image/*" onchange="handleBannerUpload(event)">
+        <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
+        <div class="achievements-grid" id="achievements-container"></div>
+    </div>
+
+    <!-- Avatar Upload Modal -->
+    <div class="modal" id="avatar-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('avatar-modal')">×</button>
+            <h2 class="modal-title">UPLOAD AVATAR</h2>
             
-            <div class="profile-header">
-                <div class="avatar-container" onclick="uploadAvatar()">
-                    <img src="" alt="Avatar" class="profile-avatar" id="user-avatar">
-                    <div class="avatar-upload-overlay">📷 CHANGE</div>
-                </div>
-                <input type="file" id="avatar-upload" accept="image/*" onchange="handleAvatarUpload(event)">
-                
-                <div class="profile-info">
-                    <h1 class="profile-username" id="username">PLAYER</h1>
-                    
-                    <!-- BADGES SECTION -->
-                    <div class="profile-badges" id="badges-container">
-                        <div class="no-badges">
-                            No badges yet! 🏆 <a href="shop.html" class="shop-link">Visit the Shop</a> to buy badges with coins!
-                        </div>
-                    </div>
-                    
-                    <div class="profile-level">⚡ LEVEL <span id="user-level">1</span></div>
-                    <div class="xp-bar-container">
-                        <div class="xp-bar" id="xp-bar" style="width: 0%"></div>
-                        <div class="xp-text" id="xp-text">0 / 100 XP</div>
-                    </div>
-                    
-                    <div class="profile-stats">
-                        <div class="stat-item">
-                            <span class="stat-value" id="stat-achievements">0</span>
-                            <div class="stat-label">🏆 Achievements</div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="stat-games">0</span>
-                            <div class="stat-label">🎮 Games Played</div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="stat-movies">0</span>
-                            <div class="stat-label">🎬 Movies Watched</div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="stat-coins">100</span>
-                            <div class="stat-label">🪙 Coins</div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="stat-joined">Today</span>
-                            <div class="stat-label">📅 Member Since</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="file-upload-section">
+                <h3 style="margin-bottom: 15px; color: var(--neon-blue);">Choose Image</h3>
+                <input type="file" id="avatar-file-input" accept="image/*" onchange="previewAvatar(event)">
+                <label for="avatar-file-input" class="upload-label">📤 SELECT IMAGE</label>
+                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 2MB • JPG, PNG, GIF, WEBP</p>
+                <img id="avatar-preview" class="preview-image" style="display: none;">
             </div>
             
-            <h2 class="section-title">🏆 RECENT ACHIEVEMENTS</h2>
-            <div class="achievements-grid" id="achievements-container"></div>
+            <button class="save-btn" onclick="saveAvatar()">💾 SAVE AVATAR</button>
         </div>
     </div>
-    
+
+    <!-- Banner Upload Modal -->
+    <div class="modal" id="banner-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('banner-modal')">×</button>
+            <h2 class="modal-title">UPLOAD BANNER</h2>
+            
+            <div class="file-upload-section">
+                <h3 style="margin-bottom: 15px; color: var(--neon-blue);">Choose Image</h3>
+                <input type="file" id="banner-file-input" accept="image/*" onchange="previewBanner(event)">
+                <label for="banner-file-input" class="upload-label">📤 SELECT IMAGE</label>
+                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 2MB • JPG, PNG, GIF, WEBP • 1200x400 recommended</p>
+                <img id="banner-preview" class="preview-image" style="display: none;">
+            </div>
+            
+            <button class="save-btn" onclick="saveBanner()">💾 SAVE BANNER</button>
+        </div>
+    </div>
+
     <script>
-        // XP System
-        const XP_PER_GAME = 50;
-        const XP_PER_MOVIE = 25;
-        const COINS_PER_GAME = 10;
-        const COINS_PER_MOVIE = 5;
+        // ========== USER DATA MANAGEMENT ==========
+        function getUser() {
+            const user = localStorage.getItem('arcadeUser');
+            if (!user) {
+                window.location.href = 'index.html';
+                return null;
+            }
+            return JSON.parse(user);
+        }
         
+        function saveUser(userData) {
+            localStorage.setItem('arcadeUser', JSON.stringify(userData));
+        }
+        
+        // ========== XP & LEVELING SYSTEM ==========
         function calculateLevel(xp) {
             return Math.floor(Math.sqrt(xp / 100)) + 1;
         }
         
-        function xpForLevel(level) {
+        function xpForNextLevel(level) {
             return Math.pow(level, 2) * 100;
         }
         
-        // Check if user exists
-        function checkUser() {
-            const user = JSON.parse(localStorage.getItem('arcadeUser') || 'null');
+        function addXP(amount, source = 'general') {
+            const user = getUser();
+            if (!user) return;
             
-            if (user) {
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('profile-section').style.display = 'block';
-                document.getElementById('logout-btn').style.display = 'block';
-                loadProfile(user);
-            } else {
-                document.getElementById('login-section').style.display = 'block';
-                document.getElementById('profile-section').style.display = 'none';
-            }
+            user.xp = (user.xp || 0) + amount;
+            user.level = calculateLevel(user.xp);
+            
+            // Track sources
+            if (!user.xpSources) user.xpSources = {};
+            user.xpSources[source] = (user.xpSources[source] || 0) + amount;
+            
+            saveUser(user);
+            showNotification(`+${amount} XP from ${source}!`, 'success');
+            loadProfile();
         }
         
-        function createProfile() {
-            const username = document.getElementById('username-input').value.trim();
-            const email = document.getElementById('email-input').value.trim();
+        // Call this when user plays a game
+        function trackGamePlayed(gameId) {
+            const user = getUser();
+            if (!user) return;
             
-            if (!username) {
-                alert('Please enter a username!');
-                return;
-            }
-            
-            if (username.length < 3) {
-                alert('Username must be at least 3 characters!');
-                return;
-            }
-            
-            const newUser = {
-                username: username,
-                email: email || '',
-                level: 1,
-                xp: 0,
-                coins: 100,
-                achievements: [],
-                badges: [],
-                gamesPlayed: 0,
-                moviesWatched: 0,
-                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-                banner: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop',
-                joinDate: new Date().toLocaleDateString()
-            };
-            
-            localStorage.setItem('arcadeUser', JSON.stringify(newUser));
-            checkUser();
+            user.gamesPlayed = (user.gamesPlayed || 0) + 1;
+            addXP(50, 'games');
+            saveUser(user);
         }
         
-        function loadProfile(user) {
-            document.getElementById('username').textContent = user.username.toUpperCase();
-            document.getElementById('user-level').textContent = user.level;
-            document.getElementById('user-avatar').src = user.avatar;
-            document.getElementById('profile-banner').src = user.banner;
-            document.getElementById('stat-achievements').textContent = user.achievements.length;
-            document.getElementById('stat-games').textContent = user.gamesPlayed || 0;
-            document.getElementById('stat-movies').textContent = user.moviesWatched || 0;
-            document.getElementById('stat-coins').textContent = user.coins;
-            document.getElementById('stat-joined').textContent = user.joinDate;
+        // Call this when user watches a movie
+        function trackMovieWatched(movieId) {
+            const user = getUser();
+            if (!user) return;
             
-            // Level and XP
-            const currentLevel = user.level;
-            const xpNeeded = xpForLevel(currentLevel + 1);
-            const xpForCurrentLevel = xpForLevel(currentLevel);
-            const xpInLevel = user.xp - xpForCurrentLevel;
-            const xpNeededForNext = xpNeeded - xpForCurrentLevel;
-            const xpProgress = (xpInLevel / xpNeededForNext) * 100;
-            
-            document.getElementById('xp-bar').style.width = xpProgress + '%';
-            document.getElementById('xp-text').textContent = `${xpInLevel} / ${xpNeededForNext} XP`;
-            
-            // Load badges
-            loadBadges(user);
-            
-            // Load achievements
-            loadAchievements(user);
+            user.moviesWatched = (user.moviesWatched || 0) + 1;
+            addXP(25, 'movies');
+            saveUser(user);
         }
         
-        function loadBadges(user) {
-            const container = document.getElementById('badges-container');
+        // ========== BADGE SYSTEM ==========
+        const BADGE_DEFINITIONS = {
+            'verified_discord': { icon: '🔷', name: 'Verified Discord' },
+            'org_badge': { icon: '🏢', name: 'Organization' },
+            'roblox_badge': { icon: '🎮', name: 'Roblox Dev' },
+            'premium_badge': { icon: '💎', name: 'Premium' },
+            'founder_badge': { icon: '👑', name: 'Founder' }
+        };
+        
+        function loadBadges() {
+            const user = getUser();
+            if (!user) return;
+            
+            const badgesContainer = document.getElementById('user-badges');
             
             if (!user.badges || user.badges.length === 0) {
-                container.innerHTML = `
+                badgesContainer.innerHTML = `
                     <div class="no-badges">
-                        No badges yet! 🏆 <a href="shop.html" class="shop-link">Visit the Shop</a> to buy badges with coins!
+                        <p>No badges yet!</p>
+                        <a href="shop.html" class="buy-badges-link">🪙 BUY BADGES IN SHOP</a>
                     </div>
                 `;
                 return;
             }
             
-            const badgeData = {
-                'verified_discord': { icon: '🔷', name: 'Discord Verified' },
-                'org_badge': { icon: '🏢', name: 'Organization' },
-                'roblox_badge': { icon: '🎮', name: 'Roblox Dev' },
-                'premium_badge': { icon: '💎', name: 'Premium' },
-                'founder_badge': { icon: '👑', name: 'Founder' }
-            };
-            
-            container.innerHTML = user.badges.map(badgeId => {
-                const badge = badgeData[badgeId] || { icon: '🏅', name: badgeId };
+            badgesContainer.innerHTML = user.badges.map(badgeId => {
+                const badge = BADGE_DEFINITIONS[badgeId];
+                if (!badge) return '';
                 return `
-                    <div class="badge">
-                        <span class="badge-icon">${badge.icon}</span>
-                        <span>${badge.name}</span>
+                    <div class="badge-item" title="${badge.name}">
+                        <div class="badge-icon">${badge.icon}</div>
+                        <div class="badge-name">${badge.name}</div>
                     </div>
                 `;
             }).join('');
         }
         
-        function loadAchievements(user) {
-            const container = document.getElementById('achievements-container');
-            const recentAchievements = user.achievements.slice(0, 6);
+        // ========== IMAGE UPLOAD ==========
+        let avatarFile = null;
+        let bannerFile = null;
+        
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
             
-            if (recentAchievements.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px; background: rgba(191, 0, 255, 0.1); border: 2px dashed var(--neon-purple); border-radius: 20px;">
-                        <div style="font-size: 4em; margin-bottom: 20px;">🏆</div>
-                        <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-purple); margin-bottom: 15px;">No Achievements Yet</h3>
-                        <p style="opacity: 0.8;">Start playing games to unlock achievements!</p>
-                    </div>
-                `;
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification('File too large! Max 2MB', 'error');
                 return;
             }
             
-            container.innerHTML = recentAchievements.map(ach => `
-                <div class="achievement-card">
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                avatarFile = e.target.result;
+                document.getElementById('avatar-preview').src = e.target.result;
+                document.getElementById('avatar-preview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function previewBanner(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification('File too large! Max 2MB', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                bannerFile = e.target.result;
+                document.getElementById('banner-preview').src = e.target.result;
+                document.getElementById('banner-preview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function saveAvatar() {
+            if (!avatarFile) {
+                showNotification('Please select an image first', 'error');
+                return;
+            }
+            
+            const user = getUser();
+            if (!user) return;
+            
+            user.avatar = avatarFile;
+            saveUser(user);
+            
+            document.getElementById('user-avatar').src = avatarFile;
+            closeModal('avatar-modal');
+            showNotification('Avatar updated!', 'success');
+            avatarFile = null;
+        }
+        
+        function saveBanner() {
+            if (!bannerFile) {
+                showNotification('Please select an image first', 'error');
+                return;
+            }
+            
+            const user = getUser();
+            if (!user) return;
+            
+            user.banner = bannerFile;
+            saveUser(user);
+            
+            document.getElementById('profile-banner').src = bannerFile;
+            closeModal('banner-modal');
+            showNotification('Banner updated!', 'success');
+            bannerFile = null;
+        }
+        
+        // ========== ACHIEVEMENTS ==========
+        const ALL_ACHIEVEMENTS = [
+            { id: 'annie_hall', name: 'Annie Hall', description: 'Play your first game', icon: '🎬', xp: 10, unlocked: false },
+            { id: 'first_steps', name: 'First Steps', description: 'Create your arcade profile', icon: '👣', xp: 5, unlocked: false },
+            { id: 'coffee_break', name: 'Coffee Break', description: 'Play 5 games', icon: '☕', xp: 25, unlocked: false },
+            { id: 'godfather', name: 'The Godfather', description: 'Reach Level 10', icon: '👑', xp: 50, unlocked: false },
+            { id: 'something_gotta_give', name: "Something's Gotta Give", description: 'Score 10,000 points total', icon: '💎', xp: 100, unlocked: false },
+            { id: 'first_wives_club', name: 'First Wives Club', description: 'Complete all games', icon: '💪', xp: 500, unlocked: false },
+            { id: 'movie_buff', name: 'Movie Buff', description: 'Watch 10 movies', icon: '🎥', xp: 100, unlocked: false },
+            { id: 'cinephile', name: 'Cinephile', description: 'Watch 25 movies', icon: '🍿', xp: 250, unlocked: false }
+        ];
+        
+        function checkAchievements() {
+            const user = getUser();
+            if (!user) return;
+            
+            if (!user.achievements) user.achievements = [];
+            
+            // Check game-based achievements
+            if (user.gamesPlayed >= 1 && !user.achievements.includes('annie_hall')) {
+                unlockAchievement('annie_hall');
+            }
+            if (user.gamesPlayed >= 5 && !user.achievements.includes('coffee_break')) {
+                unlockAchievement('coffee_break');
+            }
+            
+            // Check level-based achievements
+            if (user.level >= 10 && !user.achievements.includes('godfather')) {
+                unlockAchievement('godfather');
+            }
+            
+            // Check movie-based achievements
+            if (user.moviesWatched >= 10 && !user.achievements.includes('movie_buff')) {
+                unlockAchievement('movie_buff');
+            }
+            if (user.moviesWatched >= 25 && !user.achievements.includes('cinephile')) {
+                unlockAchievement('cinephile');
+            }
+        }
+        
+        function unlockAchievement(achievementId) {
+            const user = getUser();
+            if (!user) return;
+            
+            if (!user.achievements) user.achievements = [];
+            if (user.achievements.includes(achievementId)) return;
+            
+            const achievement = ALL_ACHIEVEMENTS.find(a => a.id === achievementId);
+            if (!achievement) return;
+            
+            user.achievements.push(achievementId);
+            addXP(achievement.xp, 'achievement');
+            saveUser(user);
+            
+            showNotification(`🏆 Achievement Unlocked: ${achievement.name}!`, 'success');
+        }
+        
+        function loadAchievements() {
+            const user = getUser();
+            if (!user) return;
+            
+            const container = document.getElementById('achievements-container');
+            
+            // Update user achievements with unlock status
+            const userAchievements = ALL_ACHIEVEMENTS.map(ach => ({
+                ...ach,
+                unlocked: user.achievements && user.achievements.includes(ach.id)
+            }));
+            
+            // Show first 8 achievements
+            const displayAchievements = userAchievements.slice(0, 8);
+            
+            container.innerHTML = displayAchievements.map(ach => `
+                <div class="achievement-card ${ach.unlocked ? '' : 'locked'}">
+                    ${!ach.unlocked ? '<div style="position: absolute; top: 15px; right: 15px; font-size: 1.5em;">🔒</div>' : ''}
                     <div class="achievement-icon">${ach.icon}</div>
                     <div class="achievement-name">${ach.name}</div>
-                    <p style="font-size: 0.9em; opacity: 0.8;">${ach.description}</p>
+                    <div class="achievement-desc">${ach.description}</div>
+                    <div style="margin-top: 15px; color: var(--neon-green); font-family: 'Orbitron', sans-serif; font-weight: 700;">+${ach.xp} XP</div>
                 </div>
             `).join('');
-        }
-        
-        // Image Upload Functions
-        function uploadAvatar() {
-            document.getElementById('avatar-upload').click();
-        }
-        
-        function uploadBanner() {
-            document.getElementById('banner-upload').click();
-        }
-        
-        function handleAvatarUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
             
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File too large! Max 5MB');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const user = JSON.parse(localStorage.getItem('arcadeUser'));
-                user.avatar = e.target.result;
-                localStorage.setItem('arcadeUser', JSON.stringify(user));
-                document.getElementById('user-avatar').src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            // Add "View All" card
+            container.innerHTML += `
+                <div class="achievement-card" style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(191, 0, 255, 0.1);" onclick="window.location.href='achievements.html'">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
+                        <div class="achievement-name">View All</div>
+                        <div class="achievement-desc">${ALL_ACHIEVEMENTS.length} total achievements</div>
+                    </div>
+                </div>
+            `;
         }
         
-        function handleBannerUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File too large! Max 5MB');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const user = JSON.parse(localStorage.getItem('arcadeUser'));
-                user.banner = e.target.result;
-                localStorage.setItem('arcadeUser', JSON.stringify(user));
-                document.getElementById('profile-banner').src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        // XP TRACKING FUNCTIONS - Call these from game/movie pages
-        window.addGameXP = function() {
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
+        // ========== PROFILE LOADING ==========
+        function loadProfile() {
+            const user = getUser();
             if (!user) return;
             
-            user.xp += XP_PER_GAME;
-            user.coins += COINS_PER_GAME;
-            user.gamesPlayed = (user.gamesPlayed || 0) + 1;
-            user.level = calculateLevel(user.xp);
+            // Update username
+            document.getElementById('username').textContent = user.username.toUpperCase();
             
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            console.log(`+${XP_PER_GAME} XP, +${COINS_PER_GAME} Coins for playing a game!`);
+            // Update avatar and banner
+            document.getElementById('user-avatar').src = user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.username;
+            document.getElementById('profile-banner').src = user.banner || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop';
+            
+            // Update level and XP
+            const level = user.level || 1;
+            const xp = user.xp || 0;
+            const xpNeeded = xpForNextLevel(level);
+            const xpProgress = ((xp % xpNeeded) / xpNeeded) * 100;
+            
+            document.getElementById('user-level').textContent = level;
+            document.getElementById('xp-bar').style.width = xpProgress + '%';
+            document.getElementById('xp-text').textContent = `${xp} / ${xpNeeded} XP`;
+            
+            // Update stats
+            document.getElementById('stat-achievements').textContent = (user.achievements || []).length;
+            document.getElementById('stat-games').textContent = user.gamesPlayed || 0;
+            document.getElementById('stat-movies').textContent = user.moviesWatched || 0;
+            document.getElementById('stat-coins').textContent = (user.coins || 0).toLocaleString();
+            document.getElementById('stat-xp').textContent = xp.toLocaleString();
+            
+            // Update join date
+            if (user.joinDate) {
+                const joinDate = new Date(user.joinDate);
+                document.getElementById('stat-joined').textContent = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            } else {
+                // If no join date exists, set it to now
+                user.joinDate = new Date().toISOString();
+                saveUser(user);
+                document.getElementById('stat-joined').textContent = 'Just now';
+            }
+            
+            // Load badges
+            loadBadges();
+            
+            // Load achievements
+            loadAchievements();
+            
+            // Check for new achievements
+            checkAchievements();
         }
         
-        window.addMovieXP = function() {
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
-            if (!user) return;
-            
-            user.xp += XP_PER_MOVIE;
-            user.coins += COINS_PER_MOVIE;
-            user.moviesWatched = (user.moviesWatched || 0) + 1;
-            user.level = calculateLevel(user.xp);
-            
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            console.log(`+${XP_PER_MOVIE} XP, +${COINS_PER_MOVIE} Coins for watching a movie!`);
+        // ========== MODAL FUNCTIONS ==========
+        function openAvatarModal() {
+            document.getElementById('avatar-modal').classList.add('active');
+            document.getElementById('avatar-preview').style.display = 'none';
         }
         
+        function openBannerModal() {
+            document.getElementById('banner-modal').classList.add('active');
+            document.getElementById('banner-preview').style.display = 'none';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            avatarFile = null;
+            bannerFile = null;
+        }
+        
+        // ========== LOGOUT ==========
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('arcadeUser');
-                window.location.reload();
+                window.location.href = 'index.html';
             }
         }
         
-        // Initialize
-        checkUser();
+        // ========== NOTIFICATIONS ==========
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+        
+        // ========== INITIALIZE ==========
+        loadProfile();
+        
+        // EXPOSED FUNCTIONS FOR OTHER PAGES
+        window.addXP = addXP;
+        window.trackGamePlayed = trackGamePlayed;
+        window.trackMovieWatched = trackMovieWatched;
     </script>
 </body>
 </html>

@@ -93,32 +93,15 @@
             transform: translateY(-3px);
         }
         
-        .xp-notification {
-            position: fixed;
-            top: 80px;
-            right: 30px;
-            padding: 20px 30px;
-            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
-            color: white;
-            border-radius: 15px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 1.2em;
-            z-index: 10000;
-            box-shadow: 0 0 40px var(--neon-green);
-            animation: slideIn 0.5s ease;
-            display: none;
+        .bot-btn {
+            background: linear-gradient(135deg, #39ff14, #00f3ff) !important;
+            border: none !important;
+            color: #000 !important;
         }
         
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .profile-btn {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink)) !important;
+            border: none !important;
         }
         
         .container {
@@ -144,6 +127,77 @@
             font-size: 1.2em;
             margin-bottom: 60px;
             opacity: 0.9;
+        }
+        
+        .xp-banner {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            border: 3px solid var(--neon-green);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 50px;
+            text-align: center;
+            box-shadow: 0 0 40px var(--neon-green);
+        }
+        
+        .xp-banner h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            color: var(--darker);
+            margin-bottom: 10px;
+        }
+        
+        .xp-banner p {
+            font-size: 1.2em;
+            color: var(--darker);
+            font-weight: 700;
+        }
+        
+        .live-player-section {
+            background: rgba(5, 5, 16, 0.95);
+            border: 3px solid var(--neon-green);
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 60px;
+            box-shadow: 0 0 60px rgba(57, 255, 20, 0.3);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .live-dot {
+            width: 15px;
+            height: 15px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--neon-green);
+            animation: blink 1.5s ease infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .live-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            color: var(--neon-green);
+            text-shadow: 0 0 20px var(--neon-green);
+            letter-spacing: 2px;
+        }
+
+        .pluto-player {
+            width: 100%;
+            height: 600px;
+            border: 4px solid var(--neon-green);
+            border-radius: 20px;
+            box-shadow: 0 0 40px var(--neon-green);
+            background: #000;
         }
         
         .section-header {
@@ -354,10 +408,41 @@
             background: #000;
         }
         
+        .xp-notification {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            padding: 20px 30px;
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            color: var(--darker);
+            border-radius: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.2em;
+            z-index: 20000;
+            box-shadow: 0 0 50px var(--neon-green);
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px;
+            margin-top: 80px;
+            border-top: 2px solid rgba(0, 243, 255, 0.2);
+            opacity: 0.7;
+        }
+        
         @media (max-width: 768px) {
             .page-title { font-size: 2.5em; }
             .movies-grid { grid-template-columns: 1fr; }
+            .pluto-player { height: 400px; }
             .custom-player { height: 60vh; }
+            .nav-bar { flex-direction: column; }
         }
     </style>
 </head>
@@ -369,13 +454,10 @@
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
-            <a href="profile.html" class="nav-link">MY PROFILE</a>
+            <a href="bot.html" class="nav-link bot-btn">DIANE BOT 🤖</a>
+            <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
         </div>
     </nav>
-    
-    <div class="xp-notification" id="xp-notification">
-        🎬 +25 XP | +5 🪙 Coins
-    </div>
     
     <div class="container">
         <h1 class="page-title">🎬 WATCH 40+ DIANE KEATON FILMS 🎬</h1>
@@ -383,6 +465,30 @@
             Stream 40+ classic Diane Keaton movies completely FREE!<br>
             Powered by YouTube, Tubi and Pluto TV
         </p>
+        
+        <!-- XP REWARD BANNER -->
+        <div class="xp-banner">
+            <h3>⚡ EARN XP BY WATCHING! ⚡</h3>
+            <p>Get +25 XP for every movie you watch! Level up while enjoying classics!</p>
+        </div>
+        
+        <!-- PLUTO TV LIVE PLAYER -->
+        <div class="live-player-section">
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                <h2 class="live-title">📡 PLUTO TV LIVE - 24/7 STREAMING</h2>
+            </div>
+            <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px; opacity: 0.9;">
+                Watch classic movies LIVE 24/7! No account needed.
+            </p>
+            <iframe 
+                class="pluto-player"
+                src="https://pluto.tv/en/live-tv/pluto-tv-classic-movies"
+                allowfullscreen
+                allow="autoplay; encrypted-media"
+                frameborder="0">
+            </iframe>
+        </div>
 
         <div class="section-header youtube">
             <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube">
@@ -404,6 +510,11 @@
         </div>
         
         <div class="movies-grid" id="pluto-movies"></div>
+    </div>
+    
+    <div class="footer">
+        <p>💜 Diane Keaton Memorial Arcade © 2025</p>
+        <p style="font-size: 0.9em; margin-top: 10px;">40+ Movies Streaming Free</p>
     </div>
     
     <!-- Custom Video Player Modal -->
@@ -438,16 +549,7 @@
             {title:"Hampstead", year:"2017", desc:"American widow in London.", url:"https://tubitv.com/movies/533882", poster:"https://m.media-amazon.com/images/M/MV5BMjMyODQ0ODYyNl5BMl5BanBnXkFtZTgwNDU4NDY1MTI@._V1_.jpg"},
             {title:"Darling Companion", year:"2012", desc:"Family searches for lost dog.", url:"https://tubitv.com/movies/440915", poster:"https://m.media-amazon.com/images/M/MV5BMTU4ODM3MzA0MV5BMl5BanBnXkFtZTcwMjk1NjYwNw@@._V1_.jpg"},
             {title:"Poms", year:"2019", desc:"Cheerleading squad at retirement home.", url:"https://tubitv.com/movies/534189", poster:"https://m.media-amazon.com/images/M/MV5BOWZmMTEzMDUtYjk1OC00YzQ4LWFjNzYtMjE0MTY3NjI5NzVhXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg"},
-            {title:"Smother", year:"2008", desc:"Mother moves in with son.", url:"https://tubitv.com/movies/400948", poster:"https://m.media-amazon.com/images/M/MV5BMTg5NzMxNDQ4M15BMl5BanBnXkFtZTcwOTI4MDk0MQ@@._V1_.jpg"},
-            {title:"Love Weddings Disasters", year:"2020", desc:"Boston romantic comedy.", url:"https://tubitv.com/movies/596033", poster:"https://m.media-amazon.com/images/M/MV5BNmQ1YmVlZTAtYmQ2MC00OGIxLTk1OGQtM2M5YWVlMmY3ZDg2XkEyXkFqcGdeQXVyNzEzNjU1NDg@._V1_.jpg"},
-            {title:"Crimes of the Heart", year:"1986", desc:"Three sisters reunite.", url:"https://tubitv.com/movies/456331", poster:"https://m.media-amazon.com/images/M/MV5BMTU1MTI1OTUyN15BMl5BanBnXkFtZTcwMjg5NzQyNA@@._V1_.jpg"},
-            {title:"Manhattan", year:"1979", desc:"Woody Allen classic.", url:"https://tubitv.com/movies/400948", poster:"https://m.media-amazon.com/images/M/MV5BMTU2Mzc5MTMtNjgyNi00NGI1LTk0M2YtMzhmYjc5YzFjMDBiXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
-            {title:"The Only Thrill", year:"1997", desc:"Decades-spanning romance.", url:"https://tubitv.com/movies/477192", poster:"https://m.media-amazon.com/images/M/MV5BMTEzNzQ5MTI3NjReQTJeQWpwZ15BbWU3MDM4NTYzMjI@._V1_.jpg"},
-            {title:"On Thin Ice", year:"2003", desc:"Widow turns to drug dealing.", url:"https://tubitv.com/movies/438891", poster:"https://m.media-amazon.com/images/M/MV5BMTY2MTMxMzY4M15BMl5BanBnXkFtZTcwNzg0NTIyMQ@@._V1_.jpg"},
-            {title:"Mamas Boy", year:"2007", desc:"Man living with mother.", url:"https://tubitv.com/movies/418624", poster:"https://m.media-amazon.com/images/M/MV5BMTYxNDU0MzE1MV5BMl5BanBnXkFtZTcwMzU1OTIzMw@@._V1_.jpg"},
-            {title:"Radio Days", year:"1987", desc:"Nostalgic 1940s radio era.", url:"https://tubitv.com/movies/451027", poster:"https://m.media-amazon.com/images/M/MV5BNjEwNzM2MTk1MF5BMl5BanBnXkFtZTcwMzk2Mzc1NA@@._V1_.jpg"},
-            {title:"Interiors", year:"1978", desc:"Dysfunctional family drama.", url:"https://tubitv.com/movies/481156", poster:"https://m.media-amazon.com/images/M/MV5BMTk0NzE3NTExNl5BMl5BanBnXkFtZTcwODgyODgyNA@@._V1_.jpg"},
-            {title:"Harry and Walter", year:"1976", desc:"Period comedy.", url:"https://tubitv.com/movies/527336", poster:"https://m.media-amazon.com/images/M/MV5BNjE4MjM0Njk0N15BMl5BanBnXkFtZTcwMzI5NDcyMQ@@._V1_.jpg"}
+            {title:"Smother", year:"2008", desc:"Mother moves in with son.", url:"https://tubitv.com/movies/400948", poster:"https://m.media-amazon.com/images/M/MV5BMTg5NzMxNDQ4M15BMl5BanBnXkFtZTcwOTI4MDk0MQ@@._V1_.jpg"}
         ];
         
         const plutoMovies = [
@@ -457,43 +559,61 @@
             {title:"Manhattan", year:"1979", desc:"NYC love letter.", url:"https://pluto.tv/en/on-demand/movies/manhattan-1979-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTU2Mzc5MTMtNjgyNi00NGI1LTk0M2YtMzhmYjc5YzFjMDBiXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg"},
             {title:"Love and Death", year:"1975", desc:"Russian lit comedy.", url:"https://pluto.tv/en/on-demand/movies/love-and-death-1975-1-1", poster:"https://m.media-amazon.com/images/M/MV5BZDk5OWVjMjItMDk5NS00ZTljLThkNTItMzQ4NzcyYWM3MjQ3XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg"},
             {title:"Radio Days", year:"1987", desc:"1940s radio era.", url:"https://pluto.tv/en/on-demand/movies/radio-days-1987-1-1", poster:"https://m.media-amazon.com/images/M/MV5BNjEwNzM2MTk1MF5BMl5BanBnXkFtZTcwMzk2Mzc1NA@@._V1_.jpg"},
-            {title:"Interiors", year:"1978", desc:"Family drama.", url:"https://pluto.tv/en/on-demand/movies/interiors-1978-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTk0NzE3NTExNl5BMl5BanBnXkFtZTcwODgyODgyNA@@._V1_.jpg"},
-            {title:"Reds", year:"1981", desc:"Warren Beatty epic.", url:"https://pluto.tv/en/on-demand/movies/reds-1981-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTQwNTY5NTEyMl5BMl5BanBnXkFtZTcwOTg4NjcyNA@@._V1_.jpg"},
-            {title:"Baby Boom", year:"1987", desc:"Career woman comedy.", url:"https://pluto.tv/en/on-demand/movies/baby-boom-1987-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTUwNzA2MTg5Nl5BMl5BanBnXkFtZTcwMTQyNDQyNA@@._V1_.jpg"},
-            {title:"Love the Coopers", year:"2015", desc:"Family Christmas.", url:"https://pluto.tv/en/on-demand/movies/love-the-coopers-2015-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTczNzcyNDY2N15BMl5BanBnXkFtZTgwNjk5OTE0NzE@._V1_.jpg"},
-            {title:"The Only Thrill", year:"1997", desc:"Romantic drama.", url:"https://pluto.tv/en/on-demand/movies/the-only-thrill-1997-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTEzNzQ5MTI3NjReQTJeQWpwZ15BbWU3MDM4NTYzMjI@._V1_.jpg"},
-            {title:"Crossed Over", year:"2002", desc:"Death row drama.", url:"https://pluto.tv/en/on-demand/movies/crossed-over-2002-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTc2MTk1NTUyMV5BMl5BanBnXkFtZTcwNzE4MjQyMQ@@._V1_.jpg"},
-            {title:"Love Weddings Disasters", year:"2020", desc:"Romantic anthology.", url:"https://pluto.tv/en/on-demand/movies/love-weddings-other-disasters-2020-1-1", poster:"https://m.media-amazon.com/images/M/MV5BNmQ1YmVlZTAtYmQ2MC00OGIxLTk1OGQtM2M5YWVlMmY3ZDg2XkEyXkFqcGdeQXVyNzEzNjU1NDg@._V1_.jpg"},
-            {title:"Mamas Boy", year:"2007", desc:"Man with mother.", url:"https://pluto.tv/en/on-demand/movies/mamas-boy-2007-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTYxNDU0MzE1MV5BMl5BanBnXkFtZTcwMzU1OTIzMw@@._V1_.jpg"},
-            {title:"Poms", year:"2019", desc:"Cheerleading squad.", url:"https://pluto.tv/en/on-demand/movies/poms-2019-1-1", poster:"https://m.media-amazon.com/images/M/MV5BOWZmMTEzMDUtYjk1OC00YzQ4LWFjNzYtMjE0MTY3NjI5NzVhXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg"}
+            {title:"Baby Boom", year:"1987", desc:"Career woman comedy.", url:"https://pluto.tv/en/on-demand/movies/baby-boom-1987-1-1", poster:"https://m.media-amazon.com/images/M/MV5BMTUwNzA2MTg5Nl5BMl5BanBnXkFtZTcwMTQyNDQyNA@@._V1_.jpg"}
         ];
         
-        // XP TRACKING FUNCTION
-        function addMovieXP() {
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
-            if (!user) {
-                console.log('No user profile found - create profile to earn XP!');
-                return;
+        // TRACK MOVIE WATCHING - ADD XP
+        function trackMovieWatched(movieTitle, platform) {
+            try {
+                const user = JSON.parse(localStorage.getItem('arcadeUser'));
+                if (!user) return;
+                
+                // Check if already watched this movie
+                if (!user.moviesWatched) user.moviesWatched = 0;
+                if (!user.moviesHistory) user.moviesHistory = {};
+                
+                const movieKey = `${platform}_${movieTitle}`;
+                if (user.moviesHistory[movieKey]) {
+                    console.log('Movie already watched - no XP');
+                    return;
+                }
+                
+                // Add 25 XP for watching a movie
+                user.xp = (user.xp || 0) + 25;
+                user.moviesWatched = user.moviesWatched + 1;
+                user.level = Math.floor(Math.sqrt(user.xp / 100)) + 1;
+                
+                // Track this specific movie
+                user.moviesHistory[movieKey] = {
+                    title: movieTitle,
+                    platform: platform,
+                    watchedAt: new Date().toISOString()
+                };
+                
+                localStorage.setItem('arcadeUser', JSON.stringify(user));
+                
+                // Show XP notification
+                showXPNotification(movieTitle);
+                
+                console.log(`✅ Tracked movie: ${movieTitle} on ${platform} (+25 XP)`);
+            } catch (error) {
+                console.error('Failed to track movie:', error);
             }
+        }
+        
+        function showXPNotification(movieTitle) {
+            const notification = document.createElement('div');
+            notification.className = 'xp-notification';
+            notification.innerHTML = `
+                <div style="font-size: 1.5em; margin-bottom: 5px;">⚡ +25 XP!</div>
+                <div style="font-size: 0.9em;">Watched: ${movieTitle}</div>
+            `;
+            document.body.appendChild(notification);
             
-            const XP_PER_MOVIE = 25;
-            const COINS_PER_MOVIE = 5;
-            
-            user.xp = (user.xp || 0) + XP_PER_MOVIE;
-            user.coins = (user.coins || 0) + COINS_PER_MOVIE;
-            user.moviesWatched = (user.moviesWatched || 0) + 1;
-            user.level = Math.floor(Math.sqrt(user.xp / 100)) + 1;
-            
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            
-            // Show XP notification
-            const notification = document.getElementById('xp-notification');
-            notification.style.display = 'block';
             setTimeout(() => {
-                notification.style.display = 'none';
+                notification.style.animation = 'slideIn 0.5s ease reverse';
+                setTimeout(() => notification.remove(), 500);
             }, 5000);
-            
-            console.log(`✅ +${XP_PER_MOVIE} XP, +${COINS_PER_MOVIE} Coins! Level: ${user.level}`);
         }
         
         function createMovieCard(movie, platform) {
@@ -535,8 +655,10 @@
             
             modal.classList.add('active');
             
-            // 🎬 AWARD XP FOR WATCHING MOVIE
-            addMovieXP();
+            // TRACK MOVIE WATCHED - ADD XP AFTER 5 MINUTES
+            setTimeout(() => {
+                trackMovieWatched(movie.title, platform);
+            }, 300000); // 5 minutes = 300,000 ms
         }
         
         function closeVideo() {
@@ -548,9 +670,12 @@
         
         // Close video on escape key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeVideo();
+            if (e.key === 'Escape') {
+                closeVideo();
+            }
         });
         
+        // Initialize
         loadMovies();
     </script>
 </body>

@@ -296,7 +296,7 @@
             <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="admin.html" class="nav-link admin-link" id="admin-link" style="display: none;">🛡️ ADMIN PANEL</a>
+            <a href="admin.html" class="nav-link admin-link" id="adminLink" style="display: none;">🛡️ ADMIN PANEL</a>
         </div>
     </nav>
     
@@ -338,19 +338,19 @@
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                 <div style="background: rgba(0, 243, 255, 0.1); border: 2px solid var(--neon-blue); border-radius: 15px; padding: 20px; text-align: center;">
-                    <div style="font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: var(--neon-blue);" id="stat-level">1</div>
+                    <div style="font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: var(--neon-blue);" id="statLevel">1</div>
                     <div style="opacity: 0.8; margin-top: 10px;">Level</div>
                 </div>
                 <div style="background: rgba(0, 243, 255, 0.1); border: 2px solid var(--neon-blue); border-radius: 15px; padding: 20px; text-align: center;">
-                    <div style="font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: var(--neon-green);" id="stat-xp">0</div>
+                    <div style="font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: var(--neon-green);" id="statXp">0</div>
                     <div style="opacity: 0.8; margin-top: 10px;">Total XP</div>
                 </div>
                 <div style="background: rgba(0, 243, 255, 0.1); border: 2px solid var(--neon-blue); border-radius: 15px; padding: 20px; text-align: center;">
-                    <div style="font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: #ffd700;" id="stat-coins">0</div>
+                    <div style="font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: #ffd700;" id="statCoins">0</div>
                     <div style="opacity: 0.8; margin-top: 10px;">Coins 🪙</div>
                 </div>
                 <div style="background: rgba(0, 243, 255, 0.1); border: 2px solid var(--neon-blue); border-radius: 15px; padding: 20px; text-align: center;">
-                    <div style="font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: var(--neon-purple);" id="stat-games">0</div>
+                    <div style="font-family: 'Orbitron', sans-serif; font-size: 2.5em; color: var(--neon-purple);" id="statGames">0</div>
                     <div style="opacity: 0.8; margin-top: 10px;">Games Played</div>
                 </div>
             </div>
@@ -398,40 +398,46 @@
     </div>
     
     <script>
+        const ADMIN_EMAILS = [
+            'tannerkurrasch@gmail.com',
+            'kurraschgaminmerchstore@gmail.com',
+            'gamekillerszone@gmail.com'
+        ];
+        
         let currentUser = null;
         
-        async function loadUserData() {
-            try {
-                const response = await fetch('/api/user');
-                if (!response.ok) {
-                    window.location.href = '/';
-                    return;
-                }
-                
-                currentUser = await response.json();
-                
-                // Update form fields
-                document.getElementById('username').value = currentUser.username;
-                document.getElementById('email').value = currentUser.email;
-                
-                // Update stats
-                document.getElementById('stat-level').textContent = currentUser.level;
-                document.getElementById('stat-xp').textContent = currentUser.xp.toLocaleString();
-                document.getElementById('stat-coins').textContent = currentUser.coins.toLocaleString();
-                document.getElementById('stat-games').textContent = currentUser.total_games_played;
-                
-                // Show admin link if user is admin
-                if (currentUser.is_admin) {
-                    document.getElementById('admin-link').style.display = 'block';
-                }
-                
-            } catch (error) {
-                console.error('Failed to load user data:', error);
-                showNotification('Failed to load settings', 'error');
+        function loadUserData() {
+            const userData = localStorage.getItem('arcadeUser');
+            
+            if (!userData) {
+                alert('Please login first!');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Update form fields
+            document.getElementById('username').value = currentUser.username || 'Unknown';
+            document.getElementById('email').value = currentUser.email || 'No email';
+            
+            // Calculate level from XP
+            const xp = currentUser.xp || 0;
+            const level = Math.floor(Math.sqrt(xp / 100)) + 1;
+            
+            // Update stats
+            document.getElementById('statLevel').textContent = level;
+            document.getElementById('statXp').textContent = xp.toLocaleString();
+            document.getElementById('statCoins').textContent = (currentUser.coins || 0).toLocaleString();
+            document.getElementById('statGames').textContent = (currentUser.gamesPlayed || 0).toLocaleString();
+            
+            // Show admin link if user is admin
+            if (ADMIN_EMAILS.includes(currentUser.email)) {
+                document.getElementById('adminLink').style.display = 'block';
             }
         }
         
-        async function savePassword() {
+        function savePassword() {
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
@@ -450,25 +456,13 @@
                 return;
             }
             
-            try {
-                const response = await fetch('/api/user/password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to change password');
-                }
-                
-                showNotification('Password changed successfully!', 'success');
-                document.getElementById('password').value = '';
-                document.getElementById('confirmPassword').value = '';
-                
-            } catch (error) {
-                console.error('Password change error:', error);
-                showNotification('Failed to change password', 'error');
-            }
+            // Update password in localStorage
+            currentUser.password = password;
+            localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+            
+            showNotification('Password changed successfully!', 'success');
+            document.getElementById('password').value = '';
+            document.getElementById('confirmPassword').value = '';
         }
         
         function showDeleteModal() {
@@ -479,27 +473,29 @@
             document.getElementById('deleteModal').classList.remove('active');
         }
         
-        async function deleteAccount() {
-            try {
-                const response = await fetch('/api/user/delete', {
-                    method: 'DELETE'
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to delete account');
+        function deleteAccount() {
+            if (!currentUser) return;
+            
+            // Remove all user data from localStorage
+            localStorage.removeItem('arcadeUser');
+            localStorage.removeItem('user_' + currentUser.username);
+            
+            // Clear all user-specific data
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.includes(currentUser.username) || key.includes(currentUser.email)) {
+                    keysToRemove.push(key);
                 }
-                
-                showNotification('Account deleted', 'success');
-                
-                // Redirect to home after 1 second
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
-                
-            } catch (error) {
-                console.error('Delete account error:', error);
-                showNotification('Failed to delete account', 'error');
             }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            showNotification('Account deleted successfully', 'success');
+            
+            // Redirect to home after 1 second
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
         }
         
         function showNotification(message, type = 'info') {

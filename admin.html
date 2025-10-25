@@ -285,6 +285,10 @@
             display: none;
         }
         
+        .alert.show {
+            display: block;
+        }
+        
         .alert-success {
             background: rgba(57, 255, 20, 0.2);
             border: 2px solid var(--neon-green);
@@ -297,24 +301,23 @@
             color: var(--neon-red);
         }
         
-        .staff-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .staff-card {
+        .application-card {
             background: rgba(191, 0, 255, 0.1);
             border: 2px solid var(--neon-purple);
             border-radius: 15px;
-            padding: 20px;
-            transition: all 0.3s;
+            padding: 25px;
+            margin-bottom: 20px;
         }
         
-        .staff-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 30px var(--neon-purple);
+        .application-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .badge-preview {
+            font-size: 3em;
         }
         
         @media (max-width: 768px) {
@@ -333,14 +336,13 @@
     <div class="container">
         <div class="admin-nav">
             <button class="admin-tab active" onclick="showSection('users')">👥 USER MANAGEMENT</button>
-            <button class="admin-tab" onclick="showSection('staff')">🛡️ STAFF MANAGEMENT</button>
+            <button class="admin-tab" onclick="showSection('applications')">📋 BADGE APPLICATIONS</button>
             <button class="admin-tab" onclick="showSection('moderation')">⚖️ MODERATION</button>
-            <button class="admin-tab" onclick="showSection('content')">📝 CONTENT MANAGEMENT</button>
-            <button class="admin-tab" onclick="showSection('achievements')">🏆 ACHIEVEMENTS</button>
-            <button class="admin-tab" onclick="showSection('leaderboard')">📊 LEADERBOARDS</button>
+            <button class="admin-tab" onclick="showSection('rewards')">🎁 GIVE REWARDS</button>
+            <button class="admin-tab" onclick="showSection('content')">📄 CONTENT</button>
         </div>
         
-        <!-- USER MANAGEMENT SECTION -->
+        <!-- USER MANAGEMENT -->
         <div class="admin-section active" id="users">
             <div class="admin-panel">
                 <h2 class="panel-header">👥 User Management</h2>
@@ -358,55 +360,26 @@
                             <th>Username</th>
                             <th>Email</th>
                             <th>Level</th>
+                            <th>Coins</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="userTableBody">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 30px; opacity: 0.6;">Loading users from database...</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="userTableBody"></tbody>
                 </table>
             </div>
         </div>
         
-        <!-- STAFF MANAGEMENT SECTION -->
-        <div class="admin-section" id="staff">
+        <!-- BADGE APPLICATIONS -->
+        <div class="admin-section" id="applications">
             <div class="admin-panel">
-                <h2 class="panel-header">🛡️ Staff Management</h2>
-                
-                <div class="form-group">
-                    <label class="form-label">Add Staff Member by Email</label>
-                    <input type="email" class="form-input" id="staffEmail" placeholder="Enter staff email address">
-                    <button class="btn btn-success" onclick="addStaff()" style="margin-top: 15px;">➕ ADD STAFF</button>
-                </div>
-                
-                <div class="alert alert-success" id="staffAlert"></div>
-                
-                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-purple); margin: 30px 0 20px;">Current Staff Members</h3>
-                
-                <div class="staff-list" id="staffList">
-                    <div class="staff-card">
-                        <h4 style="font-family: 'Orbitron', sans-serif; color: var(--neon-red); margin-bottom: 10px;">🔥 SUPER ADMIN</h4>
-                        <p style="margin: 10px 0;">tannerkurrasch@gmail.com</p>
-                        <span class="status-badge status-active">PERMANENT</span>
-                    </div>
-                    <div class="staff-card">
-                        <h4 style="font-family: 'Orbitron', sans-serif; color: var(--neon-red); margin-bottom: 10px;">🔥 SUPER ADMIN</h4>
-                        <p style="margin: 10px 0;">kurraschgamingmerchstore@gmail.com</p>
-                        <span class="status-badge status-active">PERMANENT</span>
-                    </div>
-                    <div class="staff-card">
-                        <h4 style="font-family: 'Orbitron', sans-serif; color: var(--neon-red); margin-bottom: 10px;">🔥 SUPER ADMIN</h4>
-                        <p style="margin: 10px 0;">gamekillerszones@gmail.com</p>
-                        <span class="status-badge status-active">PERMANENT</span>
-                    </div>
-                </div>
+                <h2 class="panel-header">📋 Badge Applications</h2>
+                <div class="alert alert-success" id="appAlert"></div>
+                <div id="applicationsList"></div>
             </div>
         </div>
         
-        <!-- MODERATION SECTION -->
+        <!-- MODERATION -->
         <div class="admin-section" id="moderation">
             <div class="admin-panel">
                 <h2 class="panel-header">⚖️ Moderation Tools</h2>
@@ -417,12 +390,14 @@
                 </div>
                 
                 <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-orange); margin: 30px 0 20px;">🖼️ Moderate User Images</h3>
-                <p style="margin-bottom: 20px; opacity: 0.8;">Review and remove user profile images and banners that violate Terms of Service</p>
                 <button class="btn btn-warning" onclick="moderateImages()">🖼️ VIEW USER IMAGES</button>
+                <div id="imagePreview" style="margin-top: 20px;"></div>
                 
                 <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-orange); margin: 30px 0 20px;">📊 Reset User Progress</h3>
                 <button class="btn btn-warning" onclick="resetLevel()">🔄 RESET LEVEL</button>
                 <button class="btn btn-warning" onclick="resetAchievements()">🏆 RESET ACHIEVEMENTS</button>
+                <button class="btn btn-warning" onclick="resetCoins()">🪙 RESET COINS</button>
+                <button class="btn btn-danger" onclick="resetAllData()">⚠️ RESET ALL DATA</button>
                 
                 <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-red); margin: 30px 0 20px;">🚫 Restrictions & Bans</h3>
                 
@@ -441,15 +416,57 @@
                 <button class="btn btn-warning" onclick="restrictUserTime()">⏱️ APPLY RESTRICTION</button>
                 <button class="btn btn-danger" onclick="banFromMovies()">🎬 BAN FROM MOVIES</button>
                 <button class="btn btn-danger" onclick="banFromSite()">🚫 BAN FROM SITE</button>
+                <button class="btn btn-success" onclick="unbanUser()">✅ UNBAN USER</button>
                 
                 <div class="alert alert-success" id="modAlert" style="margin-top: 30px;"></div>
             </div>
         </div>
         
-        <!-- CONTENT MANAGEMENT SECTION -->
+        <!-- GIVE REWARDS -->
+        <div class="admin-section" id="rewards">
+            <div class="admin-panel">
+                <h2 class="panel-header">🎁 Give Rewards</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="rewardUsername" placeholder="Enter username">
+                </div>
+                
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-blue); margin: 30px 0 20px;">🪙 Give Coins</h3>
+                <div class="form-group">
+                    <label class="form-label">Coin Amount</label>
+                    <input type="number" class="form-input" id="coinAmount" placeholder="Enter amount">
+                </div>
+                <button class="btn btn-success" onclick="giveCoins()">💰 GIVE COINS</button>
+                
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-blue); margin: 30px 0 20px;">⚡ Give XP</h3>
+                <div class="form-group">
+                    <label class="form-label">XP Amount</label>
+                    <input type="number" class="form-input" id="xpAmount" placeholder="Enter amount">
+                </div>
+                <button class="btn btn-success" onclick="giveXP()">⚡ GIVE XP</button>
+                
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-blue); margin: 30px 0 20px;">🏅 Give Badge</h3>
+                <div class="form-group">
+                    <label class="form-label">Badge Type</label>
+                    <select class="form-select" id="badgeType">
+                        <option value="verified_discord">✅ Verified Discord</option>
+                        <option value="org_badge">🏢 Organization</option>
+                        <option value="roblox_badge">🎮 Roblox Developer</option>
+                        <option value="premium_badge">💎 Premium</option>
+                        <option value="founder_badge">👑 Founder</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="giveBadge()">🏅 GIVE BADGE</button>
+                
+                <div class="alert alert-success" id="rewardAlert" style="margin-top: 30px;"></div>
+            </div>
+        </div>
+        
+        <!-- CONTENT MANAGEMENT -->
         <div class="admin-section" id="content">
             <div class="admin-panel">
-                <h2 class="panel-header">📝 Content Management</h2>
+                <h2 class="panel-header">📄 Content Management</h2>
                 
                 <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-blue); margin-bottom: 20px;">📜 Terms of Service</h3>
                 <div class="form-group">
@@ -466,741 +483,670 @@
                 <div class="alert alert-success" id="contentAlert"></div>
             </div>
         </div>
-        
-        <!-- ACHIEVEMENTS SECTION -->
-        <div class="admin-section" id="achievements">
-            <div class="admin-panel">
-                <h2 class="panel-header">🏆 Achievement Management</h2>
-                
-                <div class="form-group">
-                    <label class="form-label">Achievement Name</label>
-                    <input type="text" class="form-input" id="achievementName" placeholder="Enter achievement name">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Achievement Icon (Emoji)</label>
-                    <input type="text" class="form-input" id="achievementIcon" placeholder="Enter emoji (e.g., 🏆)">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Achievement Description</label>
-                    <textarea class="form-textarea" id="achievementDesc" placeholder="Enter achievement description..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">XP Reward</label>
-                    <input type="number" class="form-input" id="achievementXP" placeholder="Enter XP amount">
-                </div>
-                
-                <button class="btn btn-success" onclick="addAchievement()">➕ ADD ACHIEVEMENT</button>
-                
-                <div class="alert alert-success" id="achievementAlert"></div>
-            </div>
-        </div>
-        
-        <!-- LEADERBOARD SECTION -->
-        <div class="admin-section" id="leaderboard">
-            <div class="admin-panel">
-                <h2 class="panel-header">📊 Leaderboard Management</h2>
-                
-                <div class="form-group">
-                    <label class="form-label">Select Game</label>
-                    <select class="form-select" id="leaderboardGame">
-                        <option>Motherload</option>
-                        <option>Happy Wheels</option>
-                        <option>Gun Blood</option>
-                        <option>Raft Wars</option>
-                        <option>Robot Unicorn Attack</option>
-                    </select>
-                </div>
-                
-                <button class="btn btn-primary" onclick="viewLeaderboard()">📊 VIEW LEADERBOARD</button>
-                <button class="btn btn-warning" onclick="resetLeaderboard()">🔄 RESET LEADERBOARD</button>
-                
-                <div class="alert alert-success" id="leaderboardAlert"></div>
-                
-                <table class="user-table" style="margin-top: 30px;">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Username</th>
-                            <th>Score</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboardTable">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 30px; opacity: 0.6;">Select a game to view leaderboard</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
     
     <script>
-        var adminEmails = [
-            "tannerkurrasch@gmail.com",
-            "kurraschgamingmerchstore@gmail.com",
-            "gamekillerszones@gmail.com"
+        const ADMIN_EMAILS = [
+            'tannerkurrasch@gmail.com',
+            'kurraschgaminmerchstore@gmail.com',
+            'gamekillerszone@gmail.com'
         ];
         
-        var staffMembers = [];
-        
         function checkAdminAccess() {
-            var userData = localStorage.getItem("arcadeUser");
+            const userData = localStorage.getItem('arcadeUser');
             if (!userData) {
-                alert("Access Denied: Please login first");
-                window.location.href = "profile.html";
+                alert('Access Denied: Please login first');
+                window.location.href = 'index.html';
                 return false;
             }
             
-            userData = JSON.parse(userData);
-            if (!adminEmails.includes(userData.email)) {
-                alert("Access Denied: Admin privileges required");
-                window.location.href = "index.html";
+            const user = JSON.parse(userData);
+            if (!ADMIN_EMAILS.includes(user.email)) {
+                alert('Access Denied: Admin privileges required');
+                window.location.href = 'index.html';
                 return false;
             }
             
-            document.getElementById("adminEmail").textContent = userData.email;
+            document.getElementById('adminEmail').textContent = user.email;
             loadUsers();
-            loadStaffList();
+            loadApplications();
+            loadContent();
             return true;
         }
         
-        async function loadUsers() {
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/users', {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    }
-                });
-                
-                if (response.ok) {
-                    var users = await response.json();
-                    displayUsers(users);
-                } else {
-                    throw new Error('Backend not available');
-                }
-            } catch (error) {
-                console.error('Error loading users:', error);
-                loadUsersFromLocalStorage();
-            }
-        }
-        
-        function loadUsersFromLocalStorage() {
-            var allUsers = [];
-            for (var i = 0; i < localStorage.length; i++) {
-                var key = localStorage.key(i);
+        function getAllUsers() {
+            const users = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
                 if (key.startsWith('user_')) {
                     try {
-                        var user = JSON.parse(localStorage.getItem(key));
-                        allUsers.push(user);
+                        const user = JSON.parse(localStorage.getItem(key));
+                        users.push(user);
                     } catch (e) {}
                 }
             }
-            
-            if (allUsers.length === 0) {
-                document.getElementById("userTableBody").innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px; opacity: 0.6;">No users found. Users will appear here when they sign up.</td></tr>';
-            } else {
-                displayUsers(allUsers);
-            }
+            return users;
         }
         
-        function displayUsers(users) {
-            var tbody = document.getElementById("userTableBody");
+        function loadUsers() {
+            const users = getAllUsers();
+            const tbody = document.getElementById('userTableBody');
             
-            if (!users || users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px; opacity: 0.6;">No users found</td></tr>';
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px; opacity: 0.6;">No users found</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = "";
-            users.forEach(function(user) {
-                var statusClass = user.banned ? "status-banned" : (user.restricted ? "status-restricted" : "status-active");
-                var statusText = user.banned ? "BANNED" : (user.restricted ? "RESTRICTED" : "ACTIVE");
+            tbody.innerHTML = '';
+            users.forEach(user => {
+                const level = Math.floor(Math.sqrt((user.xp || 0) / 100)) + 1;
+                const statusClass = user.banned ? 'status-banned' : (user.restricted ? 'status-restricted' : 'status-active');
+                const statusText = user.banned ? 'BANNED' : (user.restricted ? 'RESTRICTED' : 'ACTIVE');
                 
-                var row = '<tr>' +
-                    '<td>' + user.username + '</td>' +
-                    '<td>' + user.email + '</td>' +
-                    '<td>' + (user.level || 1) + '</td>' +
-                    '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
-                    '<td>' +
-                    '<button class="btn btn-warning" style="padding: 8px 20px; font-size: 0.8em;" onclick="restrictUser(\'' + user.username + '\', \'' + user.id + '\')">⚠️ RESTRICT</button>' +
-                    '<button class="btn btn-danger" style="padding: 8px 20px; font-size: 0.8em;" onclick="banUser(\'' + user.username + '\', \'' + user.id + '\')">🚫 BAN</button>' +
-                    '</td>' +
-                    '</tr>';
-                
+                const row = `
+                    <tr>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${level}</td>
+                        <td>${(user.coins || 0).toLocaleString()}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="btn btn-warning" style="padding: 8px 20px; font-size: 0.8em;" onclick="viewUserDetails('${user.username}')">👁️ VIEW</button>
+                        </td>
+                    </tr>
+                `;
                 tbody.innerHTML += row;
             });
         }
         
-        async function searchUsers() {
-            var searchTerm = document.getElementById("userSearch").value;
-            
+        function searchUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
             if (!searchTerm) {
                 loadUsers();
                 return;
             }
             
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/users/search?q=' + encodeURIComponent(searchTerm), {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    }
-                });
+            const users = getAllUsers().filter(u => 
+                u.username.toLowerCase().includes(searchTerm) || 
+                u.email.toLowerCase().includes(searchTerm)
+            );
+            
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                const level = Math.floor(Math.sqrt((user.xp || 0) / 100)) + 1;
+                const statusClass = user.banned ? 'status-banned' : (user.restricted ? 'status-restricted' : 'status-active');
+                const statusText = user.banned ? 'BANNED' : (user.restricted ? 'RESTRICTED' : 'ACTIVE');
                 
-                if (response.ok) {
-                    var users = await response.json();
-                    displayUsers(users);
-                    showAlert("userAlert", "Found " + users.length + " user(s)");
-                } else {
-                    showAlert("userAlert", "Search failed");
-                }
-            } catch (error) {
-                console.error('Search error:', error);
-                showAlert("userAlert", "Error searching users");
-            }
-        }
-        
-        async function restrictUser(username, userId) {
-            if (confirm("Restrict user: " + username + "?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/users/' + userId + '/restrict', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        },
-                        body: JSON.stringify({ restricted: true })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("userAlert", "User " + username + " has been restricted");
-                        loadUsers();
-                    } else {
-                        throw new Error('Backend not available');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    restrictUserLocal(username);
-                }
-            }
-        }
-        
-        function restrictUserLocal(username) {
-            var userData = JSON.parse(localStorage.getItem('user_' + username) || '{}');
-            userData.restricted = true;
-            userData.restrictedDate = new Date().toISOString();
-            localStorage.setItem('user_' + username, JSON.stringify(userData));
-            showAlert("userAlert", "User " + username + " has been restricted (Local Mode)");
-            loadUsers();
-        }
-        
-        async function banUser(username, userId) {
-            if (confirm("Ban user: " + username + " from the site?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/users/' + userId + '/ban', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        },
-                        body: JSON.stringify({ banned: true })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("userAlert", "User " + username + " has been banned");
-                        loadUsers();
-                    } else {
-                        throw new Error('Backend not available');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    banUserLocal(username);
-                }
-            }
-        }
-        
-        function banUserLocal(username) {
-            var userData = JSON.parse(localStorage.getItem('user_' + username) || '{}');
-            userData.banned = true;
-            userData.bannedDate = new Date().toISOString();
-            localStorage.setItem('user_' + username, JSON.stringify(userData));
-            showAlert("userAlert", "User " + username + " has been banned (Local Mode)");
-            loadUsers();
-        }
-        
-        async function addStaff() {
-            var email = document.getElementById("staffEmail").value;
-            if (!email) {
-                alert("Please enter an email address");
-                return;
-            }
-            
-            if (adminEmails.includes(email)) {
-                alert("This email already has Super Admin privileges");
-                return;
-            }
-            
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/staff', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    },
-                    body: JSON.stringify({ email: email })
-                });
-                
-                if (response.ok) {
-                    showAlert("staffAlert", "Staff member added: " + email);
-                    document.getElementById("staffEmail").value = "";
-                    loadStaffList();
-                } else {
-                    showAlert("staffAlert", "Failed to add staff member");
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert("staffAlert", "Error adding staff member");
-            }
-        }
-        
-        async function loadStaffList() {
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/staff', {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    }
-                });
-                
-                if (response.ok) {
-                    staffMembers = await response.json();
-                }
-            } catch (error) {
-                console.error('Error loading staff:', error);
-            }
-            
-            var staffList = document.getElementById("staffList");
-            var html = '<div class="staff-card"><h4 style="font-family: \'Orbitron\', sans-serif; color: var(--neon-red); margin-bottom: 10px;">🔥 SUPER ADMIN</h4><p style="margin: 10px 0;">tannerkurrasch@gmail.com</p><span class="status-badge status-active">PERMANENT</span></div>';
-            html += '<div class="staff-card"><h4 style="font-family: \'Orbitron\', sans-serif; color: var(--neon-red); margin-bottom: 10px;">🔥 SUPER ADMIN</h4><p style="margin: 10px 0;">kurraschgamingmerchstore@gmail.com</p><span class="status-badge status-active">PERMANENT</span></div>';
-            html += '<div class="staff-card"><h4 style="font-family: \'Orbitron\', sans-serif; color: var(--neon-red); margin-bottom: 10px;">🔥 SUPER ADMIN</h4><p style="margin: 10px 0;">gamekillerszones@gmail.com</p><span class="status-badge status-active">PERMANENT</span></div>';
-            
-            staffMembers.forEach(function(staff) {
-                html += '<div class="staff-card"><h4 style="font-family: \'Orbitron\', sans-serif; color: var(--neon-purple); margin-bottom: 10px;">🛡️ STAFF</h4><p style="margin: 10px 0;">' + staff.email + '</p><button class="btn btn-danger" style="padding: 8px 20px; font-size: 0.8em; margin-top: 10px;" onclick="removeStaff(\'' + staff.id + '\', \'' + staff.email + '\')">REMOVE</button></div>';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${level}</td>
+                        <td>${(user.coins || 0).toLocaleString()}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="btn btn-warning" style="padding: 8px 20px; font-size: 0.8em;" onclick="viewUserDetails('${user.username}')">👁️ VIEW</button>
+                        </td>
+                    </tr>
+                `;
             });
             
-            staffList.innerHTML = html;
+            showAlert('userAlert', `Found ${users.length} user(s)`);
         }
         
-        async function removeStaff(staffId, email) {
-            if (confirm("Remove staff member: " + email + "?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/staff/' + staffId, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("staffAlert", "Staff member removed: " + email);
-                        loadStaffList();
-                    } else {
-                        showAlert("staffAlert", "Failed to remove staff member");
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showAlert("staffAlert", "Error removing staff member");
-                }
-            }
-        }
-        
-        async function moderateImages() {
-            var username = document.getElementById("modUsername").value;
-            if (!username) {
-                alert("Please enter a username");
+        function viewUserDetails(username) {
+            const user = JSON.parse(localStorage.getItem('user_' + username));
+            if (!user) {
+                alert('User not found');
                 return;
             }
             
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/users/images?username=' + encodeURIComponent(username), {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    }
-                });
-                
-                if (response.ok) {
-                    var images = await response.json();
-                    showAlert("modAlert", "Found " + images.length + " image(s) for user: " + username);
-                } else {
-                    showAlert("modAlert", "User not found or has no images");
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert("modAlert", "Error loading user images");
-            }
+            const level = Math.floor(Math.sqrt((user.xp || 0) / 100)) + 1;
+            const badges = user.badges ? user.badges.join(', ') : 'None';
+            
+            alert(`User Details:\n\nUsername: ${user.username}\nEmail: ${user.email}\nLevel: ${level}\nXP: ${user.xp || 0}\nCoins: ${user.coins || 0}\nGames Played: ${user.gamesPlayed || 0}\nMovies Watched: ${user.moviesWatched || 0}\nBadges: ${badges}\n\nJoined: ${user.joinDate || 'Unknown'}`);
         }
         
-        async function resetLevel() {
-            var username = document.getElementById("modUsername").value;
-            if (!username) {
-                alert("Please enter a username");
-                return;
-            }
-            if (confirm("Reset level for user: " + username + "?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/users/reset-level', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        },
-                        body: JSON.stringify({ username: username })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("modAlert", "Level reset for: " + username);
-                    } else {
-                        showAlert("modAlert", "Failed to reset level");
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showAlert("modAlert", "Error resetting level");
-                }
-            }
-        }
-        
-        async function resetAchievements() {
-            var username = document.getElementById("modUsername").value;
-            if (!username) {
-                alert("Please enter a username");
-                return;
-            }
-            if (confirm("Reset achievements for user: " + username + "?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/users/reset-achievements', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        },
-                        body: JSON.stringify({ username: username })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("modAlert", "Achievements reset for: " + username);
-                    } else {
-                        showAlert("modAlert", "Failed to reset achievements");
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showAlert("modAlert", "Error resetting achievements");
-                }
-            }
-        }
-        
-        async function restrictUserTime() {
-            var username = document.getElementById("modUsername").value;
-            var duration = document.getElementById("restrictDuration").value;
-            if (!username) {
-                alert("Please enter a username");
-                return;
-            }
-            if (confirm("Restrict " + username + " for " + duration + " days?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/users/restrict-time', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        },
-                        body: JSON.stringify({ username: username, days: parseInt(duration) })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("modAlert", username + " restricted for " + duration + " days");
-                    } else {
-                        showAlert("modAlert", "Failed to apply restriction");
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showAlert("modAlert", "Error applying restriction");
-                }
-            }
-        }
-        
-        async function banFromMovies() {
-            var username = document.getElementById("modUsername").value;
-            if (!username) {
-                alert("Please enter a username");
-                return;
-            }
-            if (confirm("Ban " + username + " from Movies page?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/users/ban-movies', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        },
-                        body: JSON.stringify({ username: username })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("modAlert", username + " banned from Movies page");
-                    } else {
-                        showAlert("modAlert", "Failed to ban from movies");
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showAlert("modAlert", "Error banning from movies");
-                }
-            }
-        }
-        
-        async function banFromSite() {
-            var username = document.getElementById("modUsername").value;
-            if (!username) {
-                alert("Please enter a username");
-                return;
-            }
-            if (confirm("Ban " + username + " from entire site?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/users/ban-site', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        },
-                        body: JSON.stringify({ username: username })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("modAlert", username + " banned from site");
-                        loadUsers();
-                    } else {
-                        showAlert("modAlert", "Failed to ban from site");
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showAlert("modAlert", "Error banning from site");
-                }
-            }
-        }
-        
-        async function saveTerms() {
-            var content = document.getElementById("termsContent").value;
-            if (!content) {
-                alert("Please enter Terms of Service content");
+        function loadApplications() {
+            const applications = JSON.parse(localStorage.getItem('badgeApplications') || '[]');
+            const container = document.getElementById('applicationsList');
+            
+            if (applications.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.6; padding: 40px;">No pending applications</p>';
                 return;
             }
             
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/content/terms', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    },
-                    body: JSON.stringify({ content: content })
-                });
-                
-                if (response.ok) {
-                    showAlert("contentAlert", "Terms of Service saved successfully");
-                } else {
-                    showAlert("contentAlert", "Failed to save Terms of Service");
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert("contentAlert", "Error saving Terms of Service");
-            }
-        }
-        
-        async function savePrivacy() {
-            var content = document.getElementById("privacyContent").value;
-            if (!content) {
-                alert("Please enter Privacy Policy content");
-                return;
-            }
-            
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/content/privacy', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    },
-                    body: JSON.stringify({ content: content })
-                });
-                
-                if (response.ok) {
-                    showAlert("contentAlert", "Privacy Policy saved successfully");
-                } else {
-                    showAlert("contentAlert", "Failed to save Privacy Policy");
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert("contentAlert", "Error saving Privacy Policy");
-            }
-        }
-        
-        async function addAchievement() {
-            var name = document.getElementById("achievementName").value;
-            var icon = document.getElementById("achievementIcon").value;
-            var desc = document.getElementById("achievementDesc").value;
-            var xp = document.getElementById("achievementXP").value;
-            
-            if (!name || !icon || !desc || !xp) {
-                alert("Please fill in all fields");
-                return;
-            }
-            
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/achievements', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    },
-                    body: JSON.stringify({
-                        name: name,
-                        icon: icon,
-                        description: desc,
-                        xp: parseInt(xp)
-                    })
-                });
-                
-                if (response.ok) {
-                    showAlert("achievementAlert", "Achievement created successfully");
-                    document.getElementById("achievementName").value = "";
-                    document.getElementById("achievementIcon").value = "";
-                    document.getElementById("achievementDesc").value = "";
-                    document.getElementById("achievementXP").value = "";
-                } else {
-                    showAlert("achievementAlert", "Failed to create achievement");
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert("achievementAlert", "Error creating achievement");
-            }
-        }
-        
-        async function viewLeaderboard() {
-            var game = document.getElementById("leaderboardGame").value;
-            
-            try {
-                var response = await fetch('http://localhost:3000/api/admin/leaderboard?game=' + encodeURIComponent(game), {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                    }
-                });
-                
-                if (response.ok) {
-                    var scores = await response.json();
-                    displayLeaderboard(scores);
-                } else {
-                    showAlert("leaderboardAlert", "Failed to load leaderboard");
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert("leaderboardAlert", "Error loading leaderboard");
-            }
-        }
-        
-        function displayLeaderboard(scores) {
-            var tbody = document.getElementById("leaderboardTable");
-            
-            if (!scores || scores.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px; opacity: 0.6;">No scores found</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = "";
-            scores.forEach(function(score, index) {
-                var row = '<tr>' +
-                    '<td>' + (index + 1) + '</td>' +
-                    '<td>' + score.username + '</td>' +
-                    '<td>' + score.score + '</td>' +
-                    '<td>' + new Date(score.date).toLocaleDateString() + '</td>' +
-                    '<td><button class="btn btn-danger" style="padding: 8px 20px; font-size: 0.8em;" onclick="deleteScore(\'' + score.id + '\')">DELETE</button></td>' +
-                    '</tr>';
-                
-                tbody.innerHTML += row;
+            container.innerHTML = '';
+            applications.forEach((app, index) => {
+                const card = `
+                    <div class="application-card">
+                        <div class="application-header">
+                            <div>
+                                <div class="badge-preview">${getBadgeIcon(app.item_id)}</div>
+                                <h3>${app.username}</h3>
+                                <p style="opacity: 0.7;">${app.email}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p><strong>Badge:</strong> ${getBadgeName(app.item_id)}</p>
+                                <p><strong>Applied:</strong> ${new Date(app.timestamp).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <p><strong>Discord Invite:</strong> <a href="${app.discord_invite}" target="_blank" style="color: var(--neon-blue);">${app.discord_invite}</a></p>
+                            <p><strong>Member Count:</strong> ${app.member_count}</p>
+                            <p><strong>Additional Info:</strong> ${app.additional_info || 'None'}</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-success" onclick="approveApplication(${index})">✅ APPROVE</button>
+                            <button class="btn btn-danger" onclick="denyApplication(${index})">❌ DENY</button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
             });
         }
         
-        async function resetLeaderboard() {
-            var game = document.getElementById("leaderboardGame").value;
+        function getBadgeIcon(itemId) {
+            const badges = {
+                'verified_discord': '✅',
+                'org_badge': '🏢',
+                'roblox_badge': '🎮'
+            };
+            return badges[itemId] || '🏅';
+        }
+        
+        function getBadgeName(itemId) {
+            const names = {
+                'verified_discord': 'Verified Discord',
+                'org_badge': 'Organization',
+                'roblox_badge': 'Roblox Developer'
+            };
+            return names[itemId] || 'Badge';
+        }
+        
+        function approveApplication(index) {
+            const applications = JSON.parse(localStorage.getItem('badgeApplications') || '[]');
+            const app = applications[index];
             
-            if (confirm("Reset entire leaderboard for " + game + "?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/leaderboard/reset', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
-                        },
-                        body: JSON.stringify({ game: game })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("leaderboardAlert", "Leaderboard reset for " + game);
-                        viewLeaderboard();
-                    } else {
-                        showAlert("leaderboardAlert", "Failed to reset leaderboard");
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showAlert("leaderboardAlert", "Error resetting leaderboard");
-                }
-            }
-        }
-        
-        async function deleteScore(scoreId) {
-            if (confirm("Delete this score?")) {
-                try {
-                    var response = await fetch('http://localhost:3000/api/admin/leaderboard/score/' + scoreId, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+            if (confirm(`Approve ${app.username}'s application for ${getBadgeName(app.item_id)}?`)) {
+                // Give badge to user
+                const user = JSON.parse(localStorage.getItem('user_' + app.username));
+                if (user) {
+                    if (!user.badges) user.badges = [];
+                    if (!user.badges.includes(app.item_id)) {
+                        user.badges.push(app.item_id);
+                        localStorage.setItem('user_' + app.username, JSON.stringify(user));
+                        
+                        // Update current user if they're logged in
+                        const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                        if (currentUser && currentUser.username === app.username) {
+                            currentUser.badges = user.badges;
+                            localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
                         }
-                    });
-                    
-                    if (response.ok) {
-                        showAlert("leaderboardAlert", "Score deleted");
-                        viewLeaderboard();
-                    } else {
-                        showAlert("leaderboardAlert", "Failed to delete score");
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showAlert("leaderboardAlert", "Error deleting score");
+                }
+                
+                // Remove application
+                applications.splice(index, 1);
+                localStorage.setItem('badgeApplications', JSON.stringify(applications));
+                
+                showAlert('appAlert', `✅ Approved! ${app.username} received ${getBadgeName(app.item_id)} badge`);
+                loadApplications();
+            }
+        }
+        
+        function denyApplication(index) {
+            const applications = JSON.parse(localStorage.getItem('badgeApplications') || '[]');
+            const app = applications[index];
+            
+            if (confirm(`Deny ${app.username}'s application?`)) {
+                applications.splice(index, 1);
+                localStorage.setItem('badgeApplications', JSON.stringify(applications));
+                showAlert('appAlert', `❌ Application denied for ${app.username}`);
+                loadApplications();
+            }
+        }
+        
+        function moderateImages() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('user_' + username));
+            if (!user) {
+                showAlert('modAlert', 'User not found');
+                return;
+            }
+            
+            const preview = document.getElementById('imagePreview');
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">';
+            
+            if (user.banner) {
+                html += `
+                    <div style="border: 2px solid var(--neon-purple); border-radius: 15px; padding: 20px;">
+                        <h4 style="color: var(--neon-purple); margin-bottom: 15px;">Banner Image</h4>
+                        <img src="${user.banner}" style="width: 100%; border-radius: 10px; margin-bottom: 15px;">
+                        <button class="btn btn-danger" onclick="removeImage('${username}', 'banner')">🗑️ REMOVE BANNER</button>
+                    </div>
+                `;
+            }
+            
+            if (user.avatar) {
+                html += `
+                    <div style="border: 2px solid var(--neon-purple); border-radius: 15px; padding: 20px;">
+                        <h4 style="color: var(--neon-purple); margin-bottom: 15px;">Profile Avatar</h4>
+                        <img src="${user.avatar}" style="width: 100%; border-radius: 10px; margin-bottom: 15px;">
+                        <button class="btn btn-danger" onclick="removeImage('${username}', 'avatar')">🗑️ REMOVE AVATAR</button>
+                    </div>
+                `;
+            }
+            
+            if (!user.banner && !user.avatar) {
+                html = '<p style="text-align: center; opacity: 0.6;">User has no uploaded images</p>';
+            } else {
+                html += '</div>';
+            }
+            
+            preview.innerHTML = html;
+            showAlert('modAlert', `Viewing images for ${username}`);
+        }
+        
+        function removeImage(username, type) {
+            if (confirm(`Remove ${type} for ${username}?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    delete user[type];
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    // Update current user if they're logged in
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        delete currentUser[type];
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `${type} removed for ${username}`);
+                    moderateImages();
                 }
             }
         }
         
-        function
+        function resetLevel() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`Reset level and XP for ${username}?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.xp = 0;
+                    user.level = 1;
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.xp = 0;
+                        currentUser.level = 1;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `Level reset for ${username}`);
+                    loadUsers();
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+        
+        function resetAchievements() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`Reset all achievements for ${username}?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.achievements = [];
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.achievements = [];
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `Achievements reset for ${username}`);
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+        
+        function resetCoins() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`Reset coins to 0 for ${username}?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.coins = 0;
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.coins = 0;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `Coins reset for ${username}`);
+                    loadUsers();
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+        
+        function resetAllData() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`⚠️ RESET ALL DATA for ${username}?\n\nThis will reset:\n- Level & XP\n- Coins\n- Achievements\n- Badges\n- Game history\n- Movie history\n\nThis cannot be undone!`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.xp = 0;
+                    user.level = 1;
+                    user.coins = 0;
+                    user.achievements = [];
+                    user.badges = [];
+                    user.gamesPlayed = 0;
+                    user.moviesWatched = 0;
+                    user.gameHistory = [];
+                    user.moviesHistory = [];
+                    user.inventory = [];
+                    user.activeBoosts = {};
+                    
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        localStorage.setItem('arcadeUser', JSON.stringify(user));
+                    }
+                    
+                    showAlert('modAlert', `⚠️ ALL DATA RESET for ${username}`);
+                    loadUsers();
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+        
+        function restrictUserTime() {
+            const username = document.getElementById('modUsername').value;
+            const duration = parseInt(document.getElementById('restrictDuration').value);
+            
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`Restrict ${username} for ${duration} days?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.restricted = true;
+                    user.restrictedUntil = new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString();
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.restricted = true;
+                        currentUser.restrictedUntil = user.restrictedUntil;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `${username} restricted for ${duration} days`);
+                    loadUsers();
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+        
+        function banFromMovies() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`Ban ${username} from Movies page?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.bannedFromMovies = true;
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.bannedFromMovies = true;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `${username} banned from Movies`);
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+        
+        function banFromSite() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`Ban ${username} from entire site?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.banned = true;
+                    user.bannedDate = new Date().toISOString();
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.banned = true;
+                        currentUser.bannedDate = user.bannedDate;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `${username} banned from site`);
+                    loadUsers();
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+        
+        function unbanUser() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`Remove all bans and restrictions for ${username}?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.banned = false;
+                    user.restricted = false;
+                    user.bannedFromMovies = false;
+                    delete user.bannedDate;
+                    delete user.restrictedUntil;
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.banned = false;
+                        currentUser.restricted = false;
+                        currentUser.bannedFromMovies = false;
+                        delete currentUser.bannedDate;
+                        delete currentUser.restrictedUntil;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `✅ ${username} unbanned and unrestricted`);
+                    loadUsers();
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+        
+        function giveCoins() {
+            const username = document.getElementById('rewardUsername').value;
+            const amount = parseInt(document.getElementById('coinAmount').value);
+            
+            if (!username || !amount) {
+                alert('Please enter username and amount');
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('user_' + username));
+            if (user) {
+                user.coins = (user.coins || 0) + amount;
+                localStorage.setItem('user_' + username, JSON.stringify(user));
                 
+                const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                if (currentUser && currentUser.username === username) {
+                    currentUser.coins = user.coins;
+                    localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                }
+                
+                showAlert('rewardAlert', `✅ Gave ${amount} coins to ${username}!`);
+                document.getElementById('coinAmount').value = '';
+                loadUsers();
+            } else {
+                showAlert('rewardAlert', 'User not found');
+            }
+        }
+        
+        function giveXP() {
+            const username = document.getElementById('rewardUsername').value;
+            const amount = parseInt(document.getElementById('xpAmount').value);
+            
+            if (!username || !amount) {
+                alert('Please enter username and amount');
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('user_' + username));
+            if (user) {
+                user.xp = (user.xp || 0) + amount;
+                localStorage.setItem('user_' + username, JSON.stringify(user));
+                
+                const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                if (currentUser && currentUser.username === username) {
+                    currentUser.xp = user.xp;
+                    localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                }
+                
+                showAlert('rewardAlert', `✅ Gave ${amount} XP to ${username}!`);
+                document.getElementById('xpAmount').value = '';
+                loadUsers();
+            } else {
+                showAlert('rewardAlert', 'User not found');
+            }
+        }
+        
+        function giveBadge() {
+            const username = document.getElementById('rewardUsername').value;
+            const badgeType = document.getElementById('badgeType').value;
+            
+            if (!username) {
+                alert('Please enter username');
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('user_' + username));
+            if (user) {
+                if (!user.badges) user.badges = [];
+                
+                if (user.badges.includes(badgeType)) {
+                    showAlert('rewardAlert', `${username} already has this badge`);
+                    return;
+                }
+                
+                user.badges.push(badgeType);
+                localStorage.setItem('user_' + username, JSON.stringify(user));
+                
+                const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                if (currentUser && currentUser.username === username) {
+                    currentUser.badges = user.badges;
+                    localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                }
+                
+                showAlert('rewardAlert', `✅ Gave ${getBadgeName(badgeType)} badge to ${username}!`);
+            } else {
+                showAlert('rewardAlert', 'User not found');
+            }
+        }
+        
+        function loadContent() {
+            const terms = localStorage.getItem('siteTerms') || '';
+            const privacy = localStorage.getItem('sitePrivacy') || '';
+            
+            document.getElementById('termsContent').value = terms;
+            document.getElementById('privacyContent').value = privacy;
+        }
+        
+        function saveTerms() {
+            const content = document.getElementById('termsContent').value;
+            if (!content) {
+                alert('Please enter Terms of Service content');
+                return;
+            }
+            
+            localStorage.setItem('siteTerms', content);
+            showAlert('contentAlert', '✅ Terms of Service saved successfully!');
+        }
+        
+        function savePrivacy() {
+            const content = document.getElementById('privacyContent').value;
+            if (!content) {
+                alert('Please enter Privacy Policy content');
+                return;
+            }
+            
+            localStorage.setItem('sitePrivacy', content);
+            showAlert('contentAlert', '✅ Privacy Policy saved successfully!');
+        }
+        
         function showSection(section) {
-            var sections = document.querySelectorAll(".admin-section");
-            var tabs = document.querySelectorAll(".admin-tab");
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
             
-            sections.forEach(function(s) { s.classList.remove("active"); });
-            tabs.forEach(function(t) { t.classList.remove("active"); });
-            
-            document.getElementById(section).classList.add("active");
-            event.target.classList.add("active");
+            document.getElementById(section).classList.add('active');
+            event.target.classList.add('active');
         }
         
         function showAlert(alertId, message) {
-            var alert = document.getElementById(alertId);
+            const alert = document.getElementById(alertId);
             alert.textContent = message;
-            alert.style.display = "block";
-            setTimeout(function() {
-                alert.style.display = "none";
-            }, 5000);
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 5000);
         }
         
         checkAdminAccess();

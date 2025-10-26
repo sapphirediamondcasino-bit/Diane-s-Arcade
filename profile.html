@@ -1053,11 +1053,10 @@
             document.body.appendChild(notification);
             
             setTimeout(() => notification.classList.add('show'), 100);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            }, 4000);
-        }
+setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+}, 4000);
         
         // ========== INITIALIZE ==========
         loadProfile();

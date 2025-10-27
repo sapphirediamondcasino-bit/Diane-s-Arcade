@@ -101,10 +101,138 @@
             cursor: pointer;
         }
         
+        /* LOGIN/REGISTER FORM STYLES */
+        .auth-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 50px;
+            background: rgba(5, 5, 16, 0.95);
+            border: 3px solid var(--neon-blue);
+            border-radius: 30px;
+            box-shadow: 0 0 60px rgba(0, 243, 255, 0.4);
+        }
+        
+        .auth-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .auth-tab.active {
+            background: var(--neon-blue);
+            color: var(--darker);
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-purple);
+            font-weight: 700;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            color: white;
+            font-size: 1em;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px var(--neon-purple);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 50px rgba(0, 243, 255, 0.8);
+        }
+        
+        .error-message {
+            background: rgba(255, 0, 102, 0.2);
+            border: 2px solid var(--neon-pink);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: var(--neon-pink);
+            font-family: 'Orbitron', sans-serif;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        /* PROFILE STYLES (existing) */
         .container {
             max-width: 1600px;
             margin: 60px auto;
             padding: 0 40px;
+            display: none;
+        }
+        
+        .container.active {
+            display: block;
         }
         
         .profile-banner {
@@ -298,18 +426,6 @@
             box-shadow: 0 0 30px var(--neon-gold);
         }
         
-        .admin-badge {
-            display: inline-block;
-            padding: 8px 20px;
-            background: linear-gradient(135deg, #ffd700, #ff6600);
-            border-radius: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            color: #000;
-            margin-left: 15px;
-            box-shadow: 0 0 30px #ffd700;
-        }
-        
         .profile-level {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.5em;
@@ -335,25 +451,19 @@
             background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
             border-radius: 20px;
             transition: width 1s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
             box-shadow: 0 0 30px var(--neon-blue);
-            position: relative;
-            z-index: 2;
         }
         
         .xp-text {
             position: absolute;
-            width: 100%;
-            text-align: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            z-index: 3;
             color: white;
             text-shadow: 0 0 10px #000;
+            z-index: 2;
         }
         
         .profile-stats {
@@ -601,62 +711,108 @@
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
             <a href="Settings.html" class="nav-link">SETTINGS ⚙️</a>
-            <button class="nav-link logout-btn" onclick="logout()">LOGOUT</button>
+            <button class="nav-link logout-btn" onclick="logout()" style="display: none;" id="logoutBtn">LOGOUT</button>
         </div>
     </nav>
     
-    <div class="container">
+    <!-- LOGIN/REGISTER FORM -->
+    <div class="auth-container" id="authContainer">
+        <h1 class="auth-title">🎮 ARCADE PROFILE 🎮</h1>
+        
+        <div class="auth-tabs">
+            <div class="auth-tab active" onclick="switchTab('login')">LOGIN</div>
+            <div class="auth-tab" onclick="switchTab('register')">REGISTER</div>
+        </div>
+        
+        <div class="error-message" id="authError"></div>
+        
+        <!-- LOGIN FORM -->
+        <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label class="form-label">Username or Email</label>
+                <input type="text" class="form-input" id="loginUsername" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-input" id="loginPassword" required>
+            </div>
+            <button type="submit" class="submit-btn">🔓 LOGIN</button>
+        </form>
+        
+        <!-- REGISTER FORM -->
+        <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-input" id="regUsername" required minlength="3">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="regEmail" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-input" id="regPassword" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" class="form-input" id="regConfirmPassword" required>
+            </div>
+            <button type="submit" class="submit-btn">🎮 CREATE ACCOUNT</button>
+        </form>
+    </div>
+    
+    <!-- PROFILE CONTENT -->
+    <div class="container" id="profileContainer">
         <div class="profile-banner">
-            <img src="" alt="Banner" class="banner-image" id="profile-banner">
+            <img src="" alt="Banner" class="banner-image" id="profileBanner">
             <div class="banner-overlay"></div>
             <button class="edit-banner-btn" onclick="openBannerModal()">✏️ CHANGE BANNER</button>
         </div>
         
         <div class="profile-header">
             <div class="avatar-container">
-                <img src="" alt="Avatar" class="profile-avatar" id="user-avatar">
+                <img src="" alt="Avatar" class="profile-avatar" id="userAvatar">
                 <button class="edit-avatar-btn" onclick="openAvatarModal()">✏️</button>
             </div>
             <div class="profile-info">
                 <h1 class="profile-username" id="username">LOADING...</h1>
                 
-                <!-- BADGES SECTION -->
-                <div class="profile-badges" id="user-badges">
+                <div class="profile-badges" id="userBadges">
                     <div class="no-badges">
                         <p>No badges yet!</p>
                         <a href="shop.html" class="buy-badges-link">🪙 BUY BADGES IN SHOP</a>
                     </div>
                 </div>
                 
-                <div class="profile-level">⚡ LEVEL <span id="user-level">1</span></div>
+                <div class="profile-level">⚡ LEVEL <span id="userLevel">1</span></div>
                 <div class="xp-bar-container">
-                    <div class="xp-bar" id="xp-bar" style="width: 0%"></div>
-                    <div class="xp-text" id="xp-text">0 / 100 XP</div>
+                    <div class="xp-bar" id="xpBar" style="width: 0%"></div>
+                    <div class="xp-text" id="xpText">0 / 100 XP</div>
                 </div>
                 
                 <div class="profile-stats">
                     <div class="stat-item">
-                        <span class="stat-value" id="stat-achievements">0</span>
+                        <span class="stat-value" id="statAchievements">0</span>
                         <div class="stat-label">🏆 Achievements</div>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="stat-games">0</span>
+                        <span class="stat-value" id="statGames">0</span>
                         <div class="stat-label">🎮 Games Played</div>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="stat-movies">0</span>
+                        <span class="stat-value" id="statMovies">0</span>
                         <div class="stat-label">🎬 Movies Watched</div>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="stat-coins">0</span>
+                        <span class="stat-value" id="statCoins">0</span>
                         <div class="stat-label">🪙 Coins</div>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="stat-xp">0</span>
+                        <span class="stat-value" id="statXp">0</span>
                         <div class="stat-label">✨ Total XP</div>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="stat-joined">Loading...</span>
+                        <span class="stat-value" id="statJoined">--</span>
                         <div class="stat-label">📅 Member Since</div>
                     </div>
                 </div>
@@ -664,106 +820,40 @@
         </div>
         
         <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
-        <div class="achievements-grid" id="achievements-container"></div>
+        <div class="achievements-grid" id="achievementsContainer"></div>
     </div>
 
-    <!-- Avatar Upload Modal -->
-    <div class="modal" id="avatar-modal">
+    <!-- Avatar Modal -->
+    <div class="modal" id="avatarModal">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('avatar-modal')">×</button>
+            <button class="close-modal" onclick="closeModal('avatarModal')">×</button>
             <h2 class="modal-title">UPLOAD AVATAR</h2>
-            
             <div class="file-upload-section">
-                <h3 style="margin-bottom: 15px; color: var(--neon-blue);">Choose Image</h3>
-                <input type="file" id="avatar-file-input" accept="image/*" onchange="previewAvatar(event)">
-                <label for="avatar-file-input" class="upload-label">📤 SELECT IMAGE</label>
-                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 1000MB • JPG, PNG, GIF, WEBP</p>
-                <img id="avatar-preview" class="preview-image" style="display: none;">
+                <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(event)">
+                <label for="avatarInput" class="upload-label">📤 SELECT IMAGE</label>
+                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 2MB</p>
+                <img id="avatarPreview" class="preview-image" style="display: none;">
             </div>
-            
             <button class="save-btn" onclick="saveAvatar()">💾 SAVE AVATAR</button>
         </div>
     </div>
 
-    <!-- Banner Upload Modal -->
-    <div class="modal" id="banner-modal">
+    <!-- Banner Modal -->
+    <div class="modal" id="bannerModal">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('banner-modal')">×</button>
+            <button class="close-modal" onclick="closeModal('bannerModal')">×</button>
             <h2 class="modal-title">UPLOAD BANNER</h2>
-            
             <div class="file-upload-section">
-                <h3 style="margin-bottom: 15px; color: var(--neon-blue);">Choose Image</h3>
-                <input type="file" id="banner-file-input" accept="image/*" onchange="previewBanner(event)">
-                <label for="banner-file-input" class="upload-label">📤 SELECT IMAGE</label>
-                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 1000MB • JPG, PNG, GIF, WEBP • 1200x400 recommended</p>
-                <img id="banner-preview" class="preview-image" style="display: none;">
+                <input type="file" id="bannerInput" accept="image/*" onchange="previewBanner(event)">
+                <label for="bannerInput" class="upload-label">📤 SELECT IMAGE</label>
+                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 2MB</p>
+                <img id="bannerPreview" class="preview-image" style="display: none;">
             </div>
-            
             <button class="save-btn" onclick="saveBanner()">💾 SAVE BANNER</button>
         </div>
     </div>
 
     <script>
-        // ========== USER DATA MANAGEMENT ==========
-        function getUser() {
-            const user = localStorage.getItem('arcadeUser');
-            if (!user) {
-                window.location.href = 'index.html';
-                return null;
-            }
-            return JSON.parse(user);
-        }
-        
-        function saveUser(userData) {
-            localStorage.setItem('arcadeUser', JSON.stringify(userData));
-        }
-        
-        // ========== XP & LEVELING SYSTEM ==========
-        function calculateLevel(xp) {
-            return Math.floor(Math.sqrt(xp / 100)) + 1;
-        }
-        
-        function xpForNextLevel(level) {
-            return Math.pow(level, 2) * 100;
-        }
-        
-        function addXP(amount, source = 'general') {
-            const user = getUser();
-            if (!user) return;
-            
-            user.xp = (user.xp || 0) + amount;
-            user.level = calculateLevel(user.xp);
-            
-            // Track sources
-            if (!user.xpSources) user.xpSources = {};
-            user.xpSources[source] = (user.xpSources[source] || 0) + amount;
-            
-            saveUser(user);
-            showNotification(`+${amount} XP from ${source}!`, 'success');
-            loadProfile();
-        }
-        
-        // Call this when user plays a game
-        function trackGamePlayed(gameId) {
-            const user = getUser();
-            if (!user) return;
-            
-            user.gamesPlayed = (user.gamesPlayed || 0) + 1;
-            addXP(50, 'games');
-            saveUser(user);
-        }
-        
-        // Call this when user watches a movie
-        function trackMovieWatched(movieId) {
-            const user = getUser();
-            if (!user) return;
-            
-            user.moviesWatched = (user.moviesWatched || 0) + 1;
-            addXP(25, 'movies');
-            saveUser(user);
-        }
-        
-        // ========== BADGE SYSTEM ==========
         const BADGE_DEFINITIONS = {
             'verified_discord': { icon: '🔷', name: 'Verified Discord' },
             'org_badge': { icon: '🏢', name: 'Organization' },
@@ -772,14 +862,197 @@
             'founder_badge': { icon: '👑', name: 'Founder' }
         };
         
+        const ALL_ACHIEVEMENTS = [
+            { id: 'first_game', name: 'First Game', desc: 'Play your first game', icon: '🎬', xp: 10 },
+            { id: 'game_master', name: 'Game Master', desc: 'Play 10 games', icon: '🏆', xp: 50 },
+            { id: 'movie_buff', name: 'Movie Buff', desc: 'Watch 5 movies', icon: '🎬', xp: 25 },
+            { id: 'coin_collector', name: 'Coin Collector', desc: 'Earn 1000 coins', icon: '🪙', xp: 100 },
+            { id: 'level_10', name: 'Level 10', desc: 'Reach level 10', icon: '⚡', xp: 200 },
+            { id: 'badge_hunter', name: 'Badge Hunter', desc: 'Get your first badge', icon: '🏅', xp: 50 },
+            { id: 'explorer', name: 'Explorer', desc: 'Visit all pages', icon: '🗺️', xp: 30 },
+            { id: 'profile_perfect', name: 'Profile Perfect', desc: 'Upload avatar and banner', icon: '✨', xp: 25 }
+        ];
+        
+        let avatarFile = null;
+        let bannerFile = null;
+        
+        // AUTH FUNCTIONS
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+            hideError();
+        }
+        
+        function showError(message) {
+            const errorEl = document.getElementById('authError');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+        
+        function hideError() {
+            document.getElementById('authError').classList.remove('show');
+        }
+        
+        function handleLogin(e) {
+            e.preventDefault();
+            hideError();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            // Check if user exists
+            const userKey = 'user_' + username;
+            const userData = localStorage.getItem(userKey);
+            
+            if (!userData) {
+                // Try finding by email
+                let found = false;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('user_')) {
+                        const user = JSON.parse(localStorage.getItem(key));
+                        if (user.email === username) {
+                            if (user.password === password) {
+                                localStorage.setItem('arcadeUser', JSON.stringify(user));
+                                initProfile();
+                                return;
+                            } else {
+                                showError('Invalid password!');
+                                return;
+                            }
+                        }
+                    }
+                }
+                showError('User not found!');
+                return;
+            }
+            
+            const user = JSON.parse(userData);
+            
+            if (user.password !== password) {
+                showError('Invalid password!');
+                return;
+            }
+            
+            // Login successful
+            localStorage.setItem('arcadeUser', JSON.stringify(user));
+            initProfile();
+        }
+        
+        function handleRegister(e) {
+            e.preventDefault();
+            hideError();
+            
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showError('Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters!');
+                return;
+            }
+            
+            // Check if username exists
+            if (localStorage.getItem('user_' + username)) {
+                showError('Username already taken!');
+                return;
+            }
+            
+            // Check if email exists
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('user_')) {
+                    const user = JSON.parse(localStorage.getItem(key));
+                    if (user.email === email) {
+                        showError('Email already registered!');
+                        return;
+                    }
+                }
+            }
+            
+            // Create new user
+            const newUser = {
+                username: username,
+                email: email,
+                password: password,
+                xp: 0,
+                coins: 0,
+                level: 1,
+                gamesPlayed: 0,
+                moviesWatched: 0,
+                achievements: [],
+                badges: [],
+                inventory: [],
+                joinDate: new Date().toISOString(),
+                avatar: null,
+                banner: null,
+                gameHistory: {},
+                moviesHistory: {}
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('user_' + username, JSON.stringify(newUser));
+            localStorage.setItem('arcadeUser', JSON.stringify(newUser));
+            
+            showNotification('Account created successfully!', 'success');
+            setTimeout(() => initProfile(), 1000);
+        }
+        
+        function initProfile() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('profileContainer').classList.add('active');
+            document.getElementById('logoutBtn').style.display = 'block';
+            loadProfile();
+        }
+        
+        function checkAuth() {
+            const user = localStorage.getItem('arcadeUser');
+            if (user) {
+                initProfile();
+            }
+        }
+        
+        // PROFILE FUNCTIONS
+        function getUser() {
+            const user = localStorage.getItem('arcadeUser');
+            return user ? JSON.parse(user) : null;
+        }
+        
+        function saveUser(userData) {
+            localStorage.setItem('arcadeUser', JSON.stringify(userData));
+            localStorage.setItem('user_' + userData.username, JSON.stringify(userData));
+        }
+        
+        function calculateLevel(xp) {
+            return Math.floor(Math.sqrt(xp / 100)) + 1;
+        }
+        
+        function xpForNextLevel(level) {
+            return level * level * 100;
+        }
+        
         function loadBadges() {
             const user = getUser();
             if (!user) return;
             
-            const badgesContainer = document.getElementById('user-badges');
+            const container = document.getElementById('userBadges');
             
             if (!user.badges || user.badges.length === 0) {
-                badgesContainer.innerHTML = `
+                container.innerHTML = `
                     <div class="no-badges">
                         <p>No badges yet!</p>
                         <a href="shop.html" class="buy-badges-link">🪙 BUY BADGES IN SHOP</a>
@@ -788,7 +1061,7 @@
                 return;
             }
             
-            badgesContainer.innerHTML = user.badges.map(badgeId => {
+            container.innerHTML = user.badges.map(badgeId => {
                 const badge = BADGE_DEFINITIONS[badgeId];
                 if (!badge) return '';
                 return `
@@ -800,24 +1073,119 @@
             }).join('');
         }
         
-        // ========== IMAGE UPLOAD ==========
-        let avatarFile = null;
-        let bannerFile = null;
+        function loadAchievements() {
+            const user = getUser();
+            if (!user) return;
+            
+            const container = document.getElementById('achievementsContainer');
+            
+            container.innerHTML = ALL_ACHIEVEMENTS.slice(0, 8).map(ach => {
+                const unlocked = user.achievements && user.achievements.includes(ach.id);
+                return `
+                    <div class="achievement-card ${unlocked ? '' : 'locked'}">
+                        ${!unlocked ? '<div style="position: absolute; top: 15px; right: 15px; font-size: 1.5em;">🔒</div>' : ''}
+                        <div class="achievement-icon">${ach.icon}</div>
+                        <div class="achievement-name">${ach.name}</div>
+                        <div class="achievement-desc">${ach.desc}</div>
+                        <div style="margin-top: 15px; color: var(--neon-green); font-family: 'Orbitron', sans-serif; font-weight: 700;">+${ach.xp} XP</div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML += `
+                <div class="achievement-card" style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(191, 0, 255, 0.1);" onclick="window.location.href='achievements.html'">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
+                        <div class="achievement-name">View All</div>
+                        <div class="achievement-desc">${ALL_ACHIEVEMENTS.length} total</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function checkAchievements(user) {
+            if (!user.achievements) user.achievements = [];
+            
+            if (user.gamesPlayed >= 1 && !user.achievements.includes('first_game')) {
+                user.achievements.push('first_game');
+                user.xp += 10;
+            }
+            if (user.gamesPlayed >= 10 && !user.achievements.includes('game_master')) {
+                user.achievements.push('game_master');
+                user.xp += 50;
+            }
+            if (user.moviesWatched >= 5 && !user.achievements.includes('movie_buff')) {
+                user.achievements.push('movie_buff');
+                user.xp += 25;
+            }
+            if (user.coins >= 1000 && !user.achievements.includes('coin_collector')) {
+                user.achievements.push('coin_collector');
+                user.xp += 100;
+            }
+            const level = calculateLevel(user.xp);
+            if (level >= 10 && !user.achievements.includes('level_10')) {
+                user.achievements.push('level_10');
+                user.xp += 200;
+            }
+            if (user.badges && user.badges.length >= 1 && !user.achievements.includes('badge_hunter')) {
+                user.achievements.push('badge_hunter');
+                user.xp += 50;
+            }
+            if (user.avatar && user.banner && !user.achievements.includes('profile_perfect')) {
+                user.achievements.push('profile_perfect');
+                user.xp += 25;
+            }
+            
+            saveUser(user);
+        }
+        
+        function loadProfile() {
+            const user = getUser();
+            if (!user) return;
+            
+            document.getElementById('username').textContent = user.username.toUpperCase();
+            document.getElementById('userAvatar').src = user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
+            document.getElementById('profileBanner').src = user.banner || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop';
+            
+            const level = calculateLevel(user.xp);
+            const currentLevelXP = xpForNextLevel(level - 1);
+            const nextLevelXP = xpForNextLevel(level);
+            const xpInLevel = user.xp - currentLevelXP;
+            const xpNeeded = nextLevelXP - currentLevelXP;
+            const progress = (xpInLevel / xpNeeded) * 100;
+            
+            document.getElementById('userLevel').textContent = level;
+            document.getElementById('xpBar').style.width = progress + '%';
+            document.getElementById('xpText').textContent = `${xpInLevel} / ${xpNeeded} XP`;
+            
+            document.getElementById('statAchievements').textContent = user.achievements.length;
+            document.getElementById('statGames').textContent = user.gamesPlayed;
+            document.getElementById('statMovies').textContent = user.moviesWatched;
+            document.getElementById('statCoins').textContent = user.coins.toLocaleString();
+            document.getElementById('statXp').textContent = user.xp.toLocaleString();
+            
+            const joinDate = new Date(user.joinDate);
+            document.getElementById('statJoined').textContent = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            
+            loadBadges();
+            loadAchievements();
+            checkAchievements(user);
+        }
         
         function previewAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
             
-            if (file.size > 1000 * 1024 * 1024) {
-                showNotification('File too large! Max 1000MB', 'error');
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification('File too large! Max 2MB', 'error');
                 return;
             }
             
             const reader = new FileReader();
             reader.onload = function(e) {
                 avatarFile = e.target.result;
-                document.getElementById('avatar-preview').src = e.target.result;
-                document.getElementById('avatar-preview').style.display = 'block';
+                document.getElementById('avatarPreview').src = e.target.result;
+                document.getElementById('avatarPreview').style.display = 'block';
             };
             reader.readAsDataURL(file);
         }
@@ -826,16 +1194,16 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            if (file.size > 1000 * 1024 * 1024) {
-                showNotification('File too large! Max 1000MB', 'error');
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification('File too large! Max 2MB', 'error');
                 return;
             }
             
             const reader = new FileReader();
             reader.onload = function(e) {
                 bannerFile = e.target.result;
-                document.getElementById('banner-preview').src = e.target.result;
-                document.getElementById('banner-preview').style.display = 'block';
+                document.getElementById('bannerPreview').src = e.target.result;
+                document.getElementById('bannerPreview').style.display = 'block';
             };
             reader.readAsDataURL(file);
         }
@@ -852,10 +1220,12 @@
             user.avatar = avatarFile;
             saveUser(user);
             
-            document.getElementById('user-avatar').src = avatarFile;
-            closeModal('avatar-modal');
+            document.getElementById('userAvatar').src = avatarFile;
+            closeModal('avatarModal');
             showNotification('Avatar updated!', 'success');
             avatarFile = null;
+            checkAchievements(user);
+            loadProfile();
         }
         
         function saveBanner() {
@@ -870,165 +1240,22 @@
             user.banner = bannerFile;
             saveUser(user);
             
-            document.getElementById('profile-banner').src = bannerFile;
-            closeModal('banner-modal');
+            document.getElementById('profileBanner').src = bannerFile;
+            closeModal('bannerModal');
             showNotification('Banner updated!', 'success');
             bannerFile = null;
+            checkAchievements(user);
+            loadProfile();
         }
         
-        // ========== ACHIEVEMENTS ==========
-        const ALL_ACHIEVEMENTS = [
-            { id: 'annie_hall', name: 'Annie Hall', description: 'Play your first game', icon: '🎬', xp: 10, unlocked: false },
-            { id: 'first_steps', name: 'First Steps', description: 'Create your arcade profile', icon: '👣', xp: 5, unlocked: false },
-            { id: 'coffee_break', name: 'Coffee Break', description: 'Play 5 games', icon: '☕', xp: 25, unlocked: false },
-            { id: 'godfather', name: 'The Godfather', description: 'Reach Level 10', icon: '👑', xp: 50, unlocked: false },
-            { id: 'something_gotta_give', name: "Something's Gotta Give", description: 'Score 10,000 points total', icon: '💎', xp: 100, unlocked: false },
-            { id: 'first_wives_club', name: 'First Wives Club', description: 'Complete all games', icon: '💪', xp: 500, unlocked: false },
-            { id: 'movie_buff', name: 'Movie Buff', description: 'Watch 10 movies', icon: '🎥', xp: 100, unlocked: false },
-            { id: 'cinephile', name: 'Cinephile', description: 'Watch 25 movies', icon: '🍿', xp: 250, unlocked: false }
-        ];
-        
-        function checkAchievements() {
-            const user = getUser();
-            if (!user) return;
-            
-            if (!user.achievements) user.achievements = [];
-            
-            // Check game-based achievements
-            if (user.gamesPlayed >= 1 && !user.achievements.includes('annie_hall')) {
-                unlockAchievement('annie_hall');
-            }
-            if (user.gamesPlayed >= 5 && !user.achievements.includes('coffee_break')) {
-                unlockAchievement('coffee_break');
-            }
-            
-            // Check level-based achievements
-            if (user.level >= 10 && !user.achievements.includes('godfather')) {
-                unlockAchievement('godfather');
-            }
-            
-            // Check movie-based achievements
-            if (user.moviesWatched >= 10 && !user.achievements.includes('movie_buff')) {
-                unlockAchievement('movie_buff');
-            }
-            if (user.moviesWatched >= 25 && !user.achievements.includes('cinephile')) {
-                unlockAchievement('cinephile');
-            }
-        }
-        
-        function unlockAchievement(achievementId) {
-            const user = getUser();
-            if (!user) return;
-            
-            if (!user.achievements) user.achievements = [];
-            if (user.achievements.includes(achievementId)) return;
-            
-            const achievement = ALL_ACHIEVEMENTS.find(a => a.id === achievementId);
-            if (!achievement) return;
-            
-            user.achievements.push(achievementId);
-            addXP(achievement.xp, 'achievement');
-            saveUser(user);
-            
-            showNotification(`🏆 Achievement Unlocked: ${achievement.name}!`, 'success');
-        }
-        
-        function loadAchievements() {
-            const user = getUser();
-            if (!user) return;
-            
-            const container = document.getElementById('achievements-container');
-            
-            // Update user achievements with unlock status
-            const userAchievements = ALL_ACHIEVEMENTS.map(ach => ({
-                ...ach,
-                unlocked: user.achievements && user.achievements.includes(ach.id)
-            }));
-            
-            // Show first 8 achievements
-            const displayAchievements = userAchievements.slice(0, 8);
-            
-            container.innerHTML = displayAchievements.map(ach => `
-                <div class="achievement-card ${ach.unlocked ? '' : 'locked'}">
-                    ${!ach.unlocked ? '<div style="position: absolute; top: 15px; right: 15px; font-size: 1.5em;">🔒</div>' : ''}
-                    <div class="achievement-icon">${ach.icon}</div>
-                    <div class="achievement-name">${ach.name}</div>
-                    <div class="achievement-desc">${ach.description}</div>
-                    <div style="margin-top: 15px; color: var(--neon-green); font-family: 'Orbitron', sans-serif; font-weight: 700;">+${ach.xp} XP</div>
-                </div>
-            `).join('');
-            
-            // Add "View All" card
-            container.innerHTML += `
-                <div class="achievement-card" style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(191, 0, 255, 0.1);" onclick="window.location.href='achievements.html'">
-                    <div style="text-align: center;">
-                        <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
-                        <div class="achievement-name">View All</div>
-                        <div class="achievement-desc">${ALL_ACHIEVEMENTS.length} total achievements</div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // ========== PROFILE LOADING ==========
-        function loadProfile() {
-            const user = getUser();
-            if (!user) return;
-            
-            // Update username
-            document.getElementById('username').textContent = user.username.toUpperCase();
-            
-            // Update avatar and banner
-            document.getElementById('user-avatar').src = user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.username;
-            document.getElementById('profile-banner').src = user.banner || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop';
-            
-            // Update level and XP
-            const level = user.level || 1;
-            const xp = user.xp || 0;
-            const xpNeeded = xpForNextLevel(level);
-            const xpProgress = ((xp % xpNeeded) / xpNeeded) * 100;
-            
-            document.getElementById('user-level').textContent = level;
-            document.getElementById('xp-bar').style.width = xpProgress + '%';
-            document.getElementById('xp-text').textContent = `${xp} / ${xpNeeded} XP`;
-            
-            // Update stats
-            document.getElementById('stat-achievements').textContent = (user.achievements || []).length;
-            document.getElementById('stat-games').textContent = user.gamesPlayed || 0;
-            document.getElementById('stat-movies').textContent = user.moviesWatched || 0;
-            document.getElementById('stat-coins').textContent = (user.coins || 0).toLocaleString();
-            document.getElementById('stat-xp').textContent = xp.toLocaleString();
-            
-            // Update join date
-            if (user.joinDate) {
-                const joinDate = new Date(user.joinDate);
-                document.getElementById('stat-joined').textContent = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            } else {
-                // If no join date exists, set it to now
-                user.joinDate = new Date().toISOString();
-                saveUser(user);
-                document.getElementById('stat-joined').textContent = 'Just now';
-            }
-            
-            // Load badges
-            loadBadges();
-            
-            // Load achievements
-            loadAchievements();
-            
-            // Check for new achievements
-            checkAchievements();
-        }
-        
-        // ========== MODAL FUNCTIONS ==========
         function openAvatarModal() {
-            document.getElementById('avatar-modal').classList.add('active');
-            document.getElementById('avatar-preview').style.display = 'none';
+            document.getElementById('avatarModal').classList.add('active');
+            document.getElementById('avatarPreview').style.display = 'none';
         }
         
         function openBannerModal() {
-            document.getElementById('banner-modal').classList.add('active');
-            document.getElementById('banner-preview').style.display = 'none';
+            document.getElementById('bannerModal').classList.add('active');
+            document.getElementById('bannerPreview').style.display = 'none';
         }
         
         function closeModal(modalId) {
@@ -1037,15 +1264,13 @@
             bannerFile = null;
         }
         
-        // ========== LOGOUT ==========
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('arcadeUser');
-                window.location.href = 'index.html';
+                location.reload();
             }
         }
         
-        // ========== NOTIFICATIONS ==========
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
@@ -1053,18 +1278,21 @@
             document.body.appendChild(notification);
             
             setTimeout(() => notification.classList.add('show'), 100);
-setTimeout(() => {
-    notification.classList.remove('show');
-    setTimeout(() => notification.remove(), 300);
-}, 4000);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
         
-        // ========== INITIALIZE ==========
-        loadProfile();
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal('avatarModal');
+                closeModal('bannerModal');
+            }
+        });
         
-        // EXPOSED FUNCTIONS FOR OTHER PAGES
-        window.addXP = addXP;
-        window.trackGamePlayed = trackGamePlayed;
-        window.trackMovieWatched = trackMovieWatched;
+        // Initialize
+        checkAuth();
     </script>
 </body>
 </html>

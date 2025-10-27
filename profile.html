@@ -831,7 +831,7 @@
             <div class="file-upload-section">
                 <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(event)">
                 <label for="avatarInput" class="upload-label">📤 SELECT IMAGE</label>
-                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 2MB</p>
+                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 1000MB</p>
                 <img id="avatarPreview" class="preview-image" style="display: none;">
             </div>
             <button class="save-btn" onclick="saveAvatar()">💾 SAVE AVATAR</button>
@@ -846,7 +846,7 @@
             <div class="file-upload-section">
                 <input type="file" id="bannerInput" accept="image/*" onchange="previewBanner(event)">
                 <label for="bannerInput" class="upload-label">📤 SELECT IMAGE</label>
-                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 2MB</p>
+                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 1000MB</p>
                 <img id="bannerPreview" class="preview-image" style="display: none;">
             </div>
             <button class="save-btn" onclick="saveBanner()">💾 SAVE BANNER</button>
@@ -1176,8 +1176,8 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            if (file.size > 2 * 1024 * 1024) {
-                showNotification('File too large! Max 2MB', 'error');
+            if (file.size > 10000 * 1024 * 1024) {
+                showNotification('File too large! Max 1000MB', 'error');
                 return;
             }
             
@@ -1194,8 +1194,8 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            if (file.size > 2 * 1024 * 1024) {
-                showNotification('File too large! Max 2MB', 'error');
+            if (file.size > 1000 * 1024 * 1024) {
+                showNotification('File too large! Max 1000MB', 'error');
                 return;
             }
             

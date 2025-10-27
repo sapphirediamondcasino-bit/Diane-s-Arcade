@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - Diane Keaton Memorial Arcade</title>
+    <title>Coin Shop - Diane's Arcade</title>
+    <link rel="icon" href="https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=32&h=32&fit=crop" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,6 +15,7 @@
             --neon-pink: #ff00ff;
             --neon-green: #39ff14;
             --neon-gold: #ffd700;
+            --neon-red: #ff0000;
             --dark-bg: #050510;
             --darker: #020208;
         }
@@ -44,8 +46,7 @@
         }
         
         .nav-bar {
-            position: sticky;
-            top: 0;
+            position: sticky; top: 0;
             background: rgba(5, 5, 16, 0.98);
             backdrop-filter: blur(30px);
             padding: 20px 50px;
@@ -63,16 +64,12 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 1.5em;
             font-weight: 900;
-            color: var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue);
+            color: var(--neon-gold);
+            text-shadow: 0 0 20px var(--neon-gold);
             letter-spacing: 2px;
         }
         
-        .nav-links {
-            display: flex;
-            gap: 25px;
-            flex-wrap: wrap;
-        }
+        .nav-links { display: flex; gap: 25px; flex-wrap: wrap; }
         
         .nav-link {
             font-family: 'Orbitron', sans-serif;
@@ -94,446 +91,296 @@
             transform: translateY(-3px);
         }
         
-        .logout-btn {
-            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
-            border: none;
-            box-shadow: 0 0 25px var(--neon-purple);
-            cursor: pointer;
-        }
+        .container { max-width: 1400px; margin: 60px auto; padding: 0 40px; }
         
-        .container {
-            max-width: 1600px;
-            margin: 60px auto;
-            padding: 0 40px;
-        }
-        
-        .profile-banner {
-            position: relative;
-            height: 300px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border-radius: 30px 30px 0 0;
-            overflow: hidden;
-            border: 3px solid var(--neon-blue);
-            border-bottom: none;
-        }
-        
-        .banner-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .banner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to bottom, transparent, rgba(5, 5, 16, 0.8));
-        }
-        
-        .edit-banner-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 12px 30px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--neon-blue);
-            border-radius: 25px;
-            color: white;
+        .page-title {
             font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 10;
-        }
-        
-        .edit-banner-btn:hover {
-            background: var(--neon-blue);
-            color: var(--darker);
-            box-shadow: 0 0 30px var(--neon-blue);
-        }
-        
-        .profile-header {
-            background: rgba(5, 5, 16, 0.95);
-            border: 3px solid var(--neon-blue);
-            border-top: none;
-            border-radius: 0 0 30px 30px;
-            padding: 50px;
-            margin-bottom: 40px;
-            box-shadow: 0 0 60px rgba(0, 243, 255, 0.4);
-            display: flex;
-            align-items: flex-start;
-            gap: 50px;
-            flex-wrap: wrap;
-            position: relative;
-            margin-top: -100px;
-        }
-        
-        .avatar-container {
-            position: relative;
-            margin-top: -80px;
-        }
-        
-        .profile-avatar {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            border: 5px solid var(--neon-blue);
-            box-shadow: 0 0 60px var(--neon-blue);
-            object-fit: cover;
-            animation: avatarGlow 3s ease infinite;
-            background: var(--darker);
-        }
-        
-        @keyframes avatarGlow {
-            0%, 100% { box-shadow: 0 0 60px var(--neon-blue); }
-            50% { box-shadow: 0 0 100px var(--neon-blue), 0 0 140px var(--neon-purple); }
-        }
-        
-        .edit-avatar-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--neon-blue);
-            border: 3px solid var(--darker);
-            color: var(--darker);
-            font-size: 1.5em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-        
-        .edit-avatar-btn:hover {
-            background: var(--neon-purple);
-            transform: scale(1.1);
-            box-shadow: 0 0 30px var(--neon-purple);
-        }
-        
-        .profile-info {
-            flex: 1;
-            padding-top: 20px;
-        }
-        
-        .profile-username {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3em;
+            font-size: 4em;
             font-weight: 900;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            text-align: center;
+            margin: 40px 0 20px;
+            background: linear-gradient(135deg, var(--neon-gold), var(--neon-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 15px;
         }
         
-        .profile-badges {
+        .coin-balance {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 50px;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-gold);
+            text-shadow: 0 0 30px var(--neon-gold);
+        }
+        
+        .shop-categories {
             display: flex;
-            gap: 15px;
-            margin: 20px 0;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 50px;
             flex-wrap: wrap;
-            padding: 20px;
-            background: rgba(0, 243, 255, 0.05);
-            border: 2px solid var(--neon-blue);
-            border-radius: 15px;
         }
         
-        .badge-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px;
+        .category-btn {
+            padding: 15px 35px;
             background: rgba(191, 0, 255, 0.1);
             border: 2px solid var(--neon-purple);
-            border-radius: 12px;
-            cursor: help;
-            transition: all 0.3s;
-            min-width: 80px;
-        }
-        
-        .badge-item:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 30px var(--neon-purple);
-        }
-        
-        .badge-icon {
-            font-size: 2.5em;
-            margin-bottom: 5px;
-        }
-        
-        .badge-name {
-            font-size: 0.7em;
-            font-family: 'Orbitron', sans-serif;
-            color: var(--neon-purple);
-            text-align: center;
-        }
-        
-        .no-badges {
-            width: 100%;
-            text-align: center;
-            padding: 30px;
-            opacity: 0.7;
-        }
-        
-        .buy-badges-link {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 25px;
-            background: linear-gradient(135deg, var(--neon-gold), var(--neon-green));
-            color: var(--darker);
-            text-decoration: none;
-            border-radius: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            transition: all 0.3s;
-        }
-        
-        .buy-badges-link:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px var(--neon-gold);
-        }
-        
-        .profile-level {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5em;
-            color: var(--neon-green);
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px var(--neon-green);
-        }
-        
-        .xp-bar-container {
-            width: 100%;
-            max-width: 500px;
-            height: 40px;
-            background: rgba(0, 243, 255, 0.1);
-            border: 2px solid var(--neon-blue);
-            border-radius: 20px;
-            overflow: hidden;
-            margin: 20px 0;
-            position: relative;
-        }
-        
-        .xp-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-            border-radius: 20px;
-            transition: width 1s ease;
-            box-shadow: 0 0 30px var(--neon-blue);
-        }
-        
-        .xp-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            border-radius: 30px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             color: white;
-            text-shadow: 0 0 10px #000;
-            z-index: 2;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
         }
         
-        .profile-stats {
-            display: flex;
-            gap: 30px;
-            margin-top: 25px;
-            flex-wrap: wrap;
+        .category-btn:hover {
+            background: rgba(191, 0, 255, 0.3);
+            transform: translateY(-3px);
         }
         
-        .stat-item {
-            text-align: center;
-            background: rgba(0, 243, 255, 0.05);
-            padding: 15px 25px;
-            border-radius: 15px;
-            border: 2px solid rgba(0, 243, 255, 0.3);
+        .category-btn.active {
+            background: var(--neon-purple);
+            color: white;
+            box-shadow: 0 0 40px var(--neon-purple);
         }
         
-        .stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2em;
-            font-weight: 900;
-            color: var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue);
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-        
-        .section-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5em;
-            font-weight: 900;
-            text-align: center;
-            margin: 60px 0 40px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .achievements-grid {
+        .shop-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+            margin-bottom: 80px;
         }
         
-        .achievement-card {
-            background: rgba(5, 5, 16, 0.85);
-            border: 2px solid var(--neon-purple);
+        .shop-item {
+            background: rgba(0, 243, 255, 0.05);
+            border: 2px solid var(--neon-blue);
             border-radius: 20px;
             padding: 30px;
             text-align: center;
             transition: all 0.3s;
+            position: relative;
         }
         
-        .achievement-card.locked {
-            opacity: 0.3;
-            filter: grayscale(100%);
-        }
-        
-        .achievement-card:not(.locked):hover {
+        .shop-item:hover {
             transform: scale(1.05);
+            box-shadow: 0 0 50px var(--neon-blue);
+            background: rgba(0, 243, 255, 0.1);
+        }
+        
+        .shop-item.special {
+            border-color: var(--neon-gold);
+        }
+        
+        .shop-item.special:hover {
+            box-shadow: 0 0 50px var(--neon-gold);
+        }
+        
+        .shop-item.premium {
+            border-color: var(--neon-purple);
+            background: rgba(191, 0, 255, 0.1);
+        }
+        
+        .shop-item.premium:hover {
             box-shadow: 0 0 50px var(--neon-purple);
         }
         
-        .achievement-icon {
-            font-size: 4em;
-            margin-bottom: 15px;
+        .shop-item.exclusive {
+            border-color: var(--neon-red);
+            background: rgba(255, 0, 0, 0.1);
         }
         
-        .achievement-name {
+        .shop-item.exclusive:hover {
+            box-shadow: 0 0 50px var(--neon-red);
+        }
+        
+        .item-icon { font-size: 4em; margin-bottom: 20px; }
+        
+        .item-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.3em;
+            font-size: 1.5em;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
             font-weight: 900;
-            color: var(--neon-purple);
-            margin-bottom: 10px;
         }
         
-        .achievement-desc {
+        .item-description {
+            font-size: 1em;
+            opacity: 0.85;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .item-price {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8em;
+            color: var(--neon-gold);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .buy-btn {
+            padding: 12px 40px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
+        }
+        
+        .buy-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 50px var(--neon-blue);
+        }
+        
+        .buy-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .apply-btn {
+            background: linear-gradient(135deg, var(--neon-gold), var(--neon-green));
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+        
+        .apply-btn:hover {
+            box-shadow: 0 0 50px var(--neon-gold);
+        }
+        
+        .special-badge {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: var(--neon-gold);
+            color: var(--darker);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 0.8em;
+        }
+        
+        .requirements {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--neon-gold);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
             font-size: 0.9em;
-            opacity: 0.8;
+        }
+        
+        .requirements h4 {
+            color: var(--neon-gold);
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .requirements ul { margin-left: 20px; }
+        .requirements li { margin: 5px 0; }
+        
+        .warning-box {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid var(--neon-red);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        
+        .warning-box h4 {
+            color: var(--neon-red);
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
         }
         
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
             z-index: 10000;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
         
         .modal.active { display: flex; }
         
         .modal-content {
-            background: rgba(5, 5, 16, 0.98);
+            background: var(--darker);
             border: 3px solid var(--neon-blue);
-            border-radius: 30px;
-            padding: 50px;
+            border-radius: 20px;
+            padding: 40px;
             max-width: 600px;
             width: 100%;
+            box-shadow: 0 0 60px var(--neon-blue);
             max-height: 90vh;
             overflow-y: auto;
-            position: relative;
         }
         
-        .modal-title {
+        .modal h2 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2em;
-            font-weight: 900;
+            color: var(--neon-gold);
+            margin-bottom: 20px;
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
             color: var(--neon-blue);
-            margin-bottom: 30px;
-            text-align: center;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 2px solid var(--neon-blue);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1em;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px var(--neon-purple);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
         }
         
         .close-modal {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--neon-pink);
-            border: none;
-            color: white;
-            font-size: 1.5em;
+            color: var(--neon-pink);
+            font-size: 2em;
+            float: right;
             cursor: pointer;
+            line-height: 1;
             transition: all 0.3s;
         }
         
         .close-modal:hover {
-            transform: rotate(90deg) scale(1.1);
-        }
-        
-        .file-upload-section {
-            background: rgba(0, 243, 255, 0.05);
-            border: 2px dashed var(--neon-blue);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .file-upload-section input[type="file"] {
-            display: none;
-        }
-        
-        .upload-label {
-            display: inline-block;
-            padding: 15px 40px;
-            background: var(--neon-blue);
-            color: var(--darker);
-            border-radius: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .upload-label:hover {
-            box-shadow: 0 0 30px var(--neon-blue);
-            transform: scale(1.05);
-        }
-        
-        .preview-image {
-            max-width: 100%;
-            margin-top: 20px;
-            border: 2px solid var(--neon-blue);
-            border-radius: 10px;
-        }
-        
-        .save-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border: none;
-            border-radius: 50px;
-            color: white;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .save-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 50px rgba(0, 243, 255, 0.8);
+            transform: rotate(90deg);
+            text-shadow: 0 0 20px var(--neon-pink);
         }
         
         .notification {
@@ -551,452 +398,778 @@
             box-shadow: 0 0 40px var(--neon-blue);
         }
         
-        .notification.show {
-            bottom: 30px;
-        }
-        
-        .notification.error {
-            background: var(--neon-pink);
-            color: white;
-        }
-        
-        .notification.success {
-            background: var(--neon-green);
-        }
+        .notification.show { bottom: 30px; }
+        .notification.error { background: var(--neon-pink); color: white; }
+        .notification.success { background: var(--neon-green); color: var(--darker); }
         
         @media (max-width: 768px) {
-            .profile-header { flex-direction: column; text-align: center; padding: 30px; }
-            .avatar-container { margin-top: -120px; }
-            .profile-username { font-size: 2em; }
-            .achievements-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 2.5em; }
+            .shop-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <nav class="nav-bar">
-        <div class="nav-brand">🎮 MY PROFILE</div>
+        <div class="nav-brand">🪙 COIN SHOP</div>
         <div class="nav-links">
             <a href="index.html" class="nav-link">HOME</a>
-            <a href="shop.html" class="nav-link">COIN SHOP 🪙</a>
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
-            <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="Settings.html" class="nav-link">SETTINGS ⚙️</a>
-            <button class="nav-link logout-btn" onclick="logout()">LOGOUT</button>
+            <a href="profile.html" class="nav-link">MY PROFILE</a>
         </div>
     </nav>
     
     <div class="container">
-        <div class="profile-banner">
-            <img src="" alt="Banner" class="banner-image" id="profileBanner">
-            <div class="banner-overlay"></div>
-            <button class="edit-banner-btn" onclick="openBannerModal()">✏️ CHANGE BANNER</button>
+        <h1 class="page-title">🪙 COIN SHOP 🪙</h1>
+        <div class="coin-balance">Your Balance: <span id="coin-balance">0</span> 🪙</div>
+        
+        <div class="shop-categories">
+            <button class="category-btn active" onclick="filterCategory('all')">ALL ITEMS</button>
+            <button class="category-btn" onclick="filterCategory('badges')">BADGES</button>
+            <button class="category-btn" onclick="filterCategory('bots')">BOT SUBS 🤖</button>
+            <button class="category-btn" onclick="filterCategory('cosmetics')">COSMETICS</button>
+            <button class="category-btn" onclick="filterCategory('perks')">PERKS</button>
+            <button class="category-btn" onclick="filterCategory('exclusive')">EXCLUSIVE</button>
         </div>
         
-        <div class="profile-header">
-            <div class="avatar-container">
-                <img src="" alt="Avatar" class="profile-avatar" id="userAvatar">
-                <button class="edit-avatar-btn" onclick="openAvatarModal()">✏️</button>
-            </div>
-            <div class="profile-info">
-                <h1 class="profile-username" id="username">LOADING...</h1>
-                
-                <div class="profile-badges" id="userBadges">
-                    <div class="no-badges">
-                        <p>No badges yet!</p>
-                        <a href="shop.html" class="buy-badges-link">🪙 BUY BADGES IN SHOP</a>
-                    </div>
-                </div>
-                
-                <div class="profile-level">⚡ LEVEL <span id="userLevel">1</span></div>
-                <div class="xp-bar-container">
-                    <div class="xp-bar" id="xpBar"></div>
-                    <div class="xp-text" id="xpText">0 / 100 XP</div>
-                </div>
-                
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-value" id="statAchievements">0</span>
-                        <div class="stat-label">🏆 Achievements</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="statGames">0</span>
-                        <div class="stat-label">🎮 Games Played</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="statMovies">0</span>
-                        <div class="stat-label">🎬 Movies Watched</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="statCoins">0</span>
-                        <div class="stat-label">🪙 Coins</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="statXp">0</span>
-                        <div class="stat-label">✨ Total XP</div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="statJoined">--</span>
-                        <div class="stat-label">📅 Member Since</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
-        <div class="achievements-grid" id="achievementsContainer"></div>
+        <div class="shop-grid" id="shop-items"></div>
     </div>
-
-    <!-- Avatar Modal -->
-    <div class="modal" id="avatarModal">
+    
+    <!-- Application Modal -->
+    <div class="modal" id="application-modal">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('avatarModal')">×</button>
-            <h2 class="modal-title">UPLOAD AVATAR</h2>
-            <div class="file-upload-section">
-                <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(event)">
-                <label for="avatarInput" class="upload-label">📤 SELECT IMAGE</label>
-                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 2MB • JPG, PNG, GIF</p>
-                <img id="avatarPreview" class="preview-image" style="display: none;">
-            </div>
-            <button class="save-btn" onclick="saveAvatar()">💾 SAVE AVATAR</button>
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">Apply for Badge</h2>
+            <form id="application-form" onsubmit="submitApplication(event)">
+                <input type="hidden" id="app-item-id" name="item_id">
+                
+                <div class="form-group">
+                    <label>Discord Server Invite Link:</label>
+                    <input type="url" name="discord_invite" required placeholder="https://discord.gg/...">
+                </div>
+                
+                <div class="form-group">
+                    <label>Server Member Count:</label>
+                    <input type="number" name="member_count" required placeholder="e.g., 500">
+                </div>
+                
+                <div id="extra-fields"></div>
+                
+                <div class="form-group">
+                    <label>Additional Information:</label>
+                    <textarea name="additional_info" placeholder="Tell us about your community..."></textarea>
+                </div>
+                
+                <button type="submit" class="buy-btn apply-btn">SUBMIT APPLICATION</button>
+            </form>
         </div>
     </div>
-
-    <!-- Banner Modal -->
-    <div class="modal" id="bannerModal">
+    
+    <!-- Bot Purchase Modal -->
+    <div class="modal" id="bot-purchase-modal">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('bannerModal')">×</button>
-            <h2 class="modal-title">UPLOAD BANNER</h2>
-            <div class="file-upload-section">
-                <input type="file" id="bannerInput" accept="image/*" onchange="previewBanner(event)">
-                <label for="bannerInput" class="upload-label">📤 SELECT IMAGE</label>
-                <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Max 2MB • JPG, PNG, GIF</p>
-                <img id="bannerPreview" class="preview-image" style="display: none;">
+            <span class="close-modal" onclick="closeBotModal()">&times;</span>
+            <h2 id="bot-modal-title">Purchase Bot Subscription</h2>
+            <p id="bot-modal-desc" style="margin-bottom: 20px; line-height: 1.6;"></p>
+            
+            <div class="form-group">
+                <label>Subscription Length:</label>
+                <select id="bot-months">
+                    <option value="1">1 Month</option>
+                    <option value="3">3 Months</option>
+                    <option value="6">6 Months</option>
+                    <option value="12">12 Months</option>
+                </select>
             </div>
-            <button class="save-btn" onclick="saveBanner()">💾 SAVE BANNER</button>
+            
+            <div class="form-group">
+                <label>Discord Server ID:</label>
+                <input type="text" id="bot-server-id" placeholder="123456789012345678" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Server Name:</label>
+                <input type="text" id="bot-server-name" placeholder="My Awesome Server" required>
+            </div>
+            
+            <div style="background: rgba(255, 215, 0, 0.1); border: 2px solid var(--neon-gold); border-radius: 10px; padding: 15px; margin: 20px 0;">
+                <strong>Total Cost:</strong> <span id="bot-total-cost" style="color: var(--neon-gold); font-size: 1.3em;">0 🪙</span>
+            </div>
+            
+            <p style="font-size: 0.9em; opacity: 0.8; margin-bottom: 20px;">
+                ⚠️ Staff will be notified and will manually activate your bot subscription within 24 hours.
+            </p>
+            
+            <button class="buy-btn" onclick="confirmBotPurchase()">PURCHASE SUBSCRIPTION</button>
         </div>
     </div>
-
+    
     <script>
-        const BADGE_DEFINITIONS = {
-            'verified_discord': { icon: '🔷', name: 'Verified Discord' },
-            'org_badge': { icon: '🏢', name: 'Organization' },
-            'roblox_badge': { icon: '🎮', name: 'Roblox Dev' },
-            'premium_badge': { icon: '💎', name: 'Premium' },
-            'founder_badge': { icon: '👑', name: 'Founder' }
-        };
-        
-        const ACHIEVEMENTS = [
-            { id: 'first_game', name: 'First Game', desc: 'Play your first game', icon: '🎮', xp: 10 },
-            { id: 'game_master', name: 'Game Master', desc: 'Play 10 games', icon: '🏆', xp: 50 },
-            { id: 'movie_buff', name: 'Movie Buff', desc: 'Watch 5 movies', icon: '🎬', xp: 25 },
-            { id: 'coin_collector', name: 'Coin Collector', desc: 'Earn 1000 coins', icon: '🪙', xp: 100 },
-            { id: 'level_10', name: 'Level 10', desc: 'Reach level 10', icon: '⚡', xp: 200 },
-            { id: 'badge_hunter', name: 'Badge Hunter', desc: 'Get your first badge', icon: '🏅', xp: 50 },
-            { id: 'explorer', name: 'Explorer', desc: 'Visit all pages', icon: '🗺️', xp: 30 },
-            { id: 'profile_perfect', name: 'Profile Perfect', desc: 'Upload avatar and banner', icon: '✨', xp: 25 }
+        const shopItems = [
+            // === BADGES (Applications) ===
+            {
+                id: 'verified_discord',
+                name: 'Verified Discord Badge',
+                description: 'Show you\'re a verified Discord community leader!',
+                icon: '🔷',
+                price: 'FREE',
+                category: 'badges',
+                type: 'application',
+                requirements: [
+                    'Discord server with 100+ members',
+                    'Active community (messages daily)',
+                    'Server invite link required'
+                ]
+            },
+            {
+                id: 'org_badge',
+                name: 'Organization Badge',
+                description: 'Official badge for gaming organizations and teams',
+                icon: '🏢',
+                price: 'FREE',
+                category: 'badges',
+                type: 'application',
+                requirements: [
+                    'Discord server with 500+ members',
+                    'Established organization (6+ months)',
+                    'Proof of organization status',
+                    'Admin approval required'
+                ]
+            },
+            {
+                id: 'roblox_badge',
+                name: 'Roblox Developer Badge',
+                description: 'For Roblox game developers and creators',
+                icon: '🎮',
+                price: 'FREE',
+                category: 'badges',
+                type: 'application',
+                requirements: [
+                    'Published Roblox game',
+                    'Discord server with Roblox community',
+                    'Link to your Roblox profile',
+                    'Game with 1000+ visits'
+                ],
+                extraFields: [
+                    { name: 'roblox_profile', label: 'Roblox Profile URL', type: 'url', required: true },
+                    { name: 'game_link', label: 'Game Link', type: 'url', required: true }
+                ]
+            },
+            {
+                id: 'team_badge',
+                name: 'Custom Team Badge',
+                description: 'Create a custom badge for your team (Admin must approve)',
+                icon: '🎖️',
+                price: 'FREE',
+                category: 'badges',
+                type: 'application',
+                requirements: [
+                    'Team/clan with 10+ members',
+                    'Custom badge design (emoji)',
+                    'Team name and description',
+                    'Admin approval required'
+                ],
+                extraFields: [
+                    { name: 'team_name', label: 'Team Name', type: 'text', required: true },
+                    { name: 'badge_emoji', label: 'Badge Emoji', type: 'text', required: true, placeholder: '🔥' },
+                    { name: 'team_description', label: 'Team Description', type: 'textarea', required: true }
+                ]
+            },
+            
+            // === EXCLUSIVE APPLICATION ===
+            {
+                id: 'diane_bot_developer',
+                name: 'Diane Keaton Bot Developer',
+                description: 'Apply to work on the official Diane Keaton Bot (EXTREMELY SELECTIVE)',
+                icon: '💻',
+                price: 'FREE',
+                category: 'exclusive',
+                type: 'application',
+                requirements: [
+                    '✅ Proven development experience (GitHub portfolio)',
+                    '✅ Background check required',
+                    '✅ Sign NDA and copyright agreements',
+                    '✅ 3-level approval process',
+                    '⚠️ Monitored while working on bot',
+                    '⚠️ Stealing code = LEGAL ACTION'
+                ],
+                extraFields: [
+                    { name: 'github_profile', label: 'GitHub Profile URL', type: 'url', required: true },
+                    { name: 'portfolio', label: 'Portfolio/Previous Work', type: 'url', required: true },
+                    { name: 'experience_years', label: 'Years of Development Experience', type: 'number', required: true },
+                    { name: 'languages', label: 'Programming Languages Known', type: 'text', required: true, placeholder: 'JavaScript, Python, etc.' },
+                    { name: 'why_apply', label: 'Why do you want to work on Diane Bot?', type: 'textarea', required: true }
+                ],
+                warning: `
+                    <strong>⚠️ LEGAL WARNING:</strong><br>
+                    The Diane Keaton Bot is owned by:<br>
+                    • Kurrasch Gaming Merch Store LLC<br>
+                    • Kurrasch Systems<br><br>
+                    All code is copyright protected. Stealing, copying, or distributing bot code will result in legal action.
+                    You will be monitored and must sign a comprehensive NDA.
+                `
+            },
+            
+            // === BADGES (Purchasable) ===
+            {
+                id: 'premium_badge',
+                name: 'Premium Badge',
+                description: 'Show your support with a shiny premium badge!',
+                icon: '💎',
+                price: 5000,
+                category: 'badges',
+                type: 'purchase'
+            },
+            {
+                id: 'community_badge',
+                name: 'Community Badge',
+                description: 'Show you\'re a valued community member!',
+                icon: '🌟',
+                price: 2500,
+                category: 'badges',
+                type: 'purchase'
+            },
+            
+            // === BOT SUBSCRIPTIONS (Can be purchased multiple times) ===
+            {
+                id: 'stans_beat_bot',
+                name: 'Stan\'s Beat Bot',
+                description: 'Premium music bot with DJ controls, playlists, and 24/7 playback! Staff will activate manually.',
+                icon: '🎵',
+                price: 1000000,
+                category: 'bots',
+                type: 'bot_subscription'
+            },
+            {
+                id: 'betty_white_admin',
+                name: 'Betty White Admin Bot',
+                description: 'Advanced moderation bot with auto-mod, logging, and custom commands! Staff will activate manually.',
+                icon: '🛡️',
+                price: 1200000,
+                category: 'bots',
+                type: 'bot_subscription'
+            },
+            {
+                id: 'ks_application_bot',
+                name: 'KS Application Bot',
+                description: 'Automated application system with custom forms and approval workflows! Staff will activate manually.',
+                icon: '📋',
+                price: 1500000,
+                category: 'bots',
+                type: 'bot_subscription'
+            },
+            {
+                id: 'robin_repair_bot',
+                name: 'Robin Williams Repair Bot',
+                description: 'Server maintenance bot with backups, role recovery, and diagnostics! Staff will activate manually.',
+                icon: '🔧',
+                price: 1000000,
+                category: 'bots',
+                type: 'bot_subscription'
+            },
+            
+            // === COSMETICS ===
+            {
+                id: 'custom_title',
+                name: 'Custom Profile Title',
+                description: 'Add a custom title to your profile',
+                icon: '✨',
+                price: 2500,
+                category: 'cosmetics',
+                type: 'purchase'
+            },
+            {
+                id: 'profile_frame',
+                name: 'Animated Profile Frame',
+                description: 'Glowing animated frame for your avatar',
+                icon: '🖼️',
+                price: 3000,
+                category: 'cosmetics',
+                type: 'purchase'
+            },
+            {
+                id: 'name_color',
+                name: 'Colored Username',
+                description: 'Change your username color',
+                icon: '🌈',
+                price: 1500,
+                category: 'cosmetics',
+                type: 'purchase'
+            },
+            
+            // === PERKS - XP BOOSTS ===
+            {
+                id: 'xp_boost_24h',
+                name: 'XP Boost (24h)',
+                description: 'Earn 2x XP for 24 hours!',
+                icon: '⚡',
+                price: 1000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'xp_boost_3d',
+                name: 'XP Boost (3 Days)',
+                description: 'Earn 2x XP for 3 days!',
+                icon: '⚡',
+                price: 2500,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'xp_boost_7d',
+                name: 'XP Boost (7 Days)',
+                description: 'Earn 2x XP for a whole week!',
+                icon: '⚡',
+                price: 5000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'xp_boost_30d',
+                name: 'XP Boost (30 Days)',
+                description: 'Earn 2x XP for an entire month!',
+                icon: '⚡',
+                price: 15000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'mega_xp_boost_7d',
+                name: 'MEGA XP Boost (7 Days)',
+                description: 'Earn 3x XP for a week! Premium boost!',
+                icon: '⚡',
+                price: 10000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'ultra_xp_boost_30d',
+                name: 'ULTRA XP Boost (30 Days)',
+                description: 'Earn 3x XP for 30 days! Ultimate boost!',
+                icon: '⚡',
+                price: 35000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            
+            // === PERKS - COIN BOOSTS ===
+            {
+                id: 'coin_boost_7d',
+                name: 'Coin Boost (7 Days)',
+                description: 'Earn 1.5x coins for a week',
+                icon: '💰',
+                price: 2000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'coin_boost_14d',
+                name: 'Coin Boost (14 Days)',
+                description: 'Earn 1.5x coins for 2 weeks',
+                icon: '💰',
+                price: 3500,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'coin_boost_30d',
+                name: 'Coin Boost (30 Days)',
+                description: 'Earn 1.5x coins for a month',
+                icon: '💰',
+                price: 7000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'mega_coin_boost_7d',
+                name: 'MEGA Coin Boost (7 Days)',
+                description: 'Earn 2x coins for a week! Double earnings!',
+                icon: '💰',
+                price: 5000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'ultra_coin_boost_30d',
+                name: 'ULTRA Coin Boost (30 Days)',
+                description: 'Earn 2x coins for 30 days! Maximum profit!',
+                icon: '💰',
+                price: 18000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            
+            // === PERKS - COMBO BOOSTS ===
+            {
+                id: 'combo_boost_24h',
+                name: 'XP + Coin Boost (24h)',
+                description: 'Earn 2x XP + 1.5x Coins for 24 hours! Best value!',
+                icon: '🔥',
+                price: 2500,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'combo_boost_7d',
+                name: 'XP + Coin Boost (7 Days)',
+                description: 'Earn 2x XP + 1.5x Coins for a week! Popular choice!',
+                icon: '🔥',
+                price: 10000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'mega_combo_7d',
+                name: 'MEGA Combo Boost (7 Days)',
+                description: 'Earn 3x XP + 2x Coins for a week! Power combo!',
+                icon: '🔥',
+                price: 20000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'legendary_boost_30d',
+                name: 'LEGENDARY Boost (30 Days)',
+                description: 'Earn 3x XP + 2x Coins for 30 days! Ultimate power!',
+                icon: '🔥',
+                price: 50000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            
+            // === PERKS - ACHIEVEMENT BOOSTS ===
+            {
+                id: 'achievement_hunter',
+                name: 'Achievement Hunter',
+                description: 'Unlock hints for all locked achievements! See how to get them.',
+                icon: '🏆',
+                price: 5000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'double_achievement_xp',
+                name: 'Double Achievement XP (7 Days)',
+                description: 'Get 2x XP from achievements for 7 days!',
+                icon: '🏆',
+                price: 10000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            
+            // === PERKS - SPECIAL BOOSTS ===
+            {
+                id: 'game_score_multiplier',
+                name: 'Game Score Multiplier (24h)',
+                description: 'Get 1.5x game scores for 24 hours! Climb leaderboards faster!',
+                icon: '🎮',
+                price: 3000,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'lucky_boost',
+                name: 'Lucky Boost (7 Days)',
+                description: 'Increased rare drop chances for 7 days! Better rewards!',
+                icon: '🌟',
+                price: 7500,
+                category: 'perks',
+                type: 'purchase'
+            },
+            {
+                id: 'precision_boost',
+                name: 'Precision Boost (3 Days)',
+                description: 'Better accuracy in skill-based games for 3 days!',
+                icon: '🎯',
+                price: 5000,
+                category: 'perks',
+                type: 'purchase'
+            }
         ];
         
-        let avatarFile = null;
-        let bannerFile = null;
+        let currentCategory = 'all';
+        let userCoins = 0;
+        let currentBotItem = null;
         
-        function getUser() {
-            const data = localStorage.getItem('arcadeUser');
-            if (!data) {
-                alert('Please login first!');
-                window.location.href = 'index.html';
-                return null;
+        function loadShop() {
+            const userData = localStorage.getItem('arcadeUser');
+            if (userData) {
+                const user = JSON.parse(userData);
+                userCoins = user.coins || 0;
+                document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
             }
-            return JSON.parse(data);
+            renderShop();
         }
         
-        function saveUser(user) {
+        function renderShop() {
+            const container = document.getElementById('shop-items');
+            container.innerHTML = '';
+            
+            const filteredItems = currentCategory === 'all' 
+                ? shopItems 
+                : shopItems.filter(item => item.category === currentCategory);
+            
+            filteredItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'shop-item';
+                if (item.type === 'application') card.classList.add('special');
+                if (item.category === 'bots') card.classList.add('premium');
+                if (item.category === 'exclusive') card.classList.add('exclusive');
+                
+                const canAfford = typeof item.price === 'number' && userCoins >= item.price;
+                const priceDisplay = typeof item.price === 'number' ? `${item.price.toLocaleString()} 🪙` : item.price;
+                
+                let buttonHTML = '';
+                if (item.type === 'application') {
+                    buttonHTML = `<button class="buy-btn apply-btn" onclick='openApplication(${JSON.stringify(item)})'>APPLY NOW</button>`;
+                } else if (item.type === 'bot_subscription') {
+                    buttonHTML = `<button class="buy-btn" onclick='openBotPurchase(${JSON.stringify(item)})' ${!canAfford ? 'disabled' : ''}>SUBSCRIBE</button>`;
+                } else {
+                    buttonHTML = `<button class="buy-btn" onclick="purchaseItem('${item.id}', ${item.price})" ${!canAfford ? 'disabled' : ''}>BUY NOW</button>`;
+                }
+                
+                let requirementsHTML = '';
+                if (item.requirements) {
+                    requirementsHTML = `
+                        <div class="requirements">
+                            <h4>Requirements:</h4>
+                            <ul>
+                                ${item.requirements.map(req => `<li>${req}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                let warningHTML = '';
+                if (item.warning) {
+                    warningHTML = `
+                        <div class="warning-box">
+                            <h4>⚠️ IMPORTANT:</h4>
+                            <p>${item.warning}</p>
+                        </div>
+                    `;
+                }
+                
+                let badgeText = '';
+                if (item.type === 'application') {
+                    badgeText = '<div class="special-badge">APPLICATION</div>';
+                } else if (item.category === 'bots') {
+                    badgeText = '<div class="special-badge" style="background: var(--neon-purple);">BOT SUB</div>';
+                } else if (item.category === 'exclusive') {
+                    badgeText = '<div class="special-badge" style="background: var(--neon-red);">EXCLUSIVE</div>';
+                }
+                
+                card.innerHTML = `
+                    ${badgeText}
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-description">${item.description}</div>
+                    ${warningHTML}
+                    ${requirementsHTML}
+                    <div class="item-price">${priceDisplay}</div>
+                    ${buttonHTML}
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function filterCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderShop();
+        }
+        
+        function openApplication(item) {
+            document.getElementById('modal-title').textContent = `Apply for ${item.name}`;
+            document.getElementById('app-item-id').value = item.id;
+            
+            const extraFieldsContainer = document.getElementById('extra-fields');
+            extraFieldsContainer.innerHTML = '';
+            
+            if (item.extraFields) {
+                item.extraFields.forEach(field => {
+                    const div = document.createElement('div');
+                    div.className = 'form-group';
+                    
+                    if (field.type === 'textarea') {
+                        div.innerHTML = `
+                            <label>${field.label}:</label>
+                            <textarea name="${field.name}" ${field.required ? 'required' : ''} placeholder="${field.placeholder || ''}"></textarea>
+                        `;
+                    } else {
+                        div.innerHTML = `
+                            <label>${field.label}:</label>
+                            <input type="${field.type}" name="${field.name}" ${field.required ? 'required' : ''} placeholder="${field.placeholder || ''}">
+                        `;
+                    }
+                    
+                    extraFieldsContainer.appendChild(div);
+                });
+            }
+            
+            document.getElementById('application-modal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('application-modal').classList.remove('active');
+            document.getElementById('application-form').reset();
+        }
+        
+        function submitApplication(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const application = {
+                item_id: formData.get('item_id'),
+                discord_invite: formData.get('discord_invite'),
+                member_count: formData.get('member_count'),
+                additional_info: formData.get('additional_info'),
+                timestamp: new Date().toISOString(),
+                status: 'pending'
+            };
+            
+            const itemId = formData.get('item_id');
+            const item = shopItems.find(i => i.id === itemId);
+            if (item && item.extraFields) {
+                item.extraFields.forEach(field => {
+                    application[field.name] = formData.get(field.name);
+                });
+            }
+            
+            const userData = localStorage.getItem('arcadeUser');
+            if (userData) {
+                const user = JSON.parse(userData);
+                application.username = user.username;
+                application.email = user.email;
+            }
+            
+            const applications = JSON.parse(localStorage.getItem('badgeApplications') || '[]');
+            applications.push(application);
+            localStorage.setItem('badgeApplications', JSON.stringify(applications));
+            
+            showNotification('Application submitted! Staff will review it soon. 🎉', 'success');
+            closeModal();
+        }
+        
+        function openBotPurchase(item) {
+            currentBotItem = item;
+            document.getElementById('bot-modal-title').textContent = `Subscribe to ${item.name}`;
+            document.getElementById('bot-modal-desc').textContent = item.description;
+            updateBotCost();
+            document.getElementById('bot-purchase-modal').classList.add('active');
+        }
+        
+        function closeBotModal() {
+            document.getElementById('bot-purchase-modal').classList.remove('active');
+            currentBotItem = null;
+        }
+        
+        function updateBotCost() {
+            const months = parseInt(document.getElementById('bot-months').value);
+            const totalCost = currentBotItem.price * months;
+            document.getElementById('bot-total-cost').textContent = `${totalCost.toLocaleString()} 🪙`;
+        }
+        
+        document.getElementById('bot-months')?.addEventListener('change', updateBotCost);
+        
+        function confirmBotPurchase() {
+            const serverId = document.getElementById('bot-server-id').value.trim();
+            const serverName = document.getElementById('bot-server-name').value.trim();
+            const months = parseInt(document.getElementById('bot-months').value);
+            
+            if (!serverId || !serverName) {
+                showNotification('Please fill in all fields!', 'error');
+                return;
+            }
+            
+            const totalCost = currentBotItem.price * months;
+            
+            if (userCoins < totalCost) {
+                showNotification('Not enough coins!', 'error');
+                return;
+            }
+            
+            const userData = localStorage.getItem('arcadeUser');
+            if (!userData) {
+                showNotification('Please login first!', 'error');
+                return;
+            }
+            
+            const user = JSON.parse(userData);
+            user.coins -= totalCost;
+            
+            const purchase = {
+                type: 'bot_subscription',
+                item_id: currentBotItem.id,
+                item_name: currentBotItem.name,
+                months: months,
+                server_id: serverId,
+                server_name: serverName,
+                total_cost: totalCost,
+                username: user.username,
+                email: user.email,
+                timestamp: new Date().toISOString(),
+                status: 'pending_activation'
+            };
+            
+            const purchases = JSON.parse(localStorage.getItem('botPurchases') || '[]');
+            purchases.push(purchase);
+            localStorage.setItem('botPurchases', JSON.stringify(purchases));
+            
             localStorage.setItem('arcadeUser', JSON.stringify(user));
             localStorage.setItem('user_' + user.username, JSON.stringify(user));
-        }
-        
-        function calculateLevel(xp) {
-            return Math.floor(Math.sqrt(xp / 100)) + 1;
-        }
-        
-        function xpForLevel(level) {
-            return level * level * 100;
-        }
-        
-        function loadProfile() {
-            const user = getUser();
-            if (!user) return;
             
-            // Initialize default values if missing
-            if (!user.xp) user.xp = 0;
-            if (!user.coins) user.coins = 0;
-            if (!user.gamesPlayed) user.gamesPlayed = 0;
-            if (!user.moviesWatched) user.moviesWatched = 0;
-            if (!user.achievements) user.achievements = [];
+            userCoins = user.coins;
+            document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
+            
+            showNotification(`✅ Purchased ${currentBotItem.name} for ${months} month(s)! Staff will activate within 24 hours.`, 'success');
+            closeBotModal();
+            renderShop();
+        }
+        
+        function purchaseItem(itemId, price) {
+            const userData = localStorage.getItem('arcadeUser');
+            if (!userData) {
+                showNotification('Please login first!', 'error');
+                return;
+            }
+            
+            const user = JSON.parse(userData);
+            
+            if (user.coins < price) {
+                showNotification('Not enough coins!', 'error');
+                return;
+            }
+            
+            user.coins -= price;
+            
+            if (!user.inventory) user.inventory = [];
             if (!user.badges) user.badges = [];
-            if (!user.joinDate) {
-                user.joinDate = new Date().toISOString();
-                saveUser(user);
+            
+            const item = shopItems.find(i => i.id === itemId);
+            
+            if (item.category === 'badges') {
+                if (!user.badges.includes(itemId)) {
+                    user.badges.push(itemId);
+                }
+            } else {
+                user.inventory.push({
+                    item_id: itemId,
+                    purchased_at: new Date().toISOString()
+                });
             }
             
-            // Username
-            document.getElementById('username').textContent = user.username.toUpperCase();
+            localStorage.setItem('arcadeUser', JSON.stringify(user));
+            localStorage.setItem('user_' + user.username, JSON.stringify(user));
             
-            // Avatar & Banner
-            const defaultAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
-            const defaultBanner = 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=400&fit=crop';
-            document.getElementById('userAvatar').src = user.avatar || defaultAvatar;
-            document.getElementById('profileBanner').src = user.banner || defaultBanner;
+            userCoins = user.coins;
+            document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
             
-            // Level & XP
-            const level = calculateLevel(user.xp);
-            const currentLevelXP = xpForLevel(level - 1);
-            const nextLevelXP = xpForLevel(level);
-            const xpInLevel = user.xp - currentLevelXP;
-            const xpNeeded = nextLevelXP - currentLevelXP;
-            const progress = (xpInLevel / xpNeeded) * 100;
-            
-            document.getElementById('userLevel').textContent = level;
-            document.getElementById('xpBar').style.width = progress + '%';
-            document.getElementById('xpText').textContent = `${xpInLevel} / ${xpNeeded} XP`;
-            
-            // Stats
-            document.getElementById('statAchievements').textContent = user.achievements.length;
-            document.getElementById('statGames').textContent = user.gamesPlayed;
-            document.getElementById('statMovies').textContent = user.moviesWatched;
-            document.getElementById('statCoins').textContent = user.coins.toLocaleString();
-            document.getElementById('statXp').textContent = user.xp.toLocaleString();
-            
-            // Join Date
-            const joinDate = new Date(user.joinDate);
-            const monthYear = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            document.getElementById('statJoined').textContent = monthYear;
-            
-            // Load Badges
-            loadBadges(user);
-            
-            // Load Achievements
-            loadAchievements(user);
-            
-            // Check for new achievements
-            checkAchievements(user);
-        }
-        
-        function loadBadges(user) {
-            const container = document.getElementById('userBadges');
-            
-            if (!user.badges || user.badges.length === 0) {
-                container.innerHTML = `
-                    <div class="no-badges">
-                        <p>No badges yet!</p>
-                        <a href="shop.html" class="buy-badges-link">🪙 BUY BADGES IN SHOP</a>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = user.badges.map(badgeId => {
-                const badge = BADGE_DEFINITIONS[badgeId];
-                if (!badge) return '';
-                return `
-                    <div class="badge-item" title="${badge.name}">
-                        <div class="badge-icon">${badge.icon}</div>
-                        <div class="badge-name">${badge.name}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        function loadAchievements(user) {
-            const container = document.getElementById('achievementsContainer');
-            
-            container.innerHTML = ACHIEVEMENTS.slice(0, 8).map(ach => {
-                const unlocked = user.achievements.includes(ach.id);
-                return `
-                    <div class="achievement-card ${unlocked ? '' : 'locked'}">
-                        ${!unlocked ? '<div style="position: absolute; top: 15px; right: 15px; font-size: 1.5em;">🔒</div>' : ''}
-                        <div class="achievement-icon">${ach.icon}</div>
-                        <div class="achievement-name">${ach.name}</div>
-                        <div class="achievement-desc">${ach.desc}</div>
-                        <div style="margin-top: 15px; color: var(--neon-green); font-family: 'Orbitron', sans-serif; font-weight: 700;">+${ach.xp} XP</div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.innerHTML += `
-                <div class="achievement-card" style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(191, 0, 255, 0.1);" onclick="window.location.href='achievements.html'">
-                    <div style="text-align: center;">
-                        <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
-                        <div class="achievement-name">View All</div>
-                        <div class="achievement-desc">${ACHIEVEMENTS.length} total</div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function checkAchievements(user) {
-            let newAchievements = false;
-            
-            // First game
-            if (user.gamesPlayed >= 1 && !user.achievements.includes('first_game')) {
-                unlockAchievement(user, 'first_game');
-                newAchievements = true;
-            }
-            
-            // Game master
-            if (user.gamesPlayed >= 10 && !user.achievements.includes('game_master')) {
-                unlockAchievement(user, 'game_master');
-                newAchievements = true;
-            }
-            
-            // Movie buff
-            if (user.moviesWatched >= 5 && !user.achievements.includes('movie_buff')) {
-                unlockAchievement(user, 'movie_buff');
-                newAchievements = true;
-            }
-            
-            // Coin collector
-            if (user.coins >= 1000 && !user.achievements.includes('coin_collector')) {
-                unlockAchievement(user, 'coin_collector');
-                newAchievements = true;
-            }
-            
-            // Level 10
-            const level = calculateLevel(user.xp);
-            if (level >= 10 && !user.achievements.includes('level_10')) {
-                unlockAchievement(user, 'level_10');
-                newAchievements = true;
-            }
-            
-            // Badge hunter
-            if (user.badges && user.badges.length >= 1 && !user.achievements.includes('badge_hunter')) {
-                unlockAchievement(user, 'badge_hunter');
-                newAchievements = true;
-            }
-            
-            // Profile perfect
-            if (user.avatar && user.banner && !user.achievements.includes('profile_perfect')) {
-                unlockAchievement(user, 'profile_perfect');
-                newAchievements = true;
-            }
-            
-            if (newAchievements) {
-                loadProfile();
-            }
-        }
-        
-        function unlockAchievement(user, achievementId) {
-            const achievement = ACHIEVEMENTS.find(a => a.id === achievementId);
-            if (!achievement) return;
-            
-            user.achievements.push(achievementId);
-            user.xp = (user.xp || 0) + achievement.xp;
-            saveUser(user);
-            
-            showNotification(`🏆 Achievement Unlocked: ${achievement.name} (+${achievement.xp} XP)!`, 'success');
-        }
-        
-        // Image Upload Functions
-        function previewAvatar(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            if (file.size > 2 * 1024 * 1024) {
-                showNotification('File too large! Max 2MB', 'error');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                avatarFile = e.target.result;
-                document.getElementById('avatarPreview').src = e.target.result;
-                document.getElementById('avatarPreview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        function previewBanner(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            if (file.size > 2 * 1024 * 1024) {
-                showNotification('File too large! Max 2MB', 'error');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                bannerFile = e.target.result;
-                document.getElementById('bannerPreview').src = e.target.result;
-                document.getElementById('bannerPreview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        function saveAvatar() {
-            if (!avatarFile) {
-                showNotification('Please select an image first', 'error');
-                return;
-            }
-            
-            const user = getUser();
-            if (!user) return;
-            
-            user.avatar = avatarFile;
-            saveUser(user);
-            
-            document.getElementById('userAvatar').src = avatarFile;
-            closeModal('avatarModal');
-            showNotification('Avatar updated!', 'success');
-            avatarFile = null;
-            
-            // Check achievements
-            checkAchievements(user);
-        }
-        
-        function saveBanner() {
-            if (!bannerFile) {
-                showNotification('Please select an image first', 'error');
-                return;
-            }
-            
-            const user = getUser();
-            if (!user) return;
-            
-            user.banner = bannerFile;
-            saveUser(user);
-            
-            document.getElementById('profileBanner').src = bannerFile;
-            closeModal('bannerModal');
-            showNotification('Banner updated!', 'success');
-            bannerFile = null;
-            
-            // Check achievements
-            checkAchievements(user);
-        }
-        
-        // Modal Functions
-        function openAvatarModal() {
-            document.getElementById('avatarModal').classList.add('active');
-            document.getElementById('avatarPreview').style.display = 'none';
-        }
-        
-        function openBannerModal() {
-            document.getElementById('bannerModal').classList.add('active');
-            document.getElementById('bannerPreview').style.display = 'none';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            avatarFile = null;
-            bannerFile = null;
-        }
-        
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('arcadeUser');
-                window.location.href = 'index.html';
-            }
+            showNotification(`✅ Purchased ${item.name}!`, 'success');
+            renderShop();
         }
         
         function showNotification(message, type = 'info') {
@@ -1012,16 +1185,14 @@
             }, 4000);
         }
         
-        // Close modals with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                closeModal('avatarModal');
-                closeModal('bannerModal');
+                closeModal();
+                closeBotModal();
             }
         });
         
-        // Initialize profile
-        loadProfile();
+        loadShop();
     </script>
 </body>
 </html>

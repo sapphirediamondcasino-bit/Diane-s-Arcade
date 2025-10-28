@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms of Service - Diane Keaton Memorial Arcade</title>
+    <link rel="icon" href="https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=32&h=32&fit=crop" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -432,9 +433,38 @@
         <p style="margin-top: 10px;">Operated by Kurrasch Gaming Merch Stores LLC & Kurrasch Systems</p>
         <p style="margin-top: 20px; font-size: 0.9em;">
             <a href="index.html" style="color: var(--neon-blue); text-decoration: none;">Home</a> • 
-            <a href="terms.html" style="color: var(--neon-blue); text-decoration: none;">Terms of Service</a> • 
-            <a href="privacy.html" style="color: var(--neon-blue); text-decoration: none;">Privacy Policy</a>
+            <a href="TermsofService.html" style="color: var(--neon-blue); text-decoration: none;">Terms of Service</a> • 
+            <a href="PrivacyPolicy.html" style="color: var(--neon-blue); text-decoration: none;">Privacy Policy</a>
         </p>
     </div>
+
+    <script>
+        // Load admin-updated Terms of Service if available
+        function loadAdminContent() {
+            const adminTerms = localStorage.getItem('siteTerms');
+            
+            if (adminTerms && adminTerms.trim() !== '') {
+                // Admin has updated the content - show that instead
+                const contentDiv = document.querySelector('.policy-content');
+                
+                // Keep the company info box at the top
+                const companyInfo = document.querySelector('.company-info');
+                
+                // Replace content but keep structure
+                contentDiv.innerHTML = companyInfo.outerHTML + '<div style="margin-top: 30px; white-space: pre-wrap; line-height: 1.8;">' + adminTerms + '</div>';
+                
+                // Update last updated date
+                const now = new Date();
+                document.querySelector('.last-updated').textContent = 'Last Updated: ' + now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                
+                console.log('✅ Loaded admin-updated Terms of Service');
+            } else {
+                console.log('ℹ️ Using default Terms of Service');
+            }
+        }
+        
+        // Load content when page loads
+        document.addEventListener('DOMContentLoaded', loadAdminContent);
+    </script>
 </body>
 </html>

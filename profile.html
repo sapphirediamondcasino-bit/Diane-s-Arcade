@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - Diane Keaton Memorial Arcade</title>
+    <link rel="icon" href="https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=32&h=32&fit=crop" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -248,7 +249,9 @@
         .banner-image {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            object-position: center;
+            background: var(--darker);
         }
         
         .banner-overlay {
@@ -859,7 +862,8 @@
             'org_badge': { icon: '🏢', name: 'Organization' },
             'roblox_badge': { icon: '🎮', name: 'Roblox Dev' },
             'premium_badge': { icon: '💎', name: 'Premium' },
-            'founder_badge': { icon: '👑', name: 'Founder' }
+            'founder_badge': { icon: '👑', name: 'Founder' },
+            'community_badge': { icon: '🌟', name: 'Community' }
         };
         
         const ALL_ACHIEVEMENTS = [
@@ -984,7 +988,7 @@
                 }
             }
             
-            // Create new user
+            // Create new user - USE unlockedAchievements FIELD
             const newUser = {
                 username: username,
                 email: email,
@@ -994,13 +998,13 @@
                 level: 1,
                 gamesPlayed: 0,
                 moviesWatched: 0,
-                achievements: [],
+                unlockedAchievements: [], // FIXED: Use correct field name
                 badges: [],
                 inventory: [],
                 joinDate: new Date().toISOString(),
                 avatar: null,
                 banner: null,
-                gameHistory: {},
+                gamesHistory: {},
                 moviesHistory: {}
             };
             
@@ -1079,8 +1083,12 @@
             
             const container = document.getElementById('achievementsContainer');
             
-            container.innerHTML = ALL_ACHIEVEMENTS.slice(0, 8).map(ach => {
-                const unlocked = user.achievements && user.achievements.includes(ach.id);
+            // FIXED: Use unlockedAchievements instead of achievements
+            const unlockedAchs = user.unlockedAchievements || [];
+            
+            // Show ALL achievements (not just 8)
+            container.innerHTML = ALL_ACHIEVEMENTS.map(ach => {
+                const unlocked = unlockedAchs.includes(ach.id);
                 return `
                     <div class="achievement-card ${unlocked ? '' : 'locked'}">
                         ${!unlocked ? '<div style="position: absolute; top: 15px; right: 15px; font-size: 1.5em;">🔒</div>' : ''}
@@ -1097,42 +1105,43 @@
                     <div style="text-align: center;">
                         <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
                         <div class="achievement-name">View All</div>
-                        <div class="achievement-desc">${ALL_ACHIEVEMENTS.length} total</div>
+                        <div class="achievement-desc">125+ achievements</div>
                     </div>
                 </div>
             `;
         }
         
         function checkAchievements(user) {
-            if (!user.achievements) user.achievements = [];
+            // FIXED: Use unlockedAchievements instead of achievements
+            if (!user.unlockedAchievements) user.unlockedAchievements = [];
             
-            if (user.gamesPlayed >= 1 && !user.achievements.includes('first_game')) {
-                user.achievements.push('first_game');
+            if (user.gamesPlayed >= 1 && !user.unlockedAchievements.includes('first_game')) {
+                user.unlockedAchievements.push('first_game');
                 user.xp += 10;
             }
-            if (user.gamesPlayed >= 10 && !user.achievements.includes('game_master')) {
-                user.achievements.push('game_master');
+            if (user.gamesPlayed >= 10 && !user.unlockedAchievements.includes('game_master')) {
+                user.unlockedAchievements.push('game_master');
                 user.xp += 50;
             }
-            if (user.moviesWatched >= 5 && !user.achievements.includes('movie_buff')) {
-                user.achievements.push('movie_buff');
+            if (user.moviesWatched >= 5 && !user.unlockedAchievements.includes('movie_buff')) {
+                user.unlockedAchievements.push('movie_buff');
                 user.xp += 25;
             }
-            if (user.coins >= 1000 && !user.achievements.includes('coin_collector')) {
-                user.achievements.push('coin_collector');
+            if (user.coins >= 1000 && !user.unlockedAchievements.includes('coin_collector')) {
+                user.unlockedAchievements.push('coin_collector');
                 user.xp += 100;
             }
             const level = calculateLevel(user.xp);
-            if (level >= 10 && !user.achievements.includes('level_10')) {
-                user.achievements.push('level_10');
+            if (level >= 10 && !user.unlockedAchievements.includes('level_10')) {
+                user.unlockedAchievements.push('level_10');
                 user.xp += 200;
             }
-            if (user.badges && user.badges.length >= 1 && !user.achievements.includes('badge_hunter')) {
-                user.achievements.push('badge_hunter');
+            if (user.badges && user.badges.length >= 1 && !user.unlockedAchievements.includes('badge_hunter')) {
+                user.unlockedAchievements.push('badge_hunter');
                 user.xp += 50;
             }
-            if (user.avatar && user.banner && !user.achievements.includes('profile_perfect')) {
-                user.achievements.push('profile_perfect');
+            if (user.avatar && user.banner && !user.unlockedAchievements.includes('profile_perfect')) {
+                user.unlockedAchievements.push('profile_perfect');
                 user.xp += 25;
             }
             
@@ -1141,7 +1150,10 @@
         
         function loadProfile() {
             const user = getUser();
-            if (!user) return;
+            if (!user || !user.username) {
+                // User not logged in yet, silently return
+                return;
+            }
             
             document.getElementById('username').textContent = user.username.toUpperCase();
             document.getElementById('userAvatar').src = user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
@@ -1158,11 +1170,12 @@
             document.getElementById('xpBar').style.width = progress + '%';
             document.getElementById('xpText').textContent = `${xpInLevel} / ${xpNeeded} XP`;
             
-            document.getElementById('statAchievements').textContent = user.achievements.length;
-            document.getElementById('statGames').textContent = user.gamesPlayed;
-            document.getElementById('statMovies').textContent = user.moviesWatched;
-            document.getElementById('statCoins').textContent = user.coins.toLocaleString();
-            document.getElementById('statXp').textContent = user.xp.toLocaleString();
+            // FIXED: Use unlockedAchievements
+            document.getElementById('statAchievements').textContent = (user.unlockedAchievements || []).length;
+            document.getElementById('statGames').textContent = user.gamesPlayed || 0;
+            document.getElementById('statMovies').textContent = user.moviesWatched || 0;
+            document.getElementById('statCoins').textContent = (user.coins || 0).toLocaleString();
+            document.getElementById('statXp').textContent = (user.xp || 0).toLocaleString();
             
             const joinDate = new Date(user.joinDate);
             document.getElementById('statJoined').textContent = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -1176,7 +1189,7 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            if (file.size > 10000 * 1024 * 1024) {
+            if (file.size > 1000 * 1024 * 1024) {
                 showNotification('File too large! Max 1000MB', 'error');
                 return;
             }

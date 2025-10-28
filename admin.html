@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Diane Keaton Memorial Arcade</title>
+    <link rel="icon" href="https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=32&h=32&fit=crop" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -264,6 +265,12 @@
             border: 1px solid var(--neon-orange);
             color: var(--neon-orange);
         }
+
+        .status-staff {
+            background: rgba(191, 0, 255, 0.2);
+            border: 1px solid var(--neon-purple);
+            color: var(--neon-purple);
+        }
         
         .search-bar {
             display: flex;
@@ -319,6 +326,16 @@
         .badge-preview {
             font-size: 3em;
         }
+
+        .notification-badge {
+            background: var(--neon-red);
+            color: white;
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            margin-left: 10px;
+            font-weight: 900;
+        }
         
         @media (max-width: 768px) {
             .admin-title { font-size: 1.8em; }
@@ -336,7 +353,8 @@
     <div class="container">
         <div class="admin-nav">
             <button class="admin-tab active" onclick="showSection('users')">👥 USER MANAGEMENT</button>
-            <button class="admin-tab" onclick="showSection('applications')">📋 BADGE APPLICATIONS</button>
+            <button class="admin-tab" onclick="showSection('applications')">📋 BADGE APPLICATIONS <span id="appCount" class="notification-badge" style="display:none;"></span></button>
+            <button class="admin-tab" onclick="showSection('botSubs')">🤖 BOT SUBSCRIPTIONS <span id="botSubCount" class="notification-badge" style="display:none;"></span></button>
             <button class="admin-tab" onclick="showSection('moderation')">⚖️ MODERATION</button>
             <button class="admin-tab" onclick="showSection('rewards')">🎁 GIVE REWARDS</button>
             <button class="admin-tab" onclick="showSection('content')">📄 CONTENT</button>
@@ -378,6 +396,16 @@
                 <div id="applicationsList"></div>
             </div>
         </div>
+
+        <!-- BOT SUBSCRIPTIONS -->
+        <div class="admin-section" id="botSubs">
+            <div class="admin-panel">
+                <h2 class="panel-header">🤖 Bot Subscription Requests</h2>
+                <p style="margin-bottom: 20px; opacity: 0.8;">Users who purchased bot subscriptions - activate them manually via Discord</p>
+                <div class="alert alert-success" id="botSubAlert"></div>
+                <div id="botSubList"></div>
+            </div>
+        </div>
         
         <!-- MODERATION -->
         <div class="admin-section" id="moderation">
@@ -393,6 +421,10 @@
                 <button class="btn btn-warning" onclick="moderateImages()">🖼️ VIEW USER IMAGES</button>
                 <div id="imagePreview" style="margin-top: 20px;"></div>
                 
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-purple); margin: 30px 0 20px;">👮 Staff Management</h3>
+                <button class="btn btn-primary" onclick="giveStaffRole()">⭐ GIVE STAFF ROLE</button>
+                <button class="btn btn-warning" onclick="removeStaffRole()">❌ REMOVE STAFF ROLE</button>
+
                 <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-orange); margin: 30px 0 20px;">📊 Reset User Progress</h3>
                 <button class="btn btn-warning" onclick="resetLevel()">🔄 RESET LEVEL</button>
                 <button class="btn btn-warning" onclick="resetAchievements()">🏆 RESET ACHIEVEMENTS</button>
@@ -450,11 +482,12 @@
                 <div class="form-group">
                     <label class="form-label">Badge Type</label>
                     <select class="form-select" id="badgeType">
+                        <option value="founder_badge">👑 FOUNDER (Admin Only)</option>
                         <option value="verified_discord">✅ Verified Discord</option>
                         <option value="org_badge">🏢 Organization</option>
                         <option value="roblox_badge">🎮 Roblox Developer</option>
                         <option value="premium_badge">💎 Premium</option>
-                        <option value="founder_badge">👑 Founder</option>
+                        <option value="community_badge">🌟 Community</option>
                     </select>
                 </div>
                 <button class="btn btn-success" onclick="giveBadge()">🏅 GIVE BADGE</button>
@@ -467,6 +500,7 @@
         <div class="admin-section" id="content">
             <div class="admin-panel">
                 <h2 class="panel-header">📄 Content Management</h2>
+                <p style="margin-bottom: 30px; opacity: 0.8;">⚠️ Note: Content saved here will be stored in localStorage. To update the actual HTML pages, you'll need to manually copy and update the HTML files.</p>
                 
                 <h3 style="font-family: 'Orbitron', sans-serif; color: var(--neon-blue); margin-bottom: 20px;">📜 Terms of Service</h3>
                 <div class="form-group">
@@ -510,8 +544,32 @@
             document.getElementById('adminEmail').textContent = user.email;
             loadUsers();
             loadApplications();
+            loadBotSubscriptions();
             loadContent();
+            updateNotificationBadges();
             return true;
+        }
+
+        function updateNotificationBadges() {
+            const applications = JSON.parse(localStorage.getItem('badgeApplications') || '[]');
+            const botSubs = JSON.parse(localStorage.getItem('botSubscriptions') || '[]');
+            
+            const appCount = document.getElementById('appCount');
+            const botSubCount = document.getElementById('botSubCount');
+            
+            if (applications.length > 0) {
+                appCount.textContent = applications.length;
+                appCount.style.display = 'inline-block';
+            } else {
+                appCount.style.display = 'none';
+            }
+            
+            if (botSubs.length > 0) {
+                botSubCount.textContent = botSubs.length;
+                botSubCount.style.display = 'inline-block';
+            } else {
+                botSubCount.style.display = 'none';
+            }
         }
         
         function getAllUsers() {
@@ -540,8 +598,13 @@
             tbody.innerHTML = '';
             users.forEach(user => {
                 const level = Math.floor(Math.sqrt((user.xp || 0) / 100)) + 1;
-                const statusClass = user.banned ? 'status-banned' : (user.restricted ? 'status-restricted' : 'status-active');
-                const statusText = user.banned ? 'BANNED' : (user.restricted ? 'RESTRICTED' : 'ACTIVE');
+                let statusClass = user.banned ? 'status-banned' : (user.restricted ? 'status-restricted' : 'status-active');
+                let statusText = user.banned ? 'BANNED' : (user.restricted ? 'RESTRICTED' : 'ACTIVE');
+                
+                if (user.isStaff) {
+                    statusClass = 'status-staff';
+                    statusText = 'STAFF';
+                }
                 
                 const row = `
                     <tr>
@@ -576,8 +639,13 @@
             
             users.forEach(user => {
                 const level = Math.floor(Math.sqrt((user.xp || 0) / 100)) + 1;
-                const statusClass = user.banned ? 'status-banned' : (user.restricted ? 'status-restricted' : 'status-active');
-                const statusText = user.banned ? 'BANNED' : (user.restricted ? 'RESTRICTED' : 'ACTIVE');
+                let statusClass = user.banned ? 'status-banned' : (user.restricted ? 'status-restricted' : 'status-active');
+                let statusText = user.banned ? 'BANNED' : (user.restricted ? 'RESTRICTED' : 'ACTIVE');
+                
+                if (user.isStaff) {
+                    statusClass = 'status-staff';
+                    statusText = 'STAFF';
+                }
                 
                 tbody.innerHTML += `
                     <tr>
@@ -605,8 +673,87 @@
             
             const level = Math.floor(Math.sqrt((user.xp || 0) / 100)) + 1;
             const badges = user.badges ? user.badges.join(', ') : 'None';
+            const staffStatus = user.isStaff ? 'YES' : 'NO';
             
-            alert(`User Details:\n\nUsername: ${user.username}\nEmail: ${user.email}\nLevel: ${level}\nXP: ${user.xp || 0}\nCoins: ${user.coins || 0}\nGames Played: ${user.gamesPlayed || 0}\nMovies Watched: ${user.moviesWatched || 0}\nBadges: ${badges}\n\nJoined: ${user.joinDate || 'Unknown'}`);
+            alert(`User Details:\n\nUsername: ${user.username}\nEmail: ${user.email}\nStaff: ${staffStatus}\nLevel: ${level}\nXP: ${user.xp || 0}\nCoins: ${user.coins || 0}\nGames Played: ${user.gamesPlayed || 0}\nMovies Watched: ${user.moviesWatched || 0}\nBadges: ${badges}\n\nJoined: ${user.joinDate || 'Unknown'}`);
+        }
+
+        function loadBotSubscriptions() {
+            const botSubs = JSON.parse(localStorage.getItem('botSubscriptions') || '[]');
+            const container = document.getElementById('botSubList');
+            
+            if (botSubs.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.6; padding: 40px;">No bot subscription requests</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            botSubs.forEach((sub, index) => {
+                const card = `
+                    <div class="application-card">
+                        <div class="application-header">
+                            <div>
+                                <div class="badge-preview">🤖</div>
+                                <h3>${sub.username}</h3>
+                                <p style="opacity: 0.7;">${sub.email}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p><strong>Bot:</strong> ${sub.botName}</p>
+                                <p><strong>Duration:</strong> ${sub.months} month(s)</p>
+                                <p><strong>Purchased:</strong> ${new Date(sub.timestamp).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div style="margin: 20px 0; background: rgba(0, 243, 255, 0.1); padding: 15px; border-radius: 10px;">
+                            <p><strong>💰 Cost:</strong> ${sub.cost.toLocaleString()} coins</p>
+                            <p style="margin-top: 10px;"><strong>📝 Instructions:</strong> Activate this subscription manually via Discord bot panel</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-success" onclick="markBotSubComplete(${index})">✅ ACTIVATED</button>
+                            <button class="btn btn-danger" onclick="denyBotSub(${index})">❌ CANCEL</button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        function markBotSubComplete(index) {
+            const botSubs = JSON.parse(localStorage.getItem('botSubscriptions') || '[]');
+            const sub = botSubs[index];
+            
+            if (confirm(`Mark ${sub.botName} subscription for ${sub.username} as activated?`)) {
+                botSubs.splice(index, 1);
+                localStorage.setItem('botSubscriptions', JSON.stringify(botSubs));
+                showAlert('botSubAlert', `✅ ${sub.botName} activated for ${sub.username}!`);
+                loadBotSubscriptions();
+                updateNotificationBadges();
+            }
+        }
+
+        function denyBotSub(index) {
+            const botSubs = JSON.parse(localStorage.getItem('botSubscriptions') || '[]');
+            const sub = botSubs[index];
+            
+            if (confirm(`Cancel ${sub.botName} subscription for ${sub.username}?\n\nThis will refund their coins.`)) {
+                // Refund coins to user
+                const user = JSON.parse(localStorage.getItem('user_' + sub.username));
+                if (user) {
+                    user.coins = (user.coins || 0) + sub.cost;
+                    localStorage.setItem('user_' + sub.username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === sub.username) {
+                        currentUser.coins = user.coins;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                }
+                
+                botSubs.splice(index, 1);
+                localStorage.setItem('botSubscriptions', JSON.stringify(botSubs));
+                showAlert('botSubAlert', `❌ Subscription cancelled and ${sub.cost} coins refunded to ${sub.username}`);
+                loadBotSubscriptions();
+                updateNotificationBadges();
+            }
         }
         
         function loadApplications() {
@@ -652,7 +799,9 @@
             const badges = {
                 'verified_discord': '✅',
                 'org_badge': '🏢',
-                'roblox_badge': '🎮'
+                'roblox_badge': '🎮',
+                'team_badge': '👥',
+                'diane_bot_dev': '🤖'
             };
             return badges[itemId] || '🏅';
         }
@@ -661,7 +810,9 @@
             const names = {
                 'verified_discord': 'Verified Discord',
                 'org_badge': 'Organization',
-                'roblox_badge': 'Roblox Developer'
+                'roblox_badge': 'Roblox Developer',
+                'team_badge': 'Team Badge',
+                'diane_bot_dev': 'Diane Bot Developer'
             };
             return names[itemId] || 'Badge';
         }
@@ -671,7 +822,6 @@
             const app = applications[index];
             
             if (confirm(`Approve ${app.username}'s application for ${getBadgeName(app.item_id)}?`)) {
-                // Give badge to user
                 const user = JSON.parse(localStorage.getItem('user_' + app.username));
                 if (user) {
                     if (!user.badges) user.badges = [];
@@ -679,7 +829,6 @@
                         user.badges.push(app.item_id);
                         localStorage.setItem('user_' + app.username, JSON.stringify(user));
                         
-                        // Update current user if they're logged in
                         const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
                         if (currentUser && currentUser.username === app.username) {
                             currentUser.badges = user.badges;
@@ -688,12 +837,12 @@
                     }
                 }
                 
-                // Remove application
                 applications.splice(index, 1);
                 localStorage.setItem('badgeApplications', JSON.stringify(applications));
                 
                 showAlert('appAlert', `✅ Approved! ${app.username} received ${getBadgeName(app.item_id)} badge`);
                 loadApplications();
+                updateNotificationBadges();
             }
         }
         
@@ -706,6 +855,61 @@
                 localStorage.setItem('badgeApplications', JSON.stringify(applications));
                 showAlert('appAlert', `❌ Application denied for ${app.username}`);
                 loadApplications();
+                updateNotificationBadges();
+            }
+        }
+
+        function giveStaffRole() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+
+            if (confirm(`Give STAFF role to ${username}?\n\nStaff members can:\n- Access staff-only features\n- Help moderate content\n- Assist with user issues\n\nThey CANNOT access admin panel.`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.isStaff = true;
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.isStaff = true;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `✅ ${username} is now STAFF!`);
+                    loadUsers();
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
+            }
+        }
+
+        function removeStaffRole() {
+            const username = document.getElementById('modUsername').value;
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+
+            if (confirm(`Remove STAFF role from ${username}?`)) {
+                const user = JSON.parse(localStorage.getItem('user_' + username));
+                if (user) {
+                    user.isStaff = false;
+                    localStorage.setItem('user_' + username, JSON.stringify(user));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
+                    if (currentUser && currentUser.username === username) {
+                        currentUser.isStaff = false;
+                        localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
+                    }
+                    
+                    showAlert('modAlert', `❌ ${username} is no longer staff`);
+                    loadUsers();
+                } else {
+                    showAlert('modAlert', 'User not found');
+                }
             }
         }
         
@@ -729,7 +933,7 @@
                 html += `
                     <div style="border: 2px solid var(--neon-purple); border-radius: 15px; padding: 20px;">
                         <h4 style="color: var(--neon-purple); margin-bottom: 15px;">Banner Image</h4>
-                        <img src="${user.banner}" style="width: 100%; border-radius: 10px; margin-bottom: 15px;">
+                        <img src="${user.banner}" style="width: 100%; border-radius: 10px; margin-bottom: 15px;" onerror="this.src='https://via.placeholder.com/800x200?text=Image+Failed+to+Load'">
                         <button class="btn btn-danger" onclick="removeImage('${username}', 'banner')">🗑️ REMOVE BANNER</button>
                     </div>
                 `;
@@ -739,7 +943,7 @@
                 html += `
                     <div style="border: 2px solid var(--neon-purple); border-radius: 15px; padding: 20px;">
                         <h4 style="color: var(--neon-purple); margin-bottom: 15px;">Profile Avatar</h4>
-                        <img src="${user.avatar}" style="width: 100%; border-radius: 10px; margin-bottom: 15px;">
+                        <img src="${user.avatar}" style="width: 100%; border-radius: 10px; margin-bottom: 15px;" onerror="this.src='https://via.placeholder.com/400?text=Image+Failed+to+Load'">
                         <button class="btn btn-danger" onclick="removeImage('${username}', 'avatar')">🗑️ REMOVE AVATAR</button>
                     </div>
                 `;
@@ -762,7 +966,6 @@
                     delete user[type];
                     localStorage.setItem('user_' + username, JSON.stringify(user));
                     
-                    // Update current user if they're logged in
                     const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
                     if (currentUser && currentUser.username === username) {
                         delete currentUser[type];
@@ -814,12 +1017,12 @@
             if (confirm(`Reset all achievements for ${username}?`)) {
                 const user = JSON.parse(localStorage.getItem('user_' + username));
                 if (user) {
-                    user.achievements = [];
+                    user.unlockedAchievements = [];
                     localStorage.setItem('user_' + username, JSON.stringify(user));
                     
                     const currentUser = JSON.parse(localStorage.getItem('arcadeUser'));
                     if (currentUser && currentUser.username === username) {
-                        currentUser.achievements = [];
+                        currentUser.unlockedAchievements = [];
                         localStorage.setItem('arcadeUser', JSON.stringify(currentUser));
                     }
                     
@@ -870,7 +1073,7 @@
                     user.xp = 0;
                     user.level = 1;
                     user.coins = 0;
-                    user.achievements = [];
+                    user.unlockedAchievements = [];
                     user.badges = [];
                     user.gamesPlayed = 0;
                     user.moviesWatched = 0;
@@ -1120,7 +1323,7 @@
             }
             
             localStorage.setItem('siteTerms', content);
-            showAlert('contentAlert', '✅ Terms of Service saved successfully!');
+            showAlert('contentAlert', '✅ Terms of Service saved to localStorage! Remember to manually update TermsofService.html file.');
         }
         
         function savePrivacy() {
@@ -1131,7 +1334,7 @@
             }
             
             localStorage.setItem('sitePrivacy', content);
-            showAlert('contentAlert', '✅ Privacy Policy saved successfully!');
+            showAlert('contentAlert', '✅ Privacy Policy saved to localStorage! Remember to manually update PrivacyPolicy.html file.');
         }
         
         function showSection(section) {

@@ -824,6 +824,13 @@
         <h2 class="section-title">🏆 MY ACHIEVEMENTS</h2>
         <div class="achievements-grid" id="achievementsContainer"></div>
     </div>
+    <!-- ACTIVE BOOSTS SECTION -->
+<div class="profile-boosts" id="userBoosts" style="display: flex; gap: 15px; margin: 20px 0; flex-wrap: wrap; padding: 20px; background: rgba(57, 255, 20, 0.05); border: 2px solid var(--neon-green); border-radius: 15px;">
+    <div class="no-boosts" style="width: 100%; text-align: center; padding: 30px; opacity: 0.7;">
+        <p>No active boosts!</p>
+        <a href="shop.html" class="buy-badges-link" style="background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));">🪙 BUY BOOSTS IN SHOP</a>
+    </div>
+</div>
 
     <!-- Avatar Modal -->
     <div class="modal" id="avatarModal">
@@ -1075,6 +1082,80 @@
                 `;
             }).join('');
         }
+        function loadBoosts() {
+    const user = getUser();
+    if (!user) return;
+    
+    const container = document.getElementById('userBoosts');
+    const now = new Date().getTime();
+    
+    // Check inventory for active boosts
+    const activeBoosts = (user.inventory || []).filter(item => {
+        if (!item.item_id) return false;
+        if (!item.item_id.includes('boost')) return false;
+        if (!item.purchased_at) return false;
+        
+        // Calculate expiration time based on boost type
+        const purchaseTime = new Date(item.purchased_at).getTime();
+        let duration = 0;
+        
+        if (item.item_id.includes('24h')) duration = 24 * 60 * 60 * 1000;
+        else if (item.item_id.includes('3d')) duration = 3 * 24 * 60 * 60 * 1000;
+        else if (item.item_id.includes('7d')) duration = 7 * 24 * 60 * 60 * 1000;
+        else if (item.item_id.includes('14d')) duration = 14 * 24 * 60 * 60 * 1000;
+        else if (item.item_id.includes('30d')) duration = 30 * 24 * 60 * 60 * 1000;
+        
+        return (purchaseTime + duration) > now;
+    });
+    
+    if (activeBoosts.length === 0) {
+        container.innerHTML = `
+            <div class="no-boosts" style="width: 100%; text-align: center; padding: 30px; opacity: 0.7;">
+                <p>No active boosts!</p>
+                <a href="shop.html" class="buy-badges-link" style="background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));">🪙 BUY BOOSTS IN SHOP</a>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = activeBoosts.map(boost => {
+        const purchaseTime = new Date(boost.purchased_at).getTime();
+        let duration = 0;
+        let boostName = 'Boost';
+        let boostIcon = '⚡';
+        
+        // Determine duration and name
+        if (boost.item_id.includes('24h')) { duration = 24 * 60 * 60 * 1000; boostName += ' (24h)'; }
+        else if (boost.item_id.includes('3d')) { duration = 3 * 24 * 60 * 60 * 1000; boostName += ' (3d)'; }
+        else if (boost.item_id.includes('7d')) { duration = 7 * 24 * 60 * 60 * 1000; boostName += ' (7d)'; }
+        else if (boost.item_id.includes('14d')) { duration = 14 * 24 * 60 * 60 * 1000; boostName += ' (14d)'; }
+        else if (boost.item_id.includes('30d')) { duration = 30 * 24 * 60 * 60 * 1000; boostName += ' (30d)'; }
+        
+        if (boost.item_id.includes('xp')) { boostName = 'XP ' + boostName; boostIcon = '⚡'; }
+        else if (boost.item_id.includes('coin')) { boostName = 'Coin ' + boostName; boostIcon = '💰'; }
+        else if (boost.item_id.includes('combo')) { boostName = 'Combo ' + boostName; boostIcon = '🔥'; }
+        else if (boost.item_id.includes('mega')) { boostName = 'MEGA ' + boostName; boostIcon = '💥'; }
+        else if (boost.item_id.includes('ultra')) { boostName = 'ULTRA ' + boostName; boostIcon = '🌟'; }
+        else if (boost.item_id.includes('legendary')) { boostName = 'LEGENDARY ' + boostName; boostIcon = '👑'; }
+        
+        const expiresAt = purchaseTime + duration;
+        const timeLeft = expiresAt - now;
+        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+        const daysLeft = Math.floor(hoursLeft / 24);
+        
+        let timeDisplay = '';
+        if (daysLeft > 0) timeDisplay = `${daysLeft}d ${hoursLeft % 24}h left`;
+        else timeDisplay = `${hoursLeft}h left`;
+        
+        return `
+            <div class="badge-item" style="border-color: var(--neon-green);" title="${boostName}">
+                <div class="badge-icon">${boostIcon}</div>
+                <div class="badge-name">${boostName}</div>
+                <div style="font-size: 0.6em; color: var(--neon-green); margin-top: 5px;">${timeDisplay}</div>
+            </div>
+        `;
+    }).join('');
+}
         
         function loadAchievements() {
     const user = getUser();

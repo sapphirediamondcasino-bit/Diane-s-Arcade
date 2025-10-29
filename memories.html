@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Memories - Diane Keaton Memorial Arcade</title>
+    <link rel="icon" href="https://cdn.discordapp.com/attachments/1428592257581318255/1432304819158126734/Diane_Keaton_2012-1_cropped_cropped.jpg?ex=6901e2cf&is=6900914f&hm=149dfc7b629f54a1518883056a0052bdc19f7b95b3eb175eb6884ada005e4257&" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bf00ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #39ff14;
+            --neon-gold: #ffd700;
+            --dark-bg: #050510;
+            --darker: #020208;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 49%, rgba(0, 243, 255, 0.1) 50%, transparent 51%),
+                linear-gradient(0deg, transparent 49%, rgba(0, 243, 255, 0.1) 50%, transparent 51%);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        .nav-bar {
+            position: sticky; top: 0;
+            background: rgba(5, 5, 16, 0.98);
+            backdrop-filter: blur(30px);
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--neon-pink);
+            box-shadow: 0 5px 40px rgba(255, 0, 255, 0.4);
+            z-index: 2000;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .nav-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            font-weight: 900;
+            color: var(--neon-pink);
+            text-shadow: 0 0 20px var(--neon-pink);
+            letter-spacing: 2px;
+        }
+        
+        .nav-links { display: flex; gap: 25px; flex-wrap: wrap; }
+        
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            text-decoration: none;
+            padding: 12px 28px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+        
+        .nav-link:hover {
+            background: var(--neon-blue);
+            color: var(--darker);
+            box-shadow: 0 0 30px var(--neon-blue);
+            transform: translateY(-3px);
+        }
+        
+        .container { max-width: 1400px; margin: 60px auto; padding: 0 40px; }
+        
+        .memorial-header {
+            text-align: center;
+            margin: 60px 0 80px;
+            padding: 60px 40px;
+            background: rgba(255, 0, 255, 0.05);
+            border: 3px solid var(--neon-pink);
+            border-radius: 30px;
+            box-shadow: 0 0 60px rgba(255, 0, 255, 0.3);
+        }
+        
+        .memorial-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5em;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .memorial-dates {
+            font-size: 1.5em;
+            color: var(--neon-gold);
+            margin-bottom: 40px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .memorial-message {
+            max-width: 900px;
+            margin: 0 auto;
+            font-size: 1.2em;
+            line-height: 2;
+            text-align: left;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 0, 255, 0.3);
+        }
+        
+        .memorial-message p {
+            margin-bottom: 25px;
+        }
+        
+        .memorial-message strong {
+            color: var(--neon-pink);
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .add-memory-btn {
+            display: inline-block;
+            margin: 40px auto;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.5);
+        }
+        
+        .add-memory-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 60px rgba(255, 0, 255, 0.8);
+        }
+        
+        .memories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+        
+        .memory-card {
+            background: rgba(5, 5, 16, 0.9);
+            border: 2px solid var(--neon-pink);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
+        }
+        
+        .memory-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 60px rgba(255, 0, 255, 0.5);
+        }
+        
+        .memory-media {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #000;
+        }
+        
+        .memory-content {
+            padding: 25px;
+        }
+        
+        .memory-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-pink);
+            object-fit: cover;
+        }
+        
+        .author-info {
+            flex: 1;
+        }
+        
+        .author-name {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--neon-pink);
+            font-size: 1.1em;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .author-name:hover {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        .memory-date {
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+        
+        .memory-text {
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+        
+        .memory-inspiration {
+            background: rgba(255, 0, 255, 0.1);
+            border-left: 4px solid var(--neon-pink);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-style: italic;
+        }
+        
+        .no-memories {
+            text-align: center;
+            padding: 80px 40px;
+            opacity: 0.6;
+        }
+        
+        .no-memories-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active { display: flex; }
+        
+        .modal-content {
+            background: var(--darker);
+            border: 3px solid var(--neon-pink);
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 80px rgba(255, 0, 255, 0.6);
+        }
+        
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            color: var(--neon-pink);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--neon-pink);
+            border: none;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-modal:hover {
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-pink);
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 0, 255, 0.05);
+            border: 2px solid var(--neon-pink);
+            border-radius: 15px;
+            color: white;
+            font-size: 1em;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px var(--neon-purple);
+        }
+        
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .file-upload-section {
+            background: rgba(255, 0, 255, 0.05);
+            border: 2px dashed var(--neon-pink);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .file-upload-section input[type="file"] {
+            display: none;
+        }
+        
+        .upload-label {
+            display: inline-block;
+            padding: 15px 40px;
+            background: var(--neon-pink);
+            color: white;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-label:hover {
+            box-shadow: 0 0 30px var(--neon-pink);
+            transform: scale(1.05);
+        }
+        
+        .preview-image, .preview-video {
+            max-width: 100%;
+            margin-top: 20px;
+            border: 2px solid var(--neon-pink);
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 50px rgba(255, 0, 255, 0.8);
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: -100px;
+            right: 30px;
+            padding: 20px 30px;
+            background: var(--neon-pink);
+            color: white;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            z-index: 20000;
+            transition: bottom 0.3s;
+            box-shadow: 0 0 40px var(--neon-pink);
+        }
+        
+        .notification.show { bottom: 30px; }
+        .notification.success { background: var(--neon-green); color: var(--darker); }
+        .notification.error { background: var(--neon-pink); }
+        
+        @media (max-width: 768px) {
+            .memorial-title { font-size: 2em; }
+            .memorial-message { font-size: 1em; padding: 20px; }
+            .memories-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-brand">❤️ SHARED MEMORIES</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">HOME</a>
+            <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
+            <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
+            <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="profile.html" class="nav-link">MY PROFILE</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="memorial-header">
+            <h1 class="memorial-title">In Loving Memory of Diane Keaton</h1>
+            <div class="memorial-dates">January 5, 1946 - October 11, 2025</div>
+            
+            <div class="memorial-message">
+                <p><strong>Diane Keaton wasn't just an inspiration — she was the spark that started it all.</strong> Her creativity, authenticity, and warmth didn't just influence this site — they shaped the soul of the Diane Keaton Bot.</p>
+                
+                <p>Here at Game Killer Studios, we had planned the Diane Keaton Bot long before her passing. When we received the heartbreaking news, it shook our team to its core. It felt as though we'd lost someone who had quietly become part of our journey — guiding us through her humor, her brilliance, and her spirit of individuality.</p>
+                
+                <p>While many of the original features were reimagined, some made their way back in — like Diane teaching people how to code, sharing insight, laughter, and playful banter in her own unique voice. The bot can chat, befriend, and connect with others in a way that captures Diane's warmth and wit. In those moments, she feels alive again — a living memory of the woman who inspired so much creativity and heart within our studio.</p>
+                
+                <p>We here at Game Killer Studios are mourning the loss of this incredible legend. Her light, laughter, and legacy will forever live on through this project and in the hearts of everyone she touched.</p>
+                
+                <p style="text-align: center; font-size: 1.3em; margin-top: 30px; color: var(--neon-pink);"><strong>Rest easy, Diane Keaton — you were one of a kind, and your spirit will never fade.</strong></p>
+            </div>
+            
+            <button class="add-memory-btn" onclick="openMemoryModal()">❤️ SHARE YOUR MEMORY</button>
+        </div>
+        
+        <div class="memories-grid" id="memories-grid"></div>
+    </div>
+    
+    <!-- Add Memory Modal -->
+    <div class="modal" id="memory-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeMemoryModal()">×</button>
+            <h2 class="modal-title">Share Your Memory</h2>
+            <form id="memory-form" onsubmit="submitMemory(event)">
+                <div class="file-upload-section">
+                    <input type="file" id="memory-media" accept="image/*,video/*" onchange="previewMedia(event)">
+                    <label for="memory-media" class="upload-label">📸 ADD PHOTO/VIDEO</label>
+                    <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Share a photo or video of Diane Keaton</p>
+                    <img id="media-preview-image" class="preview-image">
+                    <video id="media-preview-video" class="preview-video" controls></video>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Your Memory:</label>
+                    <textarea class="form-textarea" id="memory-text" required placeholder="Share your thoughts, favorite moments, or how Diane Keaton inspired you..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">What inspired you about Diane Keaton?</label>
+                    <input type="text" class="form-input" id="memory-inspiration" required placeholder="Her humor, creativity, authenticity...">
+                </div>
+                
+                <button type="submit" class="submit-btn">❤️ POST MEMORY</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let mediaFile = null;
+        let mediaType = null;
+        
+        function getUser() {
+            const user = localStorage.getItem('arcadeUser');
+            return user ? JSON.parse(user) : null;
+        }
+        
+        function loadMemories() {
+            const memories = JSON.parse(localStorage.getItem('dianeMemories') || '[]');
+            const container = document.getElementById('memories-grid');
+            
+            if (memories.length === 0) {
+                container.innerHTML = `
+                    <div class="no-memories" style="grid-column: 1/-1;">
+                        <div class="no-memories-icon">❤️</div>
+                        <h3 style="font-family: 'Orbitron', sans-serif; font-size: 2em; margin-bottom: 20px;">No memories shared yet</h3>
+                        <p style="font-size: 1.2em;">Be the first to share a memory of Diane Keaton!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by date (newest first)
+            memories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            container.innerHTML = memories.map(memory => {
+                const date = new Date(memory.timestamp).toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+                
+                let mediaHTML = '';
+                if (memory.media) {
+                    if (memory.mediaType === 'image') {
+                        mediaHTML = `<img src="${memory.media}" alt="Memory" class="memory-media">`;
+                    } else if (memory.mediaType === 'video') {
+                        mediaHTML = `<video src="${memory.media}" class="memory-media" controls></video>`;
+                    }
+                }
+                
+                return `
+                    <div class="memory-card">
+                        ${mediaHTML}
+                        <div class="memory-content">
+                            <div class="memory-author">
+                                <img src="${memory.avatar}" alt="${memory.username}" class="author-avatar">
+                                <div class="author-info">
+                                    <a href="profile.html?user=${memory.username}" class="author-name">${memory.username}</a>
+                                    <div class="memory-date">${date}</div>
+                                </div>
+                            </div>
+                            <div class="memory-text">${memory.text}</div>
+                            <div class="memory-inspiration">
+                                <strong style="color: var(--neon-pink);">What inspired me:</strong> ${memory.inspiration}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function openMemoryModal() {
+            const user = getUser();
+            if (!user || !user.username) {
+                showNotification('Please login to share a memory!', 'error');
+                setTimeout(() => window.location.href = 'profile.html', 1500);
+                return;
+            }
+            document.getElementById('memory-modal').classList.add('active');
+        }
+        
+        function closeMemoryModal() {
+            document.getElementById('memory-modal').classList.remove('active');
+            document.getElementById('memory-form').reset();
+            document.getElementById('media-preview-image').style.display = 'none';
+            document.getElementById('media-preview-video').style.display = 'none';
+            mediaFile = null;
+            mediaType = null;
+        }
+        
+        function previewMedia(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 50 * 1024 * 1024) {
+                showNotification('File too large! Max 50MB', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                mediaFile = e.target.result;
+                
+                if (file.type.startsWith('image/')) {
+                    mediaType = 'image';
+                    document.getElementById('media-preview-image').src = e.target.result;
+                    document.getElementById('media-preview-image').style.display = 'block';
+                    document.getElementById('media-preview-video').style.display = 'none';
+                } else if (file.type.startsWith('video/')) {
+                    mediaType = 'video';
+                    document.getElementById('media-preview-video').src = e.target.result;
+                    document.getElementById('media-preview-video').style.display = 'block';
+                    document.getElementById('media-preview-image').style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function submitMemory(e) {
+            e.preventDefault();
+            
+            const user = getUser();
+            if (!user || !user.username) {
+                showNotification('Please login first!', 'error');
+                return;
+            }
+            
+            const text = document.getElementById('memory-text').value.trim();
+            const inspiration = document.getElementById('memory-inspiration').value.trim();
+            
+            if (!text || !inspiration) {
+                showNotification('Please fill in all fields!', 'error');
+                return;
+            }
+            
+            const memory = {
+                username: user.username,
+                avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
+                text: text,
+                inspiration: inspiration,
+                media: mediaFile,
+                mediaType: mediaType,
+                timestamp: new Date().toISOString()
+            };
+            
+            const memories = JSON.parse(localStorage.getItem('dianeMemories') || '[]');
+            memories.push(memory);
+            localStorage.setItem('dianeMemories', JSON.stringify(memories));
+            
+            showNotification('❤️ Memory shared! Thank you for honoring Diane.', 'success');
+            closeMemoryModal();
+            loadMemories();
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMemoryModal();
+            }
+        });
+        
+        // Load memories on page load
+        loadMemories();
+    </script>
+</body>
+</html>

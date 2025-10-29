@@ -1077,38 +1077,48 @@
         }
         
         function loadAchievements() {
-            const user = getUser();
-            if (!user) return;
-            
-            const container = document.getElementById('achievementsContainer');
-            
-            // FIXED: Use unlockedAchievements instead of achievements
-            const unlockedAchs = user.unlockedAchievements || [];
-            
-            // Show ALL achievements (not just 8)
-            container.innerHTML = ALL_ACHIEVEMENTS.map(ach => {
-                const unlocked = unlockedAchs.includes(ach.id);
-                return `
-                    <div class="achievement-card ${unlocked ? '' : 'locked'}">
-                        ${!unlocked ? '<div style="position: absolute; top: 15px; right: 15px; font-size: 1.5em;">🔒</div>' : ''}
-                        <div class="achievement-icon">${ach.icon}</div>
-                        <div class="achievement-name">${ach.name}</div>
-                        <div class="achievement-desc">${ach.desc}</div>
-                        <div style="margin-top: 15px; color: var(--neon-green); font-family: 'Orbitron', sans-serif; font-weight: 700;">+${ach.xp} XP</div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.innerHTML += `
-                <div class="achievement-card" style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(191, 0, 255, 0.1);" onclick="window.location.href='achievements.html'">
-                    <div style="text-align: center;">
-                        <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
-                        <div class="achievement-name">View All</div>
-                        <div class="achievement-desc">125+ achievements</div>
-                    </div>
-                </div>
-            `;
-        }
+    const user = getUser();
+    if (!user) return;
+    
+    const container = document.getElementById('achievementsContainer');
+    const unlockedAchs = user.unlockedAchievements || [];
+    
+    // Filter to ONLY show unlocked achievements
+    const unlockedOnly = ALL_ACHIEVEMENTS.filter(ach => unlockedAchs.includes(ach.id));
+    
+    // If no achievements unlocked
+    if (unlockedOnly.length === 0) {
+        container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px;">
+                <div style="font-size: 4em;">🔒</div>
+                <h3 style="font-family: 'Orbitron', sans-serif; margin: 20px 0;">No Achievements Unlocked Yet!</h3>
+                <a href="achievements.html" style="display: inline-block; padding: 15px 30px; background: var(--neon-blue); color: white; text-decoration: none; border-radius: 25px; font-family: 'Orbitron', sans-serif; font-weight: 700;">VIEW ALL ACHIEVEMENTS</a>
+            </div>
+        `;
+        return;
+    }
+    
+    // Show ONLY unlocked achievements
+    container.innerHTML = unlockedOnly.map(ach => `
+        <div class="achievement-card">
+            <div class="achievement-icon">${ach.icon}</div>
+            <div class="achievement-name">${ach.name}</div>
+            <div class="achievement-desc">${ach.desc}</div>
+            <div style="margin-top: 15px; color: var(--neon-green); font-family: 'Orbitron', sans-serif; font-weight: 700;">+${ach.xp} XP</div>
+        </div>
+    `).join('');
+    
+    // Add view all card
+    container.innerHTML += `
+        <div class="achievement-card" style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(191, 0, 255, 0.1);" onclick="window.location.href='achievements.html'">
+            <div style="text-align: center;">
+                <div style="font-size: 3em; margin-bottom: 15px;">🏆</div>
+                <div class="achievement-name">View All</div>
+                <div class="achievement-desc">${unlockedAchs.length} / 125+ unlocked</div>
+            </div>
+        </div>
+    `;
+}
         
         function checkAchievements(user) {
             // FIXED: Use unlockedAchievements instead of achievements

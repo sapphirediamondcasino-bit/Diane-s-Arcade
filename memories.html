@@ -613,8 +613,8 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            if (file.size > 50 * 1024 * 1024) {
-                showNotification('File too large! Max 50MB', 'error');
+            if (file.size > 1000 * 1024 * 1024) {
+                showNotification('File too large! Max 1000MB', 'error');
                 event.target.value = '';
                 return;
             }

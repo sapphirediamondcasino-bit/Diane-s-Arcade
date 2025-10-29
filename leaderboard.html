@@ -357,15 +357,21 @@
             const classes = ['podium-1', 'podium-2', 'podium-3'];
 
             for (let i = 0; i < 3 && i < players.length; i++) {
-                const p = players[i];
-                const div = document.createElement('div');
-                div.className = `podium-place ${classes[i]}`;
-                
-                const scoreVal = scoreType === 'xp' 
-                    ? `${(p.xp || 0).toLocaleString()} XP`
-                    : `${(p.score || 0).toLocaleString()}`;
-                
-                const avatar = p.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.username}`;
+    const p = players[i];
+    const div = document.createElement('div');
+    div.className = `podium-place ${classes[i]}`;
+    
+    const scoreVal = scoreType === 'xp' 
+        ? `${(p.xp || 0).toLocaleString()} XP`
+        : `${(p.score || 0).toLocaleString()}`;
+    
+    // GET CURRENT AVATAR FROM USER PROFILE
+    let avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.username}`;
+    const userData = localStorage.getItem(`user_${p.username}`);
+    if (userData) {
+        const user = JSON.parse(userData);
+        avatar = user.avatar || avatar;
+    }
                 
                 div.innerHTML = `
                     <div class="podium-rank">${medals[i]}</div>

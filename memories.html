@@ -142,8 +142,7 @@
         }
         
         .add-memory-btn {
-            display: inline-block;
-            margin: 40px auto;
+            margin: 40px 0;
             padding: 20px 50px;
             background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
             border: none;
@@ -268,6 +267,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow-y: auto;
         }
         
         .modal.active { display: flex; }
@@ -282,6 +282,7 @@
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 0 80px rgba(255, 0, 255, 0.6);
+            position: relative;
         }
         
         .modal-title {
@@ -309,6 +310,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1;
         }
         
         .close-modal:hover {
@@ -383,6 +385,7 @@
         
         .preview-image, .preview-video {
             max-width: 100%;
+            max-height: 300px;
             margin-top: 20px;
             border: 2px solid var(--neon-pink);
             border-radius: 10px;
@@ -426,7 +429,7 @@
         
         .notification.show { bottom: 30px; }
         .notification.success { background: var(--neon-green); color: var(--darker); }
-        .notification.error { background: var(--neon-pink); }
+        .notification.error { background: #ff0000; }
         
         @media (max-width: 768px) {
             .memorial-title { font-size: 2em; }
@@ -479,18 +482,18 @@
                 <div class="file-upload-section">
                     <input type="file" id="memory-media" accept="image/*,video/*" onchange="previewMedia(event)">
                     <label for="memory-media" class="upload-label">📸 ADD PHOTO/VIDEO</label>
-                    <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Share a photo or video of Diane Keaton</p>
+                    <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Optional: Share a photo or video of Diane Keaton</p>
                     <img id="media-preview-image" class="preview-image">
                     <video id="media-preview-video" class="preview-video" controls></video>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Your Memory:</label>
+                    <label class="form-label">Your Memory: *</label>
                     <textarea class="form-textarea" id="memory-text" required placeholder="Share your thoughts, favorite moments, or how Diane Keaton inspired you..."></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">What inspired you about Diane Keaton?</label>
+                    <label class="form-label">What inspired you about Diane Keaton? *</label>
                     <input type="text" class="form-input" id="memory-inspiration" required placeholder="Her humor, creativity, authenticity...">
                 </div>
                 
@@ -504,63 +507,87 @@
         let mediaType = null;
         
         function getUser() {
-            const user = localStorage.getItem('arcadeUser');
-            return user ? JSON.parse(user) : null;
+            const userData = localStorage.getItem('arcadeUser');
+            if (!userData) return null;
+            try {
+                return JSON.parse(userData);
+            } catch(e) {
+                console.error('Error parsing user data:', e);
+                return null;
+            }
         }
         
         function loadMemories() {
-            const memories = JSON.parse(localStorage.getItem('dianeMemories') || '[]');
-            const container = document.getElementById('memories-grid');
-            
-            if (memories.length === 0) {
-                container.innerHTML = `
-                    <div class="no-memories" style="grid-column: 1/-1;">
-                        <div class="no-memories-icon">❤️</div>
-                        <h3 style="font-family: 'Orbitron', sans-serif; font-size: 2em; margin-bottom: 20px;">No memories shared yet</h3>
-                        <p style="font-size: 1.2em;">Be the first to share a memory of Diane Keaton!</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Sort by date (newest first)
-            memories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            container.innerHTML = memories.map(memory => {
-                const date = new Date(memory.timestamp).toLocaleDateString('en-US', { 
-                    month: 'long', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                });
+            try {
+                const memoriesData = localStorage.getItem('dianeMemories');
+                const memories = memoriesData ? JSON.parse(memoriesData) : [];
+                const container = document.getElementById('memories-grid');
                 
-                let mediaHTML = '';
-                if (memory.media) {
-                    if (memory.mediaType === 'image') {
-                        mediaHTML = `<img src="${memory.media}" alt="Memory" class="memory-media">`;
-                    } else if (memory.mediaType === 'video') {
-                        mediaHTML = `<video src="${memory.media}" class="memory-media" controls></video>`;
-                    }
+                console.log('Loading memories:', memories.length);
+                
+                if (memories.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-memories" style="grid-column: 1/-1;">
+                            <div class="no-memories-icon">❤️</div>
+                            <h3 style="font-family: 'Orbitron', sans-serif; font-size: 2em; margin-bottom: 20px; color: var(--neon-pink);">No memories shared yet</h3>
+                            <p style="font-size: 1.2em;">Be the first to share a memory of Diane Keaton!</p>
+                        </div>
+                    `;
+                    return;
                 }
                 
-                return `
-                    <div class="memory-card">
-                        ${mediaHTML}
-                        <div class="memory-content">
-                            <div class="memory-author">
-                                <img src="${memory.avatar}" alt="${memory.username}" class="author-avatar">
-                                <div class="author-info">
-                                    <a href="profile.html?user=${memory.username}" class="author-name">${memory.username}</a>
-                                    <div class="memory-date">${date}</div>
+                // Sort by date (newest first)
+                memories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                container.innerHTML = memories.map(memory => {
+                    const date = new Date(memory.timestamp).toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                    });
+                    
+                    let mediaHTML = '';
+                    if (memory.media && memory.mediaType) {
+                        if (memory.mediaType === 'image') {
+                            mediaHTML = `<img src="${memory.media}" alt="Memory" class="memory-media">`;
+                        } else if (memory.mediaType === 'video') {
+                            mediaHTML = `<video src="${memory.media}" class="memory-media" controls></video>`;
+                        }
+                    }
+                    
+                    return `
+                        <div class="memory-card">
+                            ${mediaHTML}
+                            <div class="memory-content">
+                                <div class="memory-author">
+                                    <img src="${memory.avatar}" alt="${memory.username}" class="author-avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${memory.username}'">
+                                    <div class="author-info">
+                                        <a href="profile.html?user=${memory.username}" class="author-name">${memory.username}</a>
+                                        <div class="memory-date">${date}</div>
+                                    </div>
+                                </div>
+                                <div class="memory-text">${escapeHtml(memory.text)}</div>
+                                <div class="memory-inspiration">
+                                    <strong style="color: var(--neon-pink);">What inspired me:</strong> ${escapeHtml(memory.inspiration)}
                                 </div>
                             </div>
-                            <div class="memory-text">${memory.text}</div>
-                            <div class="memory-inspiration">
-                                <strong style="color: var(--neon-pink);">What inspired me:</strong> ${memory.inspiration}
-                            </div>
                         </div>
+                    `;
+                }).join('');
+            } catch(e) {
+                console.error('Error loading memories:', e);
+                document.getElementById('memories-grid').innerHTML = `
+                    <div class="no-memories" style="grid-column: 1/-1;">
+                        <p style="color: var(--neon-pink);">Error loading memories. Please refresh the page.</p>
                     </div>
                 `;
-            }).join('');
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
         
         function openMemoryModal() {
@@ -588,6 +615,7 @@
             
             if (file.size > 50 * 1024 * 1024) {
                 showNotification('File too large! Max 50MB', 'error');
+                event.target.value = '';
                 return;
             }
             
@@ -597,13 +625,15 @@
                 
                 if (file.type.startsWith('image/')) {
                     mediaType = 'image';
-                    document.getElementById('media-preview-image').src = e.target.result;
-                    document.getElementById('media-preview-image').style.display = 'block';
+                    const previewImg = document.getElementById('media-preview-image');
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
                     document.getElementById('media-preview-video').style.display = 'none';
                 } else if (file.type.startsWith('video/')) {
                     mediaType = 'video';
-                    document.getElementById('media-preview-video').src = e.target.result;
-                    document.getElementById('media-preview-video').style.display = 'block';
+                    const previewVid = document.getElementById('media-preview-video');
+                    previewVid.src = e.target.result;
+                    previewVid.style.display = 'block';
                     document.getElementById('media-preview-image').style.display = 'none';
                 }
             };
@@ -623,27 +653,35 @@
             const inspiration = document.getElementById('memory-inspiration').value.trim();
             
             if (!text || !inspiration) {
-                showNotification('Please fill in all fields!', 'error');
+                showNotification('Please fill in all required fields!', 'error');
                 return;
             }
             
-            const memory = {
-                username: user.username,
-                avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
-                text: text,
-                inspiration: inspiration,
-                media: mediaFile,
-                mediaType: mediaType,
-                timestamp: new Date().toISOString()
-            };
-            
-            const memories = JSON.parse(localStorage.getItem('dianeMemories') || '[]');
-            memories.push(memory);
-            localStorage.setItem('dianeMemories', JSON.stringify(memories));
-            
-            showNotification('❤️ Memory shared! Thank you for honoring Diane.', 'success');
-            closeMemoryModal();
-            loadMemories();
+            try {
+                const memory = {
+                    username: user.username,
+                    avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
+                    text: text,
+                    inspiration: inspiration,
+                    media: mediaFile || null,
+                    mediaType: mediaType || null,
+                    timestamp: new Date().toISOString()
+                };
+                
+                const memoriesData = localStorage.getItem('dianeMemories');
+                const memories = memoriesData ? JSON.parse(memoriesData) : [];
+                memories.push(memory);
+                localStorage.setItem('dianeMemories', JSON.stringify(memories));
+                
+                console.log('Memory saved!', memory);
+                
+                showNotification('❤️ Memory shared! Thank you for honoring Diane.', 'success');
+                closeMemoryModal();
+                loadMemories();
+            } catch(e) {
+                console.error('Error saving memory:', e);
+                showNotification('Error saving memory. Please try again.', 'error');
+            }
         }
         
         function showNotification(message, type = 'info') {
@@ -666,7 +704,7 @@
         });
         
         // Load memories on page load
-        loadMemories();
+        document.addEventListener('DOMContentLoaded', loadMemories);
     </script>
 </body>
 </html>

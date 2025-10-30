@@ -432,26 +432,6 @@
         .notification.success { background: var(--neon-green); color: var(--darker); }
         .notification.error { background: #ff0000; }
         
-        .quick-login {
-            background: rgba(0, 243, 255, 0.1);
-            border: 2px solid var(--neon-blue);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-        
-        .quick-login input {
-            width: 100%;
-            padding: 12px 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 2px solid var(--neon-blue);
-            border-radius: 10px;
-            color: white;
-            font-size: 1em;
-            font-family: 'Roboto', sans-serif;
-            margin-top: 10px;
-        }
-        
         @media (max-width: 768px) {
             .memorial-title { font-size: 2em; }
             .memorial-message { font-size: 1em; padding: 20px; }
@@ -527,21 +507,27 @@
         let mediaFile = null;
         let mediaType = null;
         
-        function getOrCreateUser() {
-            let userData = localStorage.getItem('arcadeUser');
-            
-            if (userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    console.log('✅ User loaded from localStorage:', user);
-                    return user;
-                } catch(e) {
-                    console.error('Error parsing user data:', e);
+        function getUser() {
+            try {
+                const userData = localStorage.getItem('arcadeUser');
+                if (!userData) {
+                    console.log('❌ No arcadeUser in localStorage');
+                    return null;
                 }
+                
+                const user = JSON.parse(userData);
+                console.log('✅ User loaded:', user);
+                
+                if (!user || !user.username) {
+                    console.log('❌ User invalid or no username');
+                    return null;
+                }
+                
+                return user;
+            } catch(e) {
+                console.error('❌ Error getting user:', e);
+                return null;
             }
-            
-            console.log('❌ No user found');
-            return null;
         }
         
         function loadMemories() {
@@ -550,7 +536,7 @@
                 const memories = memoriesData ? JSON.parse(memoriesData) : [];
                 const container = document.getElementById('memories-grid');
                 
-                console.log('📚 Loading memories:', memories.length);
+                console.log('📚 Loading', memories.length, 'memories');
                 
                 if (memories.length === 0) {
                     container.innerHTML = `
@@ -581,25 +567,31 @@
                         }
                     }
                     
+                    const safeUsername = escapeHtml(memory.username);
+                    const safeText = escapeHtml(memory.text);
+                    const safeInspiration = escapeHtml(memory.inspiration);
+                    
                     return `
                         <div class="memory-card">
                             ${mediaHTML}
                             <div class="memory-content">
                                 <div class="memory-author">
-                                    <img src="${memory.avatar}" alt="${escapeHtml(memory.username)}" class="author-avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memory.username)}'">
+                                    <img src="${memory.avatar}" alt="${safeUsername}" class="author-avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memory.username)}'">
                                     <div class="author-info">
-                                        <a href="profile.html?user=${encodeURIComponent(memory.username)}" class="author-name">${escapeHtml(memory.username)}</a>
+                                        <a href="profile.html?user=${encodeURIComponent(memory.username)}" class="author-name">${safeUsername}</a>
                                         <div class="memory-date">${date}</div>
                                     </div>
                                 </div>
-                                <div class="memory-text">${escapeHtml(memory.text)}</div>
+                                <div class="memory-text">${safeText}</div>
                                 <div class="memory-inspiration">
-                                    <strong style="color: var(--neon-pink);">What inspired me:</strong> ${escapeHtml(memory.inspiration)}
+                                    <strong style="color: var(--neon-pink);">What inspired me:</strong> ${safeInspiration}
                                 </div>
                             </div>
                         </div>
                     `;
                 }).join('');
+                
+                console.log('✅ Memories loaded successfully');
             } catch(e) {
                 console.error('❌ Error loading memories:', e);
                 document.getElementById('memories-grid').innerHTML = `
@@ -617,19 +609,18 @@
         }
         
         function openMemoryModal() {
-            const user = getOrCreateUser();
+            const user = getUser();
             
-            if (!user || !user.username) {
-                showNotification('Please create a profile first! Go to MY PROFILE.', 'error');
+            if (!user) {
+                showNotification('Please create/login to your profile first!', 'error');
                 setTimeout(() => {
                     window.location.href = 'profile.html';
                 }, 2000);
                 return;
             }
             
-            const modal = document.getElementById('memory-modal');
-            modal.classList.add('active');
-            console.log('✅ User logged in:', user.username);
+            console.log('✅ Opening modal for user:', user.username);
+            document.getElementById('memory-modal').classList.add('active');
         }
         
         function closeMemoryModal() {
@@ -645,6 +636,8 @@
             const file = event.target.files[0];
             if (!file) return;
             
+            console.log('📷 File selected:', file.name, file.size, 'bytes');
+            
             if (file.size > 1000 * 1024 * 1024) {
                 showNotification('File too large! Max 1000MB (1GB)', 'error');
                 event.target.value = '';
@@ -654,6 +647,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 mediaFile = e.target.result;
+                console.log('✅ File loaded, size:', mediaFile.length, 'chars');
                 
                 if (file.type.startsWith('image/')) {
                     mediaType = 'image';
@@ -674,61 +668,87 @@
         
         function submitMemory(e) {
             e.preventDefault();
+            console.log('🔥 SUBMIT CLICKED');
             
-            console.log('🔥 SUBMITTING MEMORY...');
+            const user = getUser();
             
-            const user = getOrCreateUser();
-            
-            if (!user || !user.username) {
-                showNotification('You must have an account! Redirecting to profile...', 'error');
-                console.log('❌ No account found - redirecting');
-                setTimeout(() => {
-                    window.location.href = 'profile.html';
-                }, 2000);
+            if (!user) {
+                console.log('❌ No user - redirecting');
+                showNotification('You must be logged in! Redirecting...', 'error');
+                setTimeout(() => window.location.href = 'profile.html', 2000);
                 return;
             }
             
-            console.log('✅ User found:', user);
+            console.log('✅ User verified:', user.username);
             
             const text = document.getElementById('memory-text').value.trim();
             const inspiration = document.getElementById('memory-inspiration').value.trim();
             
+            console.log('📝 Text:', text.length, 'chars | Inspiration:', inspiration.length, 'chars');
+            
             if (!text || !inspiration) {
+                console.log('❌ Missing fields');
                 showNotification('Please fill in all required fields!', 'error');
-                console.log('❌ Missing required fields');
                 return;
             }
             
             try {
+                console.log('💾 Creating memory...');
+                
                 const memory = {
                     username: user.username,
                     avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.username)}`,
                     text: text,
                     inspiration: inspiration,
-                    media: mediaFile || null,
-                    mediaType: mediaType || null,
+                    media: mediaFile,
+                    mediaType: mediaType,
                     timestamp: new Date().toISOString()
                 };
                 
-                console.log('💾 Saving memory:', memory);
+                console.log('📦 Memory object created, getting existing memories...');
                 
-                const memoriesData = localStorage.getItem('dianeMemories');
-                const memories = memoriesData ? JSON.parse(memoriesData) : [];
+                const existingData = localStorage.getItem('dianeMemories');
+                const memories = existingData ? JSON.parse(existingData) : [];
+                
+                console.log('📚 Current count:', memories.length);
+                
                 memories.push(memory);
-                localStorage.setItem('dianeMemories', JSON.stringify(memories));
                 
-                console.log('✅ MEMORY SAVED SUCCESSFULLY! Total memories:', memories.length);
+                console.log('💾 Attempting to save...');
+                
+                try {
+                    localStorage.setItem('dianeMemories', JSON.stringify(memories));
+                    console.log('✅✅✅ SAVED! New count:', memories.length);
+                } catch(saveError) {
+                    console.error('❌ SAVE ERROR:', saveError);
+                    
+                    if (saveError.name === 'QuotaExceededError') {
+                        console.log('🔄 Quota exceeded, trying without media...');
+                        memory.media = null;
+                        memory.mediaType = null;
+                        memories[memories.length - 1] = memory;
+                        localStorage.setItem('dianeMemories', JSON.stringify(memories));
+                        showNotification('⚠️ Memory saved but media removed due to storage limit', 'error');
+                    } else {
+                        throw saveError;
+                    }
+                }
                 
                 showNotification('❤️ Memory shared! Thank you for honoring Diane.', 'success');
                 closeMemoryModal();
                 loadMemories();
+                
             } catch(e) {
-                console.error('❌ Error saving memory:', e);
-                showNotification('Error saving memory: ' + e.message, 'error');
+                console.error('❌❌❌ COMPLETE FAILURE:', e);
+                console.error('Name:', e.name);
+                console.error('Message:', e.message);
+                console.error('Stack:', e.stack);
+                showNotification('Error: ' + e.message, 'error');
             }
         }
         
         function showNotification(message, type = 'info') {
+            console.log('🔔 Notification:', type, '-', message);
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
@@ -747,7 +767,10 @@
             }
         });
         
-        document.addEventListener('DOMContentLoaded', loadMemories);
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Page loaded, initializing...');
+            loadMemories();
+        });
     </script>
 </body>
 </html>

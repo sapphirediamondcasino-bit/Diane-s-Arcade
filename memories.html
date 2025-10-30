@@ -559,7 +559,19 @@
                     });
                     
                     let mediaHTML = '';
-                    if (memory.media && memory.mediaType) {
+                    // Load media from separate key if it exists
+                    if (memory.mediaKey) {
+                        const mediaData = localStorage.getItem(memory.mediaKey);
+                        if (mediaData && memory.mediaType) {
+                            if (memory.mediaType === 'image') {
+                                mediaHTML = `<img src="${mediaData}" alt="Memory" class="memory-media">`;
+                            } else if (memory.mediaType === 'video') {
+                                mediaHTML = `<video src="${mediaData}" class="memory-media" controls></video>`;
+                            }
+                        }
+                    }
+                    // Fallback to old format
+                    else if (memory.media && memory.mediaType) {
                         if (memory.mediaType === 'image') {
                             mediaHTML = `<img src="${memory.media}" alt="Memory" class="memory-media">`;
                         } else if (memory.mediaType === 'video') {
@@ -646,24 +658,58 @@
             
             const reader = new FileReader();
             reader.onload = function(e) {
-                mediaFile = e.target.result;
-                console.log('✅ File loaded, size:', mediaFile.length, 'chars');
-                
                 if (file.type.startsWith('image/')) {
-                    mediaType = 'image';
-                    const previewImg = document.getElementById('media-preview-image');
-                    previewImg.src = e.target.result;
-                    previewImg.style.display = 'block';
-                    document.getElementById('media-preview-video').style.display = 'none';
+                    // Compress and resize image
+                    compressImage(e.target.result, function(compressed) {
+                        mediaFile = compressed;
+                        mediaType = 'image';
+                        const previewImg = document.getElementById('media-preview-image');
+                        previewImg.src = compressed;
+                        previewImg.style.display = 'block';
+                        document.getElementById('media-preview-video').style.display = 'none';
+                        console.log('✅ Image compressed from', file.size, 'to ~', Math.round(compressed.length * 0.75), 'bytes');
+                    });
                 } else if (file.type.startsWith('video/')) {
                     mediaType = 'video';
+                    mediaFile = e.target.result;
                     const previewVid = document.getElementById('media-preview-video');
                     previewVid.src = e.target.result;
                     previewVid.style.display = 'block';
                     document.getElementById('media-preview-image').style.display = 'none';
+                    console.log('✅ Video loaded');
                 }
             };
             reader.readAsDataURL(file);
+        }
+        
+        function compressImage(dataUrl, callback) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Resize if larger than 1920x1080
+                const maxWidth = 1920;
+                const maxHeight = 1080;
+                
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width = width * ratio;
+                    height = height * ratio;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Compress to 0.7 quality JPEG
+                const compressed = canvas.toDataURL('image/jpeg', 0.7);
+                callback(compressed);
+            };
+            img.src = dataUrl;
         }
         
         function submitMemory(e) {
@@ -695,12 +741,29 @@
             try {
                 console.log('💾 Creating memory...');
                 
+                const memoryId = 'memory_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                // Store media separately if it exists
+                let mediaKey = null;
+                if (mediaFile) {
+                    mediaKey = memoryId + '_media';
+                    try {
+                        localStorage.setItem(mediaKey, mediaFile);
+                        console.log('✅ Media stored separately in key:', mediaKey);
+                    } catch(mediaError) {
+                        console.error('❌ Failed to store media:', mediaError);
+                        mediaKey = null;
+                        showNotification('⚠️ Image too large, posting without image', 'error');
+                    }
+                }
+                
                 const memory = {
+                    id: memoryId,
                     username: user.username,
                     avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.username)}`,
                     text: text,
                     inspiration: inspiration,
-                    media: mediaFile,
+                    mediaKey: mediaKey,
                     mediaType: mediaType,
                     timestamp: new Date().toISOString()
                 };
@@ -723,12 +786,11 @@
                     console.error('❌ SAVE ERROR:', saveError);
                     
                     if (saveError.name === 'QuotaExceededError') {
-                        console.log('🔄 Quota exceeded, trying without media...');
-                        memory.media = null;
-                        memory.mediaType = null;
-                        memories[memories.length - 1] = memory;
+                        // Clean up oldest memories
+                        console.log('🔄 Quota exceeded, cleaning old memories...');
+                        cleanOldMemories(memories);
                         localStorage.setItem('dianeMemories', JSON.stringify(memories));
-                        showNotification('⚠️ Memory saved but media removed due to storage limit', 'error');
+                        console.log('✅ Saved after cleanup');
                     } else {
                         throw saveError;
                     }
@@ -759,6 +821,26 @@
                 notification.classList.remove('show');
                 setTimeout(() => notification.remove(), 300);
             }, 4000);
+        }
+        
+        function cleanOldMemories(memories) {
+            // Remove oldest 20% of memories to free space
+            const toRemove = Math.ceil(memories.length * 0.2);
+            console.log('🗑️ Removing', toRemove, 'oldest memories');
+            
+            // Sort by date
+            memories.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            
+            // Remove oldest and their media
+            for (let i = 0; i < toRemove; i++) {
+                if (memories[i].mediaKey) {
+                    localStorage.removeItem(memories[i].mediaKey);
+                }
+            }
+            
+            // Remove from array
+            memories.splice(0, toRemove);
+            console.log('✅ Cleanup complete, remaining:', memories.length);
         }
         
         document.addEventListener('keydown', function(e) {

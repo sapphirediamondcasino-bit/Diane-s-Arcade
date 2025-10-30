@@ -558,6 +558,10 @@
                         year: 'numeric' 
                     });
                     
+                    // Get avatar from cache or generate
+                    const avatarKey = 'avatar_' + memory.username;
+                    const avatar = localStorage.getItem(avatarKey) || memory.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memory.username)}`;
+                    
                     let mediaHTML = '';
                     // Load media from separate key if it exists
                     if (memory.mediaKey) {
@@ -588,7 +592,7 @@
                             ${mediaHTML}
                             <div class="memory-content">
                                 <div class="memory-author">
-                                    <img src="${memory.avatar}" alt="${safeUsername}" class="author-avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memory.username)}'">
+                                    <img src="${avatar}" alt="${safeUsername}" class="author-avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memory.username)}'">
                                     <div class="author-info">
                                         <a href="profile.html?user=${encodeURIComponent(memory.username)}" class="author-name">${safeUsername}</a>
                                         <div class="memory-date">${date}</div>
@@ -757,10 +761,20 @@
                     }
                 }
                 
+                // Store avatar separately too (don't duplicate in every memory)
+                const avatarKey = 'avatar_' + user.username;
+                if (user.avatar && !localStorage.getItem(avatarKey)) {
+                    try {
+                        localStorage.setItem(avatarKey, user.avatar);
+                    } catch(e) {
+                        console.log('⚠️ Could not cache avatar');
+                    }
+                }
+                
+                // MINIMAL memory object - only IDs and text
                 const memory = {
                     id: memoryId,
                     username: user.username,
-                    avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.username)}`,
                     text: text,
                     inspiration: inspiration,
                     mediaKey: mediaKey,
@@ -768,7 +782,7 @@
                     timestamp: new Date().toISOString()
                 };
                 
-                console.log('📦 Memory object created, getting existing memories...');
+                console.log('📦 Memory object created (minimal), getting existing memories...');
                 
                 const existingData = localStorage.getItem('dianeMemories');
                 const memories = existingData ? JSON.parse(existingData) : [];
@@ -789,8 +803,13 @@
                         // Clean up oldest memories
                         console.log('🔄 Quota exceeded, cleaning old memories...');
                         cleanOldMemories(memories);
-                        localStorage.setItem('dianeMemories', JSON.stringify(memories));
-                        console.log('✅ Saved after cleanup');
+                        try {
+                            localStorage.setItem('dianeMemories', JSON.stringify(memories));
+                            console.log('✅ Saved after cleanup');
+                        } catch(e2) {
+                            console.error('❌ Still failed after cleanup');
+                            throw new Error('Storage full - please clear browser data or use fewer/smaller images');
+                        }
                     } else {
                         throw saveError;
                     }

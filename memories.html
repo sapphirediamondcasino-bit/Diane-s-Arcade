@@ -219,6 +219,7 @@
             font-size: 1.1em;
             text-decoration: none;
             transition: all 0.3s;
+            cursor: pointer;
         }
         
         .author-name:hover {
@@ -431,6 +432,26 @@
         .notification.success { background: var(--neon-green); color: var(--darker); }
         .notification.error { background: #ff0000; }
         
+        .quick-login {
+            background: rgba(0, 243, 255, 0.1);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .quick-login input {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--neon-blue);
+            border-radius: 10px;
+            color: white;
+            font-size: 1em;
+            font-family: 'Roboto', sans-serif;
+            margin-top: 10px;
+        }
+        
         @media (max-width: 768px) {
             .memorial-title { font-size: 2em; }
             .memorial-message { font-size: 1em; padding: 20px; }
@@ -473,16 +494,16 @@
         <div class="memories-grid" id="memories-grid"></div>
     </div>
     
-    <!-- Add Memory Modal -->
     <div class="modal" id="memory-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeMemoryModal()">×</button>
             <h2 class="modal-title">Share Your Memory</h2>
+            
             <form id="memory-form" onsubmit="submitMemory(event)">
                 <div class="file-upload-section">
                     <input type="file" id="memory-media" accept="image/*,video/*" onchange="previewMedia(event)">
                     <label for="memory-media" class="upload-label">📸 ADD PHOTO/VIDEO</label>
-                    <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Optional: Share a photo or video of Diane Keaton</p>
+                    <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Optional: Share a photo or video (Max 1000MB)</p>
                     <img id="media-preview-image" class="preview-image">
                     <video id="media-preview-video" class="preview-video" controls></video>
                 </div>
@@ -506,15 +527,21 @@
         let mediaFile = null;
         let mediaType = null;
         
-        function getUser() {
-            const userData = localStorage.getItem('arcadeUser');
-            if (!userData) return null;
-            try {
-                return JSON.parse(userData);
-            } catch(e) {
-                console.error('Error parsing user data:', e);
-                return null;
+        function getOrCreateUser() {
+            let userData = localStorage.getItem('arcadeUser');
+            
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    console.log('✅ User loaded from localStorage:', user);
+                    return user;
+                } catch(e) {
+                    console.error('Error parsing user data:', e);
+                }
             }
+            
+            console.log('❌ No user found');
+            return null;
         }
         
         function loadMemories() {
@@ -523,7 +550,7 @@
                 const memories = memoriesData ? JSON.parse(memoriesData) : [];
                 const container = document.getElementById('memories-grid');
                 
-                console.log('Loading memories:', memories.length);
+                console.log('📚 Loading memories:', memories.length);
                 
                 if (memories.length === 0) {
                     container.innerHTML = `
@@ -536,7 +563,6 @@
                     return;
                 }
                 
-                // Sort by date (newest first)
                 memories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 
                 container.innerHTML = memories.map(memory => {
@@ -560,9 +586,9 @@
                             ${mediaHTML}
                             <div class="memory-content">
                                 <div class="memory-author">
-                                    <img src="${memory.avatar}" alt="${memory.username}" class="author-avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${memory.username}'">
+                                    <img src="${memory.avatar}" alt="${escapeHtml(memory.username)}" class="author-avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memory.username)}'">
                                     <div class="author-info">
-                                        <a href="profile.html?user=${memory.username}" class="author-name">${memory.username}</a>
+                                        <a href="profile.html?user=${encodeURIComponent(memory.username)}" class="author-name">${escapeHtml(memory.username)}</a>
                                         <div class="memory-date">${date}</div>
                                     </div>
                                 </div>
@@ -575,7 +601,7 @@
                     `;
                 }).join('');
             } catch(e) {
-                console.error('Error loading memories:', e);
+                console.error('❌ Error loading memories:', e);
                 document.getElementById('memories-grid').innerHTML = `
                     <div class="no-memories" style="grid-column: 1/-1;">
                         <p style="color: var(--neon-pink);">Error loading memories. Please refresh the page.</p>
@@ -591,13 +617,19 @@
         }
         
         function openMemoryModal() {
-            const user = getUser();
+            const user = getOrCreateUser();
+            
             if (!user || !user.username) {
-                showNotification('Please login to share a memory!', 'error');
-                setTimeout(() => window.location.href = 'profile.html', 1500);
+                showNotification('Please create a profile first! Go to MY PROFILE.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 2000);
                 return;
             }
-            document.getElementById('memory-modal').classList.add('active');
+            
+            const modal = document.getElementById('memory-modal');
+            modal.classList.add('active');
+            console.log('✅ User logged in:', user.username);
         }
         
         function closeMemoryModal() {
@@ -614,7 +646,7 @@
             if (!file) return;
             
             if (file.size > 1000 * 1024 * 1024) {
-                showNotification('File too large! Max 1000MB', 'error');
+                showNotification('File too large! Max 1000MB (1GB)', 'error');
                 event.target.value = '';
                 return;
             }
@@ -643,24 +675,34 @@
         function submitMemory(e) {
             e.preventDefault();
             
-            const user = getUser();
+            console.log('🔥 SUBMITTING MEMORY...');
+            
+            const user = getOrCreateUser();
+            
             if (!user || !user.username) {
-                showNotification('Please login first!', 'error');
+                showNotification('You must have an account! Redirecting to profile...', 'error');
+                console.log('❌ No account found - redirecting');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 2000);
                 return;
             }
+            
+            console.log('✅ User found:', user);
             
             const text = document.getElementById('memory-text').value.trim();
             const inspiration = document.getElementById('memory-inspiration').value.trim();
             
             if (!text || !inspiration) {
                 showNotification('Please fill in all required fields!', 'error');
+                console.log('❌ Missing required fields');
                 return;
             }
             
             try {
                 const memory = {
                     username: user.username,
-                    avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
+                    avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.username)}`,
                     text: text,
                     inspiration: inspiration,
                     media: mediaFile || null,
@@ -668,19 +710,21 @@
                     timestamp: new Date().toISOString()
                 };
                 
+                console.log('💾 Saving memory:', memory);
+                
                 const memoriesData = localStorage.getItem('dianeMemories');
                 const memories = memoriesData ? JSON.parse(memoriesData) : [];
                 memories.push(memory);
                 localStorage.setItem('dianeMemories', JSON.stringify(memories));
                 
-                console.log('Memory saved!', memory);
+                console.log('✅ MEMORY SAVED SUCCESSFULLY! Total memories:', memories.length);
                 
                 showNotification('❤️ Memory shared! Thank you for honoring Diane.', 'success');
                 closeMemoryModal();
                 loadMemories();
             } catch(e) {
-                console.error('Error saving memory:', e);
-                showNotification('Error saving memory. Please try again.', 'error');
+                console.error('❌ Error saving memory:', e);
+                showNotification('Error saving memory: ' + e.message, 'error');
             }
         }
         
@@ -703,7 +747,6 @@
             }
         });
         
-        // Load memories on page load
         document.addEventListener('DOMContentLoaded', loadMemories);
     </script>
 </body>

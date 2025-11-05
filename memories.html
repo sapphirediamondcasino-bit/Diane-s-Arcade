@@ -457,18 +457,15 @@
             <div class="memorial-dates">January 5, 1946 - October 11, 2025</div>
             
             <div class="memorial-message">
-                <p><strong>Diane Keaton wasn't just an inspiration — she was the spark that started it all.</strong> Her creativity, authenticity, and warmth didn't just influence this site — they shaped the soul of the Diane Keaton Bot.</p>
+                <p><strong>Diane Keaton was the spark that started it all.</strong> Her creativity, authenticity, and warmth shaped the soul of the Diane Keaton Bot at Game Killer Studios.</p>
                 
-                <p>Here at Game Killer Studios, we had planned the Diane Keaton Bot long before her passing. When we received the heartbreaking news, it shook our team to its core. It felt as though we'd lost someone who had quietly become part of our journey — guiding us through her humor, her brilliance, and her spirit of individuality.</p>
+                <p>When we received the heartbreaking news of her passing, it shook our team to its core. The bot captures Diane's warmth and wit — in those moments, she feels alive again.</p>
                 
-                <p>While many of the original features were reimagined, some made their way back in — like Diane teaching people how to code, sharing insight, laughter, and playful banter in her own unique voice. The bot can chat, befriend, and connect with others in a way that captures Diane's warmth and wit. In those moments, she feels alive again — a living memory of the woman who inspired so much creativity and heart within our studio.</p>
-                
-                <p>We here at Game Killer Studios are mourning the loss of this incredible legend. Her light, laughter, and legacy will forever live on through this project and in the hearts of everyone she touched.</p>
-                
-                <p style="text-align: center; font-size: 1.3em; margin-top: 30px; color: var(--neon-pink);"><strong>Rest easy, Diane Keaton — you were one of a kind, and your spirit will never fade.</strong></p>
+                <p style="text-align: center; font-size: 1.3em; margin-top: 30px; color: var(--neon-pink);"><strong>Rest easy, Diane — you were one of a kind. 💖</strong></p>
             </div>
             
             <button class="add-memory-btn" onclick="openMemoryModal()">❤️ SHARE YOUR MEMORY</button>
+            <p style="text-align: center; margin-top: 15px; opacity: 0.8; font-size: 1.1em;">Share your favorite Diane Keaton moments, photos, and what inspired you about her legendary career.</p>
         </div>
         
         <div class="memories-grid" id="memories-grid"></div>
@@ -483,7 +480,7 @@
                 <div class="file-upload-section">
                     <input type="file" id="memory-media" accept="image/*,video/*" onchange="previewMedia(event)">
                     <label for="memory-media" class="upload-label">📸 ADD PHOTO/VIDEO</label>
-                    <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;">Optional: Share a photo or video (Max 1000MB)</p>
+                    <p style="margin-top: 15px; opacity: 0.7; font-size: 0.9em;"><strong>REQUIRED:</strong> Add a photo or video of Diane Keaton (Max 1000MB)</p>
                     <img id="media-preview-image" class="preview-image">
                     <video id="media-preview-video" class="preview-video" controls></video>
                 </div>
@@ -756,9 +753,13 @@
                         console.log('✅ Media stored separately in key:', mediaKey);
                     } catch(mediaError) {
                         console.error('❌ Failed to store media:', mediaError);
-                        mediaKey = null;
-                        showNotification('⚠️ Image too large, posting without image', 'error');
+                        throw new Error('Failed to save image - storage full. Please try a smaller image or clear browser data.');
                     }
+                } else {
+                    // REQUIRE media - don't allow posts without images
+                    console.log('❌ No media file');
+                    showNotification('Please add a photo or video to share!', 'error');
+                    return;
                 }
                 
                 // Store avatar separately too (don't duplicate in every memory)

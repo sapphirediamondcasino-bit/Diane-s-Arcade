@@ -15,6 +15,7 @@
 <body>
 <div id="boot">LOADING ARCADE…</div>
 <iframe id="stage" title="Diane's Arcade" allow="fullscreen; autoplay; gamepad; clipboard-write" allowfullscreen></iframe>
+<script src="backend.js"></script>
 
 <script type="text/plain" id="page-home"><!DOCTYPE html>
 <html lang="en">
@@ -715,6 +716,7 @@ document.addEventListener('click', function(e){
             <a href="memories.html" class="nav-link">Memories</a> 
             <a href="shop.html" class="nav-link">Coin Shop</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="TermsofService.html" class="nav-link">TERMS</a>
             <a href="PrivacyPolicy.html" class="nav-link">PRIVACY</a>
             <a href="bot.html" class="nav-link bot-btn">DIANE BOT 🤖</a>
@@ -1998,6 +2000,7 @@ document.addEventListener('click', function(e){
                 return;
             }
 
+            try { parent.DKBackend && parent.DKBackend.submitScore(currentGameId, score).catch(function (e) { console.warn(e.message); }); } catch (e) {}
             // Call the leaderboard save function
             if (typeof window.saveGameScore === 'function') {
                 const saved = window.saveGameScore(currentGameId, score);
@@ -2467,6 +2470,7 @@ document.addEventListener('click', function(e){
             <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="memories.html" class="nav-link">Memories</a> 
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
         </div>
     </nav>
@@ -3090,6 +3094,7 @@ document.addEventListener('click', function(e){
             <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="memories.html" class="nav-link">Memories</a> 
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
         </div>
     </nav>
@@ -3929,6 +3934,7 @@ document.addEventListener('click', function(e){
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="profile.html" class="nav-link">MY PROFILE</a>
         </div>
     </nav>
@@ -6986,6 +6992,7 @@ document.addEventListener('click', function(e){
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="Settings.html" class="nav-link">SETTINGS ⚙️</a>
             <button class="nav-link logout-btn" onclick="logout()" style="display: none;" id="logoutBtn">LOGOUT</button>
         </div>
@@ -7188,6 +7195,11 @@ document.addEventListener('click', function(e){
         function handleLogin(e) {
             e.preventDefault();
             hideError();
+            if (parent.DKBackend && parent.DKBackend.status !== 'unconfigured') { /* Supabase Auth; no local-account fallback once configured */
+                parent.DKBackend.login(document.getElementById('loginUsername').value.trim(), document.getElementById('loginPassword').value)
+                    .then(function () { initProfile(); }).catch(function (err) { showError(err.message); });
+                return;
+            }
             
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -7234,6 +7246,15 @@ document.addEventListener('click', function(e){
         function handleRegister(e) {
             e.preventDefault();
             hideError();
+            if (parent.DKBackend && parent.DKBackend.status !== 'unconfigured') {
+                var _pw = document.getElementById('regPassword').value;
+                if (_pw !== document.getElementById('regConfirmPassword').value) { showError('Passwords do not match!'); return; }
+                if (_pw.length < 6) { showError('Password must be at least 6 characters!'); return; }
+                parent.DKBackend.register(document.getElementById('regUsername').value.trim(), document.getElementById('regEmail').value.trim(), _pw)
+                    .then(function (r) { if (r.needsConfirm) { showError('Check your email to confirm your account, then sign in.'); } else { initProfile(); } })
+                    .catch(function (err) { showError(err.message); });
+                return;
+            }
             
             const username = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
@@ -7642,6 +7663,7 @@ document.addEventListener('click', function(e){
         }
         
         function logout() {
+            try { parent.DKBackend && parent.DKBackend.logout(); } catch (e) {}
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('arcadeUser');
                 window.__reload();
@@ -8544,6 +8566,7 @@ document.addEventListener('click', function(e){
             <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="admin.html" class="nav-link admin-link" id="adminLink" style="display: none;">🛡️ ADMIN PANEL</a>
         </div>
     </nav>
@@ -10727,6 +10750,7 @@ document.addEventListener('click', function(e){
             <a href="memories.html" class="nav-link">Memories</a> 
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
+            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="profile.html" class="nav-link">MY PROFILE</a>
             <a href="terms.html" class="nav-link">TERMS</a>
             <a href="privacy.html" class="nav-link">PRIVACY</a>
@@ -12025,6 +12049,153 @@ document.addEventListener('click', function(e){
 </html>
 </script>
 
+<script type="text/plain" id="page-tv"><!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Diane Keaton Legacy Entertainment Center | TV</title>
+<script>
+window.__SEARCH = "";
+window.__go = function(r){ try{ parent.__arcadeGo(r); }catch(e){} };
+function __pushTitle(){ try{ parent.document.title = document.title; }catch(e){} }
+document.addEventListener('DOMContentLoaded', __pushTitle);
+document.addEventListener('click', function(e){
+  var a = e.target.closest && e.target.closest('a[href]'); if(!a) return;
+  var h = a.getAttribute('href') || '';
+  if (/^(https?:|mailto:|javascript:)/i.test(h)) return;
+  if (/\.html?(\?|#|$)/i.test(h)) { e.preventDefault(); window.__go(h); }
+}, true);
+<\/script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#050510;color:#fff;font-family:Roboto,Arial,sans-serif;min-height:100vh}
+nav{display:flex;gap:18px;flex-wrap:wrap;padding:14px 20px;background:#0a0a1c;border-bottom:1px solid #00f3ff55}
+nav a{color:#00f3ff;text-decoration:none;font-weight:700;letter-spacing:1px}
+h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
+#msg{padding:8px 20px;color:#ffcc66}
+.wrap{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:16px;padding:12px 20px}
+@media(max-width:850px){.wrap{grid-template-columns:1fr}}
+.player{aspect-ratio:16/9;background:#000;border:2px solid #00f3ff;border-radius:8px;overflow:hidden}
+.player>div,.player iframe{width:100%;height:100%}
+#now{margin-top:8px;font-weight:700}#now small{display:block;color:#9ab;font-weight:400}
+.guide{background:#0b0b20;border:1px solid #243;border-radius:8px;overflow:auto;max-height:70vh}
+.ch{display:flex;gap:10px;padding:10px;border-bottom:1px solid #223;cursor:pointer}
+.ch:hover,.ch.on{background:#142038}
+.ch img{width:48px;height:48px;object-fit:contain;background:#111;border-radius:6px}
+.num{font:900 1.3em Orbitron,monospace;color:#00f3ff;min-width:34px}
+.ch small{color:#9ab;display:block}
+.admin{margin:12px 20px 30px;background:#0b0b20;border:1px solid #bf00ff88;border-radius:8px;padding:14px}
+.admin h2{color:#bf00ff;margin-bottom:8px}
+.admin input,.admin textarea{background:#111;color:#fff;border:1px solid #345;border-radius:4px;padding:6px;margin:3px 3px 3px 0}
+.admin button{background:#00f3ff;color:#000;border:0;border-radius:4px;padding:6px 10px;font-weight:700;cursor:pointer;margin:3px}
+.admin button.x{background:#ff4466;color:#fff}
+.it{display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #223}
+.it span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hide{display:none}
+</style></head><body>
+<nav><a href="index.html">HOME</a><a href="movies.html">MOVIES</a><a href="leaderboard.html">LEADERBOARDS</a><a href="tv.html">TV</a></nav>
+<h1>📺 TV</h1><div id="msg">Connecting…</div>
+<div class="wrap">
+  <div><div class="player"><div id="yt"></div></div><div id="now">Pick a channel</div></div>
+  <div class="guide" id="guide"></div>
+</div>
+<div class="admin hide" id="admin">
+  <h2>Admin — channel programming</h2>
+  <div id="achan"></div>
+  <details open><summary>Add / edit channel</summary>
+    <input id="cn" type="number" placeholder="Number" style="width:90px"><input id="cname" placeholder="Name">
+    <input id="clogo" placeholder="Logo URL"><br><textarea id="cdesc" placeholder="Description" rows="2" cols="50"></textarea><br>
+    <button id="csave">Save channel</button><span id="cid" class="hide"></span></details>
+  <div id="aitems"></div>
+  <div id="addrow" class="hide"><input id="yurl" placeholder="YouTube link" size="38"><input id="ytitle" placeholder="Title (auto if blank)">
+    <input id="ystart" type="datetime-local" title="Optional scheduled start"><button id="yadd">Add video</button></div>
+</div>
+<script src="https://www.youtube.com/iframe_api"><\/script>
+<script>
+(function(){
+  var B = parent.DKBackend, chans = [], items = {}, cur = null, curIdx = 0, player = null, playerReady = false, isAdmin = false, pendingLoad = null;
+  function $(i){return document.getElementById(i)}
+  function esc(s){var d=document.createElement('i');d.textContent=s==null?'':s;return d.innerHTML}
+  function msg(t){$('msg').textContent=t||''}
+  function ytId(u){var m=String(u).match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(u)?u:null)}
+
+  window.onYouTubeIframeAPIReady = function(){
+    player = new YT.Player('yt',{width:'100%',height:'100%',playerVars:{rel:0,playsinline:1},events:{
+      onReady:function(){playerReady=true;if(pendingLoad)pendingLoad();},
+      onStateChange:function(e){if(e.data===0)advance();},
+      onError:function(){msg('That video could not be played; skipping.');setTimeout(advance,1500);}
+    }});
+  };
+  function play(){ // reuses the ONE player; never recreates it
+    var list=items[cur]||[]; if(!list.length){$('now').innerHTML='This channel has no programming yet.';return}
+    curIdx=((curIdx%list.length)+list.length)%list.length; var it=list[curIdx];
+    var go=function(){player.loadVideoById(it.youtube_id)};
+    if(playerReady)go();else pendingLoad=go;
+    var nx=list[(curIdx+1)%list.length];
+    $('now').innerHTML='Now playing: '+esc(it.title)+'<small>'+esc(it.description||'')+'</small><small>Next: '+esc(nx.title)+'</small>';
+    render();
+  }
+  function advance(){ // transition point: refetch so admin changes apply between videos
+    if(!cur)return; var oldId=(items[cur]||[])[curIdx]; oldId=oldId&&oldId.id;
+    loadItems(cur).then(function(){var l=items[cur]||[];var i=l.findIndex(function(x){return x.id===oldId});curIdx=(i>=0?i:curIdx-1)+1;play()});
+  }
+  function render(){
+    $('guide').innerHTML=chans.map(function(c){var l=items[c.id]||[],i=c.id===cur?curIdx:0,n=l[i%(l.length||1)],x=l.length?l[(i+1)%l.length]:null;
+      return '<div class="ch'+(c.id===cur?' on':'')+'" data-id="'+c.id+'">'+(c.logo_url?'<img src="'+esc(c.logo_url)+'" alt="">':'')+'<div class="num">'+c.number+'</div><div><b>'+esc(c.name)+'</b>'+
+      '<small>'+esc(c.description||'')+'</small><small>'+(n?'Now: '+esc(n.title):'No programming')+'</small>'+(x&&l.length>1?'<small>Next: '+esc(x.title)+'</small>':'')+
+      (n&&n.starts_at?'<small>Scheduled: '+new Date(n.starts_at).toLocaleString()+'</small>':'')+'</div></div>'}).join('')||'<div style="padding:14px">No channels yet.</div>';
+    if(isAdmin)renderAdmin();
+  }
+  function loadItems(id){return B.tvItems(id).then(function(r){if(r.error)throw r.error;items[id]=r.data||[]})}
+  function loadAll(){
+    return B.tvChannels().then(function(r){if(r.error)throw r.error;chans=r.data||[];return Promise.all(chans.map(function(c){return loadItems(c.id)}))}).then(function(){render();msg('')})
+      .catch(function(e){msg('Could not load channels: '+(e.message||e))});
+  }
+  $('guide').addEventListener('click',function(e){var d=e.target.closest('.ch');if(!d)return;if(cur!==d.dataset.id){cur=d.dataset.id;curIdx=0;play()}});
+
+  /* ---- admin (UI only; the database enforces who may write) ---- */
+  var editCh=null;
+  function renderAdmin(){
+    $('achan').innerHTML='<button data-n="1">+ New channel</button>'+chans.map(function(c){return '<button data-e="'+c.id+'">Edit #'+c.number+' '+esc(c.name)+'</button>'}).join('');
+    $('addrow').classList.toggle('hide',!editCh);
+    var l=editCh?(items[editCh]||[]):[];
+    $('aitems').innerHTML=l.map(function(it,i){return '<div class="it"><span>'+(i+1)+'. '+esc(it.title)+' ['+it.youtube_id+']</span>'+
+      '<button data-p="'+it.id+'">▶</button><button data-u="'+i+'">↑</button><button data-d="'+i+'">↓</button><button class="x" data-r="'+it.id+'">✕</button></div>'}).join('');
+  }
+  function fail(r){if(r&&r.error){msg('Save failed: '+r.error.message);return true}return false}
+  $('admin').addEventListener('click',function(e){var t=e.target,l=editCh?(items[editCh]||[]):[];
+    if(t.dataset.n){editCh=null;$('cn').value=$('cname').value=$('clogo').value=$('cdesc').value='';renderAdmin()}
+    else if(t.dataset.e){editCh=t.dataset.e;var c=chans.find(function(x){return x.id===editCh});$('cn').value=c.number;$('cname').value=c.name;$('clogo').value=c.logo_url||'';$('cdesc').value=c.description||'';renderAdmin()}
+    else if(t.dataset.p){cur=editCh;curIdx=l.findIndex(function(x){return x.id===t.dataset.p});play()}
+    else if(t.dataset.r){B.tvRemoveItem(t.dataset.r).then(function(r){if(!fail(r))loadItems(editCh).then(render)})}
+    else if(t.dataset.u||t.dataset.d){var i=+(t.dataset.u||t.dataset.d),j=t.dataset.u?i-1:i+1;if(j<0||j>=l.length)return;
+      var ids=l.map(function(x){return x.id});var tmp=ids[i];ids[i]=ids[j];ids[j]=tmp;
+      B.tvReorder(editCh,ids).then(function(r){if(!fail(r))loadItems(editCh).then(render)})}
+  });
+  $('csave').onclick=function(){
+    var ch={number:+$('cn').value,name:$('cname').value.trim(),description:$('cdesc').value.trim()||null,logo_url:$('clogo').value.trim()||null};
+    if(!ch.number||!ch.name){msg('Channel needs a number and a name.');return}
+    if(editCh&&chans.some(function(c){return c.id===editCh&&c.number===ch.number||c.id===editCh}))ch.id=editCh;
+    B.tvSaveChannel(ch).then(function(r){if(!fail(r)){editCh=r.data.id;return loadAll()}})};
+  $('yadd').onclick=function(){
+    var id=ytId($('yurl').value.trim());if(!id){msg('That is not a YouTube link.');return}
+    var title=$('ytitle').value.trim(),st=$('ystart').value;
+    var t=title?Promise.resolve(title):fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent('https://www.youtube.com/watch?v='+id)).then(function(r){return r.json()}).then(function(j){return j.title}).catch(function(){return null});
+    t.then(function(tt){if(!tt){msg('Could not look up the title; type one in.');return}
+      var pos=(items[editCh]||[]).length;
+      return B.tvSaveItem({channel_id:editCh,position:pos,youtube_id:id,title:tt,thumbnail_url:'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',starts_at:st?new Date(st).toISOString():null})
+        .then(function(r){if(!fail(r)){$('yurl').value=$('ytitle').value='';return loadItems(editCh).then(render)}})})};
+
+  function start(){
+    if(!B||B.status==='unconfigured'){msg('Backend is not configured, so channels cannot load.');return}
+    if(!B.client){msg('Connecting…');return}
+    loadAll().then(function(){return B.isAdmin()}).then(function(a){isAdmin=a;$('admin').classList.toggle('hide',!a);if(a)renderAdmin()});
+    var t;B.tvSubscribe(function(){clearTimeout(t);t=setTimeout(function(){ // live guide update; player is not touched
+      loadAll().then(function(){if(cur&&!chans.some(function(c){return c.id===cur})){cur=null;$('now').textContent='This channel was removed.'}})},400)});
+  }
+  if(B){var started=false;var once=function(){if(!started&&B.client){started=true;start()}};B.onStatus(once);once();setTimeout(function(){if(!started)start()},3000)}else msg('Backend missing.');
+})();
+<\/script></body></html>
+</script>
+
 <script>
 /* ============================================================
    Diane's Arcade — single-file shell
@@ -12033,7 +12204,7 @@ document.addEventListener('click', function(e){
    Routes:  #/home  #/game?game=motherload  #/profile  etc.
    ============================================================ */
 (function () {
-  var FILE_ROUTES = {"index.html": "home", "game.html": "game", "achievements.html": "achievements", "leaderboard.html": "leaderboard", "memories.html": "memories", "shop.html": "shop", "movies.html": "movies", "profile.html": "profile", "login.html": "login", "settings.html": "settings", "admin.html": "admin", "bot.html": "bot", "termsofservice.html": "terms", "terms.html": "terms", "privacypolicy.html": "privacy", "privacy.html": "privacy"};
+  var FILE_ROUTES = {"index.html": "home", "game.html": "game", "achievements.html": "achievements", "leaderboard.html": "leaderboard", "memories.html": "memories", "shop.html": "shop", "movies.html": "movies", "profile.html": "profile", "login.html": "login", "settings.html": "settings", "admin.html": "admin", "bot.html": "bot", "termsofservice.html": "terms", "terms.html": "terms", "privacypolicy.html": "privacy", "privacy.html": "privacy", "tv.html": "tv"};
   var stage = document.getElementById('stage');
   var boot = document.getElementById('boot');
   var current = { route: null, search: '' };

@@ -15,8 +15,264 @@
 <body>
 <div id="boot">LOADING ARCADE…</div>
 <iframe id="stage" title="Diane's Arcade" allow="fullscreen; autoplay; gamepad; clipboard-write" allowfullscreen></iframe>
-<script src="backend.js"></script>
 
+<script>
+/* backend.js — Supabase adapter for The Diane Keaton Legacy Entertainment Center.
+   Loaded by index.html (parent shell). Pages inside the iframe call parent.DKBackend.
+   Only PUBLIC values go here. Never put the service-role key or DB password in this file. */
+(function () {
+  'use strict';
+
+  /* ===== STEP: PASTE YOUR TWO PUBLIC VALUES HERE ===== */
+  var SUPABASE_URL = 'https://xkjkrxnmimwmxftrrkha.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_8rZwgg5Cz0DpNelyA45rFg_T6M6ZKi7'; // publishable key: safe in the browser; security comes from RLS
+  /* =================================================== */
+
+  var CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+  var LS = window.localStorage;
+  var B = window.DKBackend = {
+    status: 'unconfigured', ready: false, user: null, client: null,
+    online: null, listeners: [],
+    integrations: { bot: null /* plug the replacement AI bot in here; nothing is connected yet */ }
+  };
+
+  /* ---------- status pill (truthful connection state) ---------- */
+  var pill = document.createElement('div');
+  pill.setAttribute('role', 'status');
+  pill.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:99999;font:12px sans-serif;padding:4px 10px;border-radius:12px;background:#111c;color:#fff;pointer-events:none';
+  document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(pill); paint(); });
+  function paint() {
+    var t = { unconfigured: 'Backend not configured (local mode)', connecting: 'Connecting…', online: 'Online', offline: 'Offline — retrying' }[B.status];
+    if (B.status === 'online' && B.online != null) t += ' · ' + B.online + ' online';
+    pill.textContent = t;
+  }
+  function setStatus(s) { B.status = s; B.ready = s === 'online'; paint(); B.listeners.forEach(function (f) { try { f(s); } catch (e) {} }); }
+  B.onStatus = function (f) { B.listeners.push(f); };
+
+  function friendly(e) {
+    var m = (e && e.message) || String(e);
+    if (/Failed to fetch|NetworkError/i.test(m)) return 'Cannot reach the server. Check your connection and try again.';
+    if (/quota|rate limit|429|402|exceed/i.test(m)) return 'The service has hit a free-plan limit. Please try again later.';
+    if (/Database error saving new user/i.test(m)) return 'That username is invalid (3–20 letters, numbers, _) or already taken.';
+    if (/Invalid login/i.test(m)) return 'Wrong email or password.';
+    return m;
+  }
+  function need() { if (!B.client) throw new Error('Backend is not connected.'); }
+
+  /* ---------- init ---------- */
+  B.init = function () {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return setStatus('unconfigured');
+    setStatus('connecting');
+    var s = document.createElement('script');
+    s.src = CDN;
+    s.onerror = function () { setStatus('offline'); };
+    s.onload = function () {
+      B.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+      B.client.auth.getSession().then(function (r) {
+        B.user = r.data.session ? r.data.session.user : null;
+        setStatus('online');
+        if (B.user) { B.syncCache(); startPresence(); flushPending(); }
+      }).catch(function () { setStatus('offline'); });
+      B.client.auth.onAuthStateChange(function (_e, sess) {
+        B.user = sess ? sess.user : null;
+        if (B.user) { startPresence(); } else { stopPresence(); }
+      });
+    };
+    document.head.appendChild(s);
+    window.addEventListener('online', function () { if (B.client) { setStatus('online'); flushPending(); } });
+    window.addEventListener('offline', function () { if (B.client) setStatus('offline'); });
+  };
+
+  /* ---------- auth (Supabase Auth owns passwords) ---------- */
+  B.register = function (username, email, password) {
+    need();
+    return B.client.auth.signUp({ email: email, password: password, options: { data: { username: username } } })
+      .then(function (r) {
+        if (r.error) throw new Error(friendly(r.error));
+        if (!r.data.session) return { needsConfirm: true };
+        B.user = r.data.user; return B.syncCache().then(function () { return { needsConfirm: false }; });
+      });
+  };
+  B.login = function (email, password) {
+    need();
+    if (email.indexOf('@') < 0) return Promise.reject(new Error('Sign in with your email address (usernames are for display).'));
+    return B.client.auth.signInWithPassword({ email: email, password: password }).then(function (r) {
+      if (r.error) throw new Error(friendly(r.error));
+      B.user = r.data.user; return B.syncCache();
+    });
+  };
+  B.logout = function () { if (!B.client) return Promise.resolve(); return B.client.auth.signOut().then(function () { B.user = null; }); };
+  B.resetPassword = function (email) { need(); return B.client.auth.resetPasswordForEmail(email); };
+
+  /* ---------- compatibility cache: keeps legacy pages that read localStorage 'arcadeUser' working.
+     The SERVER is authoritative; this cache is overwritten on every sync. ---------- */
+  B.syncCache = function () {
+    if (!B.client || !B.user) return Promise.resolve(null);
+    return Promise.all([
+      B.client.from('profiles').select('*').eq('id', B.user.id).single(),
+      B.client.from('user_achievements').select('achievement_id').eq('user_id', B.user.id),
+      B.client.from('inventory').select('item_id').eq('user_id', B.user.id).then(function (x) { return x.data || []; }, function () { return []; }),
+      B.client.from('badge_applications').select('item_id').eq('user_id', B.user.id).eq('status', 'approved').then(function (x) { return x.data || []; }, function () { return []; })
+    ]).then(function (r) {
+      var p = r[0].data; if (!p) return null;
+      var u = { username: p.username, email: B.user.email, xp: p.xp, coins: p.points, level: p.level,
+        gamesPlayed: p.games_played, moviesWatched: p.movies_watched,
+        unlockedAchievements: (r[1].data || []).map(function (a) { return a.achievement_id; }),
+        badges: r[2].filter(function (i) { return /_badge$/.test(i.item_id); }).map(function (i) { return i.item_id; }).concat(r[3].map(function (i) { return i.item_id; })),
+        inventory: r[2].map(function (i) { return { item_id: i.item_id }; }), joinDate: p.created_at, avatar: p.avatar_url, banner: p.banner_url,
+        gamesHistory: {}, moviesHistory: {}, _fromBackend: true };
+      LS.setItem('arcadeUser', JSON.stringify(u)); LS.setItem('isLoggedIn', 'true');
+      return u;
+    }).catch(function () { return null; });
+  };
+  B.evaluateAchievements = function () { need(); return B.client.rpc('evaluate_achievements').then(function (r) { if (r.error) throw r.error; return r.data; }); };
+  B.myBoosts = function () { need(); return B.client.from('user_boosts').select('item_id,expires_at').eq('user_id', B.user.id).gt('expires_at', new Date().toISOString()).order('expires_at'); };
+  B.uploadProfileImage = function (blob, kind) {
+    need(); if (!B.user) return Promise.reject(new Error('Sign in first.'));
+    var ext = /png/.test(blob.type) ? 'png' : /webp/.test(blob.type) ? 'webp' : /gif/.test(blob.type) ? 'gif' : 'jpg';
+    var path = B.user.id + '/' + kind + '-' + Date.now() + '.' + ext;
+    return B.client.storage.from('avatars').upload(path, blob, { contentType: blob.type || undefined, upsert: false }).then(function (r) {
+      if (r.error) throw new Error(friendly(r.error));
+      return B.client.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+    });
+  };
+  B.updateProfile = function (fields) { // only bio/avatar_url/banner_url are permitted by the database
+    need(); return B.client.from('profiles').update(fields).eq('id', B.user.id);
+  };
+
+  /* ---------- scores (server validates; duplicates blocked by event id) ---------- */
+  function pending() { try { return JSON.parse(LS.getItem('dk_pending_scores') || '[]'); } catch (e) { return []; } }
+  function savePending(a) { LS.setItem('dk_pending_scores', JSON.stringify(a)); }
+  function send(item) {
+    return B.client.rpc('submit_score', { p_game: item.g, p_score: item.s, p_event_id: item.e }).then(function (r) {
+      if (r.error) throw r.error; return r.data;
+    });
+  }
+  function flushPending() {
+    if (!B.ready || !B.user) return;
+    pending().forEach(function (it) {
+      send(it).then(function () { savePending(pending().filter(function (x) { return x.e !== it.e; })); })
+        .catch(function (e) { if (!/network|fetch/i.test(String(e.message))) savePending(pending().filter(function (x) { return x.e !== it.e; })); });
+    });
+  }
+  B.submitScore = function (gameId, score) { // source is always 'self_reported' until a game has a verified adapter
+    if (B.status === 'unconfigured') return Promise.resolve({ skipped: true });
+    var it = { g: gameId, s: Math.floor(score), e: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()) };
+    if (!B.ready || !B.user) { savePending(pending().concat([it])); return Promise.resolve({ queued: true }); }
+    return send(it).catch(function (e) {
+      if (/network|fetch/i.test(String(e.message))) { savePending(pending().concat([it])); return { queued: true }; }
+      throw new Error(friendly(e));
+    });
+  };
+  B.recordPlay = function (gameId) { need(); return B.client.rpc('record_game_play', { p_game: String(gameId) }).then(function (r) { if (r.error) throw r.error; return r.data; }); };
+  B.leaderboard = function (gameId, limit) {
+    need(); return B.client.from('leaderboard_best').select('*').eq('game_id', gameId).order('score', { ascending: false }).limit(limit || 25);
+  };
+  B.xpLeaderboard = function (limit) { need(); return B.client.from('profiles').select('username,xp,level,avatar_url').order('xp', { ascending: false }).limit(limit || 50); };
+  B.globalLeaderboard = function (limit) {
+    need(); return B.client.from('profiles').select('username,points,level').order('points', { ascending: false }).limit(limit || 25);
+  };
+
+  /* ---------- realtime ---------- */
+  B.subscribe = function (table, filter, cb) { // returns unsubscribe fn
+    need();
+    var ch = B.client.channel('rt-' + table + '-' + Math.random().toString(36).slice(2))
+      .on('postgres_changes', Object.assign({ event: '*', schema: 'public', table: table }, filter ? { filter: filter } : {}), cb)
+      .subscribe(function (st) { if (st === 'CHANNEL_ERROR' || st === 'TIMED_OUT') setStatus('offline'); else if (st === 'SUBSCRIBED') setStatus('online'); });
+    return function () { B.client.removeChannel(ch); };
+  };
+  var presence = null;
+  function startPresence() {
+    if (presence || !B.client || !B.user) return;
+    presence = B.client.channel('presence-global', { config: { presence: { key: B.user.id } } });
+    presence.on('presence', { event: 'sync' }, function () { B.online = Object.keys(presence.presenceState()).length; paint(); })
+      .subscribe(function (st) { if (st === 'SUBSCRIBED') presence.track({ at: Date.now() }); });
+  }
+  function stopPresence() { if (presence) { B.client.removeChannel(presence); presence = null; B.online = null; paint(); } }
+
+  /* ---------- community ---------- */
+  B.activity = function (limit) { need(); return B.client.from('activity').select('*, profiles(username)').order('created_at', { ascending: false }).limit(limit || 30); };
+  B.notifications = function () { need(); return B.client.from('notifications').select('*').eq('user_id', B.user.id).order('created_at', { ascending: false }).limit(50); };
+  B.follow = function (uid) { need(); return B.client.from('follows').insert({ follower: B.user.id, followed: uid }); };
+  B.unfollow = function (uid) { need(); return B.client.from('follows').delete().eq('follower', B.user.id).eq('followed', uid); };
+  B.like = function (type, id) { need(); return B.client.from('likes').insert({ user_id: B.user.id, target_type: type, target_id: String(id) }); };
+  B.friendRequest = function (uid) { need(); return B.client.from('friendships').insert({ requester: B.user.id, addressee: uid }); };
+  B.watchStart = function (provider, title) { need(); return B.client.from('watch_sessions').insert({ user_id: B.user.id, provider: provider, title: title }).select().single(); };
+  B.watchEnd = function (id, seconds) { need(); return B.client.from('watch_sessions').update({ ended_at: new Date().toISOString(), seconds: Math.max(0, Math.floor(seconds)) }).eq('id', id); };
+
+  /* ---------- memories (RLS: approved are public; owners see their own; admins see all) ---------- */
+  B.memoriesList = function () { need(); return B.client.from('memories').select('*').order('created_at', { ascending: false }).limit(200); };
+  B.profilesByIds = function (ids) { need(); return B.client.from('profiles').select('id,username,avatar_url').in('id', ids); };
+  B.memorySave = function (m) { need(); if (!B.user) return Promise.reject(new Error('Sign in first.')); return B.client.from('memories').insert(Object.assign({ user_id: B.user.id }, m)).select().single(); };
+  B.memoryUpload = function (blob, kind) {
+    need(); if (!B.user) return Promise.reject(new Error('Sign in first.'));
+    var ext = kind === 'video' ? (/webm/.test(blob.type) ? 'webm' : 'mp4') : (/png/.test(blob.type) ? 'png' : /webp/.test(blob.type) ? 'webp' : 'jpg');
+    var path = B.user.id + '/' + (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2)) + '.' + ext;
+    return B.client.storage.from('memories').upload(path, blob, { contentType: blob.type || undefined, upsert: false }).then(function (r) { if (r.error) throw new Error(friendly(r.error)); return path; });
+  };
+  B.memoryUrl = function (path) { need(); return B.client.storage.from('memories').getPublicUrl(path).data.publicUrl; };
+  B.memoryModerate = function (id, status) { need(); return B.client.rpc('moderate_memory', { p_id: id, p_status: status }).then(function (r) { if (r.error) throw new Error(friendly(r.error)); }); };
+  B.memoryDelete = function (id) { need(); return B.client.from('memories').delete().eq('id', id).then(function (r) { if (r.error) throw new Error(friendly(r.error)); }); };
+
+  /* ---------- shop (all balance changes happen in database functions) ---------- */
+  function rpcErr(r) { if (r.error) { var m = r.error.message || ''; if (/not enough coins/i.test(m)) m = 'Not enough coins!'; else if (/sign in/i.test(m)) m = 'Please log in first.'; else if (/unavailable/i.test(m)) m = 'That item is not available.'; throw new Error(m || friendly(r.error)); } return r.data; }
+  B.myCoins = function () { need(); return B.client.from('profiles').select('points').eq('id', B.user.id).single(); };
+  B.purchaseItem = function (itemId) { need(); return B.client.rpc('purchase_item', { p_item: itemId }).then(rpcErr); };
+  B.purchaseBot = function (plan, months, serverId, serverName) { need(); return B.client.rpc('purchase_bot', { p_plan: plan, p_months: months, p_server_id: serverId, p_server_name: serverName }).then(rpcErr); };
+  B.applyBadge = function (itemId, answers) { need(); return B.client.from('badge_applications').insert({ user_id: B.user.id, item_id: itemId, answers: answers }).then(function (r) { if (r.error) throw new Error(friendly(r.error)); }); };
+
+  /* ---------- TV channels (public read; writes are enforced by the database: admins only) ---------- */
+  B.isAdmin = function () {
+    if (!B.client || !B.user) return Promise.resolve(false);
+    return B.client.from('admins').select('user_id').eq('user_id', B.user.id).maybeSingle().then(function (r) { return !!r.data; });
+  };
+  B.tvChannels = function () { need(); return B.client.from('channels').select('*').eq('is_active', true).order('number'); };
+  B.tvItems = function (channelId) { need(); return B.client.from('channel_items').select('*').eq('channel_id', channelId).order('position'); };
+  B.tvSaveChannel = function (ch) { need(); return B.client.from('channels').upsert(ch).select().single(); };
+  B.tvSaveItem = function (item) { need(); return B.client.from('channel_items').upsert(item).select().single(); };
+  B.tvRemoveItem = function (id) { need(); return B.client.from('channel_items').delete().eq('id', id); };
+  B.tvReorder = function (channelId, orderedIds) { need(); return B.client.rpc('tv_reorder', { p_channel: channelId, p_ids: orderedIds }); };
+  B.tvSubscribe = function (cb) { // fires when any channel, playlist or schedule row changes; returns unsubscribe fn
+    var a = B.subscribe('channels', null, cb), b = B.subscribe('channel_items', null, cb), c = B.subscribe('tv_programs', null, cb);
+    return function () { a(); b(); c(); };
+  };
+  B.tvAllItems = function () { need(); return B.client.from('channel_items').select('*').order('position'); };
+  B.tvPrograms = function () { need(); return B.client.from('tv_programs').select('*').order('starts_at'); };
+  B.tvSaveProgram = function (p) { need(); return B.client.from('tv_programs').upsert(p).select().single(); };
+  B.tvRemoveProgram = function (id) { need(); return B.client.from('tv_programs').delete().eq('id', id); };
+  B.tvRemoveChannel = function (id) { need(); return B.client.from('channels').delete().eq('id', id); };
+  B.tvReorderChannels = function (orderedIds) { need(); return B.client.rpc('tv_reorder_channels', { p_ids: orderedIds }); };
+  B.tvAdminChannels = function () { need(); return B.client.from('channels').select('*').order('number'); }; // admins also see inactive channels (RLS)
+
+  /* ---------- local data: backup + migration (never deletes local data) ---------- */
+  B.backupLocal = function () {
+    var dump = {}; for (var i = 0; i < LS.length; i++) { var k = LS.key(i); dump[k] = LS.getItem(k); }
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
+    a.download = 'arcade-local-backup-' + new Date().toISOString().slice(0, 10) + '.json'; a.click();
+  };
+  /* Uploads the old local record for the signed-in email as a PENDING import. Old passwords are stripped.
+     Balances are NOT trusted (local data can be edited); an admin approves what is granted. One import per user. */
+  B.migrateLocal = function () {
+    need(); if (!B.user) return Promise.reject(new Error('Sign in first.'));
+    var found = null;
+    for (var i = 0; i < LS.length; i++) {
+      var k = LS.key(i); if (k.indexOf('user_') !== 0) continue;
+      try { var u = JSON.parse(LS.getItem(k)); if (u.email && u.email.toLowerCase() === B.user.email.toLowerCase()) { found = u; break; } } catch (e) {}
+    }
+    if (!found) return Promise.resolve({ found: false });
+    delete found.password;
+    var body = JSON.stringify(found);
+    return B.client.from('legacy_imports').upsert({ user_id: B.user.id, payload: found }, { onConflict: 'user_id', ignoreDuplicates: true })
+      .then(function (r) {
+        if (r.error) throw new Error(friendly(r.error));
+        return B.client.from('legacy_imports').select('payload').eq('user_id', B.user.id).single();
+      }).then(function (r) { return { found: true, verified: JSON.stringify(r.data.payload) === body || !!r.data.payload }; });
+  };
+
+  B.init();
+})();
+</script>
 <script type="text/plain" id="page-home"><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -716,7 +972,6 @@ document.addEventListener('click', function(e){
             <a href="memories.html" class="nav-link">Memories</a> 
             <a href="shop.html" class="nav-link">Coin Shop</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="TermsofService.html" class="nav-link">TERMS</a>
             <a href="PrivacyPolicy.html" class="nav-link">PRIVACY</a>
             <a href="bot.html" class="nav-link bot-btn">DIANE BOT 🤖</a>
@@ -1940,29 +2195,13 @@ document.addEventListener('click', function(e){
             console.error(`Game Error: ${gameName} - ${errorMessage}`);
         }
         
-        // TRACK GAME PLAYED - ADD XP TO USER
+        // TRACK GAME PLAYED: XP is awarded by the server (record_game_play), never by the browser.
         function trackGamePlayed(gameId) {
             try {
-                const user = JSON.parse(localStorage.getItem('arcadeUser'));
-                if (!user) return;
-                
-                // Add 50 XP for playing a game
-                user.xp = (user.xp || 0) + 50;
-                user.gamesPlayed = (user.gamesPlayed || 0) + 1;
-                user.level = Math.floor(Math.sqrt(user.xp / 100)) + 1;
-                
-                // Track this specific game
-                if (!user.gamesHistory) user.gamesHistory = {};
-                user.gamesHistory[gameId] = (user.gamesHistory[gameId] || 0) + 1;
-                
-                // Save to both locations
-                localStorage.setItem('arcadeUser', JSON.stringify(user));
-                localStorage.setItem(`user_${user.username}`, JSON.stringify(user));
-                
-                console.log(`✅ Tracked game: ${gameId} (+50 XP)`);
-            } catch (error) {
-                console.error('Failed to track game:', error);
-            }
+                var B = parent.DKBackend;
+                if (!B || !B.client || !B.user || !B.recordPlay) return;
+                B.recordPlay(gameId).then(function () { return B.syncCache(); }).catch(function (e) { console.warn('recordPlay failed:', e && e.message); });
+            } catch (error) { console.error('Failed to track game:', error); }
         }
 
         // SCORE MODAL FUNCTIONS
@@ -1982,78 +2221,17 @@ document.addEventListener('click', function(e){
 
         function saveScore() {
             const score = parseInt(document.getElementById('score-input').value);
-            
-            if (!score || score <= 0) {
-                alert('Please enter a valid score!');
-                return;
-            }
-
-            if (!currentGameId) {
-                alert('No game loaded!');
-                return;
-            }
-
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
-            if (!user) {
-                alert('Please login first!');
-                window.__go('index.html');
-                return;
-            }
-
-            try { parent.DKBackend && parent.DKBackend.submitScore(currentGameId, score).catch(function (e) { console.warn(e.message); }); } catch (e) {}
-            // Call the leaderboard save function
-            if (typeof window.saveGameScore === 'function') {
-                const saved = window.saveGameScore(currentGameId, score);
-                if (saved) {
-                    showNotification(`✅ Score saved: ${score.toLocaleString()} points!`);
-                    closeScoreModal();
-                } else {
-                    showNotification('❌ Score too low or error saving');
-                }
-            } else {
-                // Fallback if leaderboard function not loaded
-                try {
-                    const scores = JSON.parse(localStorage.getItem(`leaderboard_${currentGameId}`) || '[]');
-                    
-                    const existingIndex = scores.findIndex(s => s.username === user.username);
-                    
-                    const newScore = {
-                        username: user.username,
-                        score: score,
-                        avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
-                        date: new Date().toISOString()
-                    };
-                    
-                    if (existingIndex !== -1) {
-                        if (score > scores[existingIndex].score) {
-                            scores[existingIndex] = newScore;
-                        } else {
-                            showNotification('Score not high enough!');
-                            closeScoreModal();
-                            return;
-                        }
-                    } else {
-                        scores.push(newScore);
-                    }
-                    
-                    scores.sort((a, b) => (b.score || 0) - (a.score || 0));
-                    const topScores = scores.slice(0, 100);
-                    localStorage.setItem(`leaderboard_${currentGameId}`, JSON.stringify(topScores));
-                    
-                    // Award XP
-                    const xpGain = Math.floor(score / 10);
-                    user.xp = (user.xp || 0) + xpGain;
-                    user.coins = (user.coins || 0) + Math.floor(score / 100);
-                    localStorage.setItem('arcadeUser', JSON.stringify(user));
-                    localStorage.setItem(`user_${user.username}`, JSON.stringify(user));
-                    
-                    showNotification(`✅ Score saved! +${xpGain} XP`);
-                    closeScoreModal();
-                } catch (error) {
-                    console.error('Error saving score:', error);
-                    showNotification('❌ Error saving score');
-                }
-            }
+            if (!score || score <= 0) { alert('Please enter a valid score!'); return; }
+            if (!currentGameId) { alert('No game loaded!'); return; }
+            var B = null; try { B = parent.DKBackend; } catch (e) {}
+            if (!B || !B.client || !B.user) { alert('Please log in first!'); window.__go('login.html'); return; }
+            // The server validates the score and awards XP/coins. Nothing is stored or awarded in the browser.
+            B.submitScore(currentGameId, score).then(function (r) {
+                if (r && r.queued) showNotification('Saved offline; it will upload when you reconnect.');
+                else showNotification('✅ Score submitted: ' + score.toLocaleString() + ' points');
+                closeScoreModal();
+                return B.syncCache();
+            }).catch(function (err) { showNotification('❌ ' + (err && err.message ? err.message : 'Score was rejected')); });
         }
 
         // Handle Enter key in score input
@@ -2470,7 +2648,6 @@ document.addEventListener('click', function(e){
             <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="memories.html" class="nav-link">Memories</a> 
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
         </div>
     </nav>
@@ -3094,7 +3271,6 @@ document.addEventListener('click', function(e){
             <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="memories.html" class="nav-link">Memories</a> 
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="profile.html" class="nav-link profile-btn">MY PROFILE</a>
         </div>
     </nav>
@@ -3124,7 +3300,7 @@ document.addEventListener('click', function(e){
             <a href="https://discord.gg/jR8tcWF" class="footer-link" target="_blank">DISCORD</a>
         </div>
         <p style="margin-top:40px;font-size:0.9em;opacity:0.6;">
-            © 2026 Diane Keaton Memorial Arcade • Powered by Game Killers Studio
+            © 2025 Diane Keaton Memorial Arcade • Powered by Game Killers Studio
         </p>
     </div>
 
@@ -3175,45 +3351,36 @@ document.addEventListener('click', function(e){
             bush_vs_kerry: { name: 'Bush vs Kerry', icon: '🥊', subtitle: 'Political knockout!' }
         };
         
+        // ---- Server data (Supabase). Nothing here reads or writes localStorage. ----
+        function LB() { try { return parent.DKBackend; } catch (e) { return null; } }
+        function waitBackend() {
+            return new Promise(function (resolve, reject) {
+                var B = LB(), tries = 0;
+                (function w() {
+                    if (!B) return reject(new Error('Backend unavailable.'));
+                    if (B.client) return resolve(B);
+                    if (B.status === 'unconfigured' || B.status === 'offline' || tries++ > 50) return reject(new Error('Cannot reach the server right now.'));
+                    setTimeout(w, 200);
+                })();
+            });
+        }
         function getAllPlayers() {
-            const players = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('user_')) {
-                    try {
-                        const user = JSON.parse(localStorage.getItem(key));
-                        if (user && user.username) {
-                            user.level = Math.floor(Math.sqrt((user.xp || 0) / 100)) + 1;
-                            user.achievementsCount = (user.unlockedAchievements || []).length;
-                            players.push(user);
-                        }
-                    } catch(e) {}
-                }
-            }
-            return players;
+            return waitBackend().then(function (B) { return B.xpLeaderboard(50); }).then(function (r) {
+                if (r.error) throw r.error;
+                return (r.data || []).map(function (p) { return { username: p.username, xp: p.xp || 0, level: p.level || 1, avatar: p.avatar_url, achievementsCount: null }; });
+            });
         }
-        
         function getGameScores(gameId) {
-            const scores = JSON.parse(localStorage.getItem(`leaderboard_${gameId}`) || '[]');
-            return scores.sort((a, b) => (b.score || 0) - (a.score || 0));
-        }
-        
-        function checkWeeklyReset() {
-            const lastReset = localStorage.getItem('lastLeaderboardReset');
-            const now = new Date();
-            const currentMonday = getMonday(now);
-            
-            if (!lastReset || new Date(lastReset) < currentMonday) {
-                Object.keys(GAMES).forEach(gameId => {
-                    if (gameId !== 'global') {
-                        localStorage.removeItem(`leaderboard_${gameId}`);
-                    }
+            return waitBackend().then(function (B) { return B.leaderboard(gameId, 50); }).then(function (r) {
+                if (r.error) throw r.error;
+                return (r.data || []).map(function (s) {
+                    return { username: s.username || s.display_name || (s.profiles && s.profiles.username) || 'Player', score: s.score || 0,
+                             avatar: s.avatar_url || null, date: s.achieved_at || s.created_at || s.updated_at || null };
                 });
-                localStorage.setItem('lastLeaderboardReset', currentMonday.toISOString());
-                console.log('✅ Weekly leaderboard reset complete!');
-            }
+            });
         }
-        
+        function checkWeeklyReset() { /* removed: the old reset only wiped local copies. Rankings now come from the server. */ }
+
         function getMonday(date) {
             const d = new Date(date);
             const day = d.getDay();
@@ -3226,19 +3393,17 @@ document.addEventListener('click', function(e){
         function showCategory(category) {
             document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.leaderboard-section').forEach(sec => sec.classList.remove('active'));
-
             document.querySelector(`.category-tab[data-category="${category}"]`)?.classList.add('active');
             document.getElementById(`${category}-section`)?.classList.add('active');
-
-            if (category === 'global') {
-                const players = getAllPlayers().sort((a, b) => (b.xp || 0) - (a.xp || 0));
-                createPodium(players, `${category}-podium`, 'xp');
-                populateGlobalTable(players, `${category}-tbody`);
-            } else {
-                const scores = getGameScores(category);
-                createPodium(scores, `${category}-podium`, 'score');
-                populateGameTable(scores, `${category}-tbody`);
-            }
+            const isGlobal = category === 'global';
+            const tb = document.getElementById(`${category}-tbody`);
+            if (tb) tb.innerHTML = '<tr><td colspan="6" class="no-data">Loading…</td></tr>';
+            (isGlobal ? getAllPlayers() : getGameScores(category)).then(function (rows) {
+                createPodium(rows, `${category}-podium`, isGlobal ? 'xp' : 'score');
+                if (isGlobal) populateGlobalTable(rows, `${category}-tbody`); else populateGameTable(rows, `${category}-tbody`);
+            }).catch(function (err) {
+                if (tb) tb.innerHTML = '<tr><td colspan="6" class="no-data">Could not load rankings: ' + String(err && err.message || err).replace(/[<>&]/g, '') + '</td></tr>';
+            });
         }
         
         function createPodium(players, containerId, scoreType) {
@@ -3263,14 +3428,7 @@ document.addEventListener('click', function(e){
         ? `${(p.xp || 0).toLocaleString()} XP`
         : `${(p.score || 0).toLocaleString()}`;
     
-    // GET CURRENT AVATAR FROM USER PROFILE
-    let avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.username}`;
-    const userData = localStorage.getItem(`user_${p.username}`);
-    if (userData) {
-        const user = JSON.parse(userData);
-        avatar = user.avatar || avatar;
-    }
-                
+    let avatar = p.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.username}`;
                 div.innerHTML = `
                     <div class="podium-rank">${medals[i]}</div>
                     <img src="${avatar}" alt="${p.username}" class="podium-avatar">
@@ -3311,7 +3469,7 @@ document.addEventListener('click', function(e){
                         </td>
                         <td>${p.level || 1}</td>
                         <td class="score-cell">${(p.xp || 0).toLocaleString()}</td>
-                        <td>${p.achievementsCount || 0}/125+</td>
+                        <td>${p.achievementsCount == null ? '—' : p.achievementsCount + '/125+'}</td>
                         <td><a href="profile.html?user=${p.username}" class="view-profile-btn">VIEW</a></td>
                     </tr>
                 `;
@@ -3402,65 +3560,10 @@ document.addEventListener('click', function(e){
         
         // Save score function for game.html to use
         window.saveGameScore = function(gameId, score) {
-            const user = JSON.parse(localStorage.getItem('arcadeUser'));
-            if (!user || !user.username) {
-                console.error('❌ No user logged in - cannot save score');
-                return false;
-            }
-            
-            try {
-                // Get existing scores for this game
-                const scores = getGameScores(gameId);
-                
-                // Check if user already has a score
-                const existingIndex = scores.findIndex(s => s.username === user.username);
-                
-                const newScore = {
-                    username: user.username,
-                    score: score,
-                    avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
-                    date: new Date().toISOString()
-                };
-                
-                // Update or add score
-                if (existingIndex !== -1) {
-                    // Only update if new score is higher
-                    if (score > scores[existingIndex].score) {
-                        scores[existingIndex] = newScore;
-                        console.log('✅ Updated high score for', user.username);
-                    } else {
-                        console.log('ℹ️ Score not high enough to update leaderboard');
-                        return false;
-                    }
-                } else {
-                    // Add new score
-                    scores.push(newScore);
-                    console.log('✅ Added new score for', user.username);
-                }
-                
-                // Sort by score descending
-                scores.sort((a, b) => (b.score || 0) - (a.score || 0));
-                
-                // Keep only top 100 scores
-                const topScores = scores.slice(0, 100);
-                
-                // Save to localStorage
-                localStorage.setItem(`leaderboard_${gameId}`, JSON.stringify(topScores));
-                
-                // Award XP for playing
-                const xpGain = Math.floor(score / 10); // 1 XP per 10 points
-                user.xp = (user.xp || 0) + xpGain;
-                
-                // Update user data
-                localStorage.setItem('arcadeUser', JSON.stringify(user));
-                localStorage.setItem(`user_${user.username}`, JSON.stringify(user));
-                
-                console.log(`✅ Score saved! Earned ${xpGain} XP`);
-                return true;
-            } catch (error) {
-                console.error('❌ Error saving score:', error);
-                return false;
-            }
+            var B = LB();
+            if (!B || !B.client || !B.user) return false;
+            B.submitScore(gameId, score).then(function () { return B.syncCache(); }).catch(function (e) { console.error('submitScore failed:', e && e.message); });
+            return true; // submitted to the server; the server decides whether it counts
         };
         
         // Initialize leaderboards on page load
@@ -3934,7 +4037,6 @@ document.addEventListener('click', function(e){
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="profile.html" class="nav-link">MY PROFILE</a>
         </div>
     </nav>
@@ -3992,117 +4094,111 @@ document.addEventListener('click', function(e){
         let mediaFile = null;
         let mediaType = null;
         
-        function getUser() {
-            try {
-                const userData = localStorage.getItem('arcadeUser');
-                if (!userData) {
-                    console.log('❌ No arcadeUser in localStorage');
-                    return null;
-                }
-                
-                const user = JSON.parse(userData);
-                console.log('✅ User loaded:', user);
-                
-                if (!user || !user.username) {
-                    console.log('❌ User invalid or no username');
-                    return null;
-                }
-                
-                return user;
-            } catch(e) {
-                console.error('❌ Error getting user:', e);
-                return null;
-            }
+        function MB() { try { return parent.DKBackend; } catch (e) { return null; } }
+        function waitB() {
+            return new Promise(function (res, rej) {
+                var B = MB(), n = 0;
+                (function w() {
+                    if (!B) return rej(new Error('Backend unavailable.'));
+                    if (B.client) return res(B);
+                    if (B.status === 'unconfigured' || B.status === 'offline' || n++ > 50) return rej(new Error('Cannot reach the server right now.'));
+                    setTimeout(w, 200);
+                })();
+            });
         }
-        
+        // Signed-in user from the real Supabase session (null if logged out). Display name comes from the server profile.
+        function getUser() {
+            var B = MB();
+            if (!B || !B.user) return null;
+            return { id: B.user.id, username: (B.user.user_metadata && B.user.user_metadata.username) || 'Member' };
+        }
+        var IS_ADMIN = false;
+
         function loadMemories() {
-            try {
-                const memoriesData = localStorage.getItem('dianeMemories');
-                const memories = memoriesData ? JSON.parse(memoriesData) : [];
-                const container = document.getElementById('memories-grid');
-                
-                console.log('📚 Loading', memories.length, 'memories');
-                
-                if (memories.length === 0) {
-                    container.innerHTML = `
-                        <div class="no-memories" style="grid-column: 1/-1;">
-                            <div class="no-memories-icon">❤️</div>
-                            <h3 style="font-family: 'Orbitron', sans-serif; font-size: 2em; margin-bottom: 20px; color: var(--neon-pink);">No memories shared yet</h3>
-                            <p style="font-size: 1.2em;">Be the first to share a memory of Diane Keaton!</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                memories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                
-                container.innerHTML = memories.map(memory => {
-                    const date = new Date(memory.timestamp).toLocaleDateString('en-US', { 
-                        month: 'long', 
-                        day: 'numeric', 
-                        year: 'numeric' 
+            const container = document.getElementById('memories-grid');
+            waitB().then(function (B) {
+                return Promise.all([B.memoriesList(), B.isAdmin().catch(function () { return false; })]).then(function (x) {
+                    IS_ADMIN = !!x[1];
+                    if (x[0].error) throw x[0].error;
+                    const rows = x[0].data || [];
+                    const ids = Array.from(new Set(rows.map(function (r) { return r.user_id; }).filter(Boolean)));
+                    return (ids.length ? B.profilesByIds(ids) : Promise.resolve({ data: [] })).then(function (p) {
+                        const byId = {}; ((p && p.data) || []).forEach(function (u) { byId[u.id] = u; });
+                        return { rows: rows, byId: byId, B: B };
                     });
-                    
-                    // Get avatar from cache or generate
-                    const avatarKey = 'avatar_' + memory.username;
-                    const avatar = localStorage.getItem(avatarKey) || memory.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memory.username)}`;
-                    
-                    let mediaHTML = '';
-                    // Load media from separate key if it exists
-                    if (memory.mediaKey) {
-                        const mediaData = localStorage.getItem(memory.mediaKey);
-                        if (mediaData && memory.mediaType) {
-                            if (memory.mediaType === 'image') {
-                                mediaHTML = `<img src="${mediaData}" alt="Memory" class="memory-media">`;
-                            } else if (memory.mediaType === 'video') {
-                                mediaHTML = `<video src="${mediaData}" class="memory-media" controls></video>`;
-                            }
-                        }
-                    }
-                    // Fallback to old format
-                    else if (memory.media && memory.mediaType) {
-                        if (memory.mediaType === 'image') {
-                            mediaHTML = `<img src="${memory.media}" alt="Memory" class="memory-media">`;
-                        } else if (memory.mediaType === 'video') {
-                            mediaHTML = `<video src="${memory.media}" class="memory-media" controls></video>`;
-                        }
-                    }
-                    
-                    const safeUsername = escapeHtml(memory.username);
-                    const safeText = escapeHtml(memory.text);
-                    const safeInspiration = escapeHtml(memory.inspiration);
-                    
-                    return `
-                        <div class="memory-card">
-                            ${mediaHTML}
-                            <div class="memory-content">
-                                <div class="memory-author">
-                                    <img src="${avatar}" alt="${safeUsername}" class="author-avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memory.username)}'">
-                                    <div class="author-info">
-                                        <a href="profile.html?user=${encodeURIComponent(memory.username)}" class="author-name">${safeUsername}</a>
-                                        <div class="memory-date">${date}</div>
-                                    </div>
-                                </div>
-                                <div class="memory-text">${safeText}</div>
-                                <div class="memory-inspiration">
-                                    <strong style="color: var(--neon-pink);">What inspired me:</strong> ${safeInspiration}
+                });
+            }).then(function (ctx) { renderMemories(ctx.rows, ctx.byId, ctx.B); })
+            .catch(function (e) {
+                console.error('Error loading memories:', e);
+                container.innerHTML = '<div class="no-memories" style="grid-column: 1/-1;"><p style="color: var(--neon-pink);">Could not load memories: ' + escapeHtml(String((e && e.message) || e)) + '</p></div>';
+            });
+        }
+
+        function renderMemories(memories, byId, B) {
+            const container = document.getElementById('memories-grid');
+            const me = getUser();
+            if (memories.length === 0) {
+                container.innerHTML = `
+                    <div class="no-memories" style="grid-column: 1/-1;">
+                        <div class="no-memories-icon">❤️</div>
+                        <h3 style="font-family: 'Orbitron', sans-serif; font-size: 2em; margin-bottom: 20px; color: var(--neon-pink);">No memories shared yet</h3>
+                        <p style="font-size: 1.2em;">Be the first to share a memory of Diane Keaton!</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = memories.map(function (m) {
+                const prof = byId[m.user_id] || {};
+                const username = prof.username || 'Member';
+                const date = new Date(m.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                const avatar = prof.avatar_url || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(username));
+                let mediaHTML = '';
+                if (m.image_path) {
+                    const url = B.memoryUrl(m.image_path);
+                    mediaHTML = (m.media_type === 'video' || /\.(mp4|webm)$/i.test(m.image_path))
+                        ? '<video src="' + escapeHtml(url) + '" class="memory-media" controls></video>'
+                        : '<img src="' + escapeHtml(url) + '" alt="Memory" class="memory-media">';
+                }
+                const mine = me && m.user_id === me.id;
+                let tag = '';
+                if (m.status === 'pending') tag = '<div style="color:#ffd700;font-weight:700;margin:6px 0">⏳ Awaiting approval' + (mine ? ' (only you can see this)' : '') + '</div>';
+                if (m.status === 'rejected') tag = '<div style="color:#ff6b6b;font-weight:700;margin:6px 0">✖ Not approved</div>';
+                let actions = '';
+                if (IS_ADMIN) actions += '<button onclick="modMemory(\'' + m.id + '\',\'approved\')">✅ Approve</button> <button onclick="modMemory(\'' + m.id + '\',\'rejected\')">🚫 Reject</button> ';
+                if (IS_ADMIN || mine) actions += '<button onclick="delMemory(\'' + m.id + '\')">🗑 Delete</button>';
+                return `
+                    <div class="memory-card">
+                        ${mediaHTML}
+                        <div class="memory-content">
+                            <div class="memory-author">
+                                <img src="${escapeHtml(avatar)}" alt="${escapeHtml(username)}" class="author-avatar">
+                                <div class="author-info">
+                                    <a href="profile.html?user=${encodeURIComponent(username)}" class="author-name">${escapeHtml(username)}</a>
+                                    <div class="memory-date">${date}</div>
                                 </div>
                             </div>
+                            ${tag}
+                            <div class="memory-text">${escapeHtml(m.body || '')}</div>
+                            <div class="memory-inspiration">
+                                <strong style="color: var(--neon-pink);">What inspired me:</strong> ${escapeHtml(m.inspiration || '')}
+                            </div>
+                            ${actions ? '<div style="margin-top:10px">' + actions + '</div>' : ''}
                         </div>
-                    `;
-                }).join('');
-                
-                console.log('✅ Memories loaded successfully');
-            } catch(e) {
-                console.error('❌ Error loading memories:', e);
-                document.getElementById('memories-grid').innerHTML = `
-                    <div class="no-memories" style="grid-column: 1/-1;">
-                        <p style="color: var(--neon-pink);">Error loading memories. Please refresh the page.</p>
-                    </div>
-                `;
-            }
+                    </div>`;
+            }).join('');
         }
-        
+
+        function modMemory(id, status) {
+            waitB().then(function (B) { return B.memoryModerate(id, status); })
+                .then(function () { showNotification(status === 'approved' ? 'Memory approved.' : 'Memory rejected.', 'success'); loadMemories(); })
+                .catch(function (e) { showNotification('Error: ' + (e.message || e), 'error'); });
+        }
+        function delMemory(id) {
+            if (!confirm('Delete this memory permanently?')) return;
+            waitB().then(function (B) { return B.memoryDelete(id); })
+                .then(function () { showNotification('Memory deleted.', 'success'); loadMemories(); })
+                .catch(function (e) { showNotification('Error: ' + (e.message || e), 'error'); });
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -4139,8 +4235,8 @@ document.addEventListener('click', function(e){
             
             console.log('📷 File selected:', file.name, file.size, 'bytes');
             
-            if (file.size > 1000 * 1024 * 1024) {
-                showNotification('File too large! Max 1000MB (1GB)', 'error');
+            if (file.size > 50 * 1024 * 1024) {
+                showNotification('File too large! Max 50MB', 'error');
                 event.target.value = '';
                 return;
             }
@@ -4203,118 +4299,31 @@ document.addEventListener('click', function(e){
         
         function submitMemory(e) {
             e.preventDefault();
-            console.log('🔥 SUBMIT CLICKED');
-            
             const user = getUser();
-            
             if (!user) {
-                console.log('❌ No user - redirecting');
                 showNotification('You must be logged in! Redirecting...', 'error');
-                setTimeout(() => window.__go('profile.html'), 2000);
+                setTimeout(() => window.__go('login.html'), 1500);
                 return;
             }
-            
-            console.log('✅ User verified:', user.username);
-            
             const text = document.getElementById('memory-text').value.trim();
             const inspiration = document.getElementById('memory-inspiration').value.trim();
-            
-            console.log('📝 Text:', text.length, 'chars | Inspiration:', inspiration.length, 'chars');
-            
-            if (!text || !inspiration) {
-                console.log('❌ Missing fields');
-                showNotification('Please fill in all required fields!', 'error');
-                return;
-            }
-            
-            try {
-                console.log('💾 Creating memory...');
-                
-                const memoryId = 'memory_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                
-                // Store media separately if it exists
-                let mediaKey = null;
-                if (mediaFile) {
-                    mediaKey = memoryId + '_media';
-                    try {
-                        localStorage.setItem(mediaKey, mediaFile);
-                        console.log('✅ Media stored separately in key:', mediaKey);
-                    } catch(mediaError) {
-                        console.error('❌ Failed to store media:', mediaError);
-                        throw new Error('Failed to save image - storage full. Please try a smaller image or clear browser data.');
-                    }
-                } else {
-                    // REQUIRE media - don't allow posts without images
-                    console.log('❌ No media file');
-                    showNotification('Please add a photo or video to share!', 'error');
-                    return;
-                }
-                
-                // Store avatar separately too (don't duplicate in every memory)
-                const avatarKey = 'avatar_' + user.username;
-                if (user.avatar && !localStorage.getItem(avatarKey)) {
-                    try {
-                        localStorage.setItem(avatarKey, user.avatar);
-                    } catch(e) {
-                        console.log('⚠️ Could not cache avatar');
-                    }
-                }
-                
-                // MINIMAL memory object - only IDs and text
-                const memory = {
-                    id: memoryId,
-                    username: user.username,
-                    text: text,
-                    inspiration: inspiration,
-                    mediaKey: mediaKey,
-                    mediaType: mediaType,
-                    timestamp: new Date().toISOString()
-                };
-                
-                console.log('📦 Memory object created (minimal), getting existing memories...');
-                
-                const existingData = localStorage.getItem('dianeMemories');
-                const memories = existingData ? JSON.parse(existingData) : [];
-                
-                console.log('📚 Current count:', memories.length);
-                
-                memories.push(memory);
-                
-                console.log('💾 Attempting to save...');
-                
-                try {
-                    localStorage.setItem('dianeMemories', JSON.stringify(memories));
-                    console.log('✅✅✅ SAVED! New count:', memories.length);
-                } catch(saveError) {
-                    console.error('❌ SAVE ERROR:', saveError);
-                    
-                    if (saveError.name === 'QuotaExceededError') {
-                        // Clean up oldest memories
-                        console.log('🔄 Quota exceeded, cleaning old memories...');
-                        cleanOldMemories(memories);
-                        try {
-                            localStorage.setItem('dianeMemories', JSON.stringify(memories));
-                            console.log('✅ Saved after cleanup');
-                        } catch(e2) {
-                            console.error('❌ Still failed after cleanup');
-                            throw new Error('Storage full - please clear browser data or use fewer/smaller images');
-                        }
-                    } else {
-                        throw saveError;
-                    }
-                }
-                
-                showNotification('❤️ Memory shared! Thank you for honoring Diane.', 'success');
+            if (!text || !inspiration) { showNotification('Please fill in all required fields!', 'error'); return; }
+            if (!mediaFile) { showNotification('Please add a photo or video to share!', 'error'); return; }
+            const btn = e.target.querySelector('button[type="submit"]'); if (btn) btn.disabled = true;
+            waitB().then(function (B) {
+                return fetch(mediaFile).then(function (r) { return r.blob(); }).then(function (blob) {
+                    return B.memoryUpload(blob, mediaType);
+                }).then(function (path) {
+                    return B.memorySave({ title: text.slice(0, 80), body: text, inspiration: inspiration, image_path: path, media_type: mediaType });
+                });
+            }).then(function (r) {
+                if (r && r.error) throw r.error;
+                showNotification('❤️ Memory submitted! It will appear once an administrator approves it.', 'success');
                 closeMemoryModal();
                 loadMemories();
-                
-            } catch(e) {
-                console.error('❌❌❌ COMPLETE FAILURE:', e);
-                console.error('Name:', e.name);
-                console.error('Message:', e.message);
-                console.error('Stack:', e.stack);
-                showNotification('Error: ' + e.message, 'error');
-            }
+            }).catch(function (err) {
+                showNotification('Error: ' + ((err && err.message) || err), 'error');
+            }).then(function () { if (btn) btn.disabled = false; });
         }
         
         function showNotification(message, type = 'info') {
@@ -4329,26 +4338,6 @@ document.addEventListener('click', function(e){
                 notification.classList.remove('show');
                 setTimeout(() => notification.remove(), 300);
             }, 4000);
-        }
-        
-        function cleanOldMemories(memories) {
-            // Remove oldest 20% of memories to free space
-            const toRemove = Math.ceil(memories.length * 0.2);
-            console.log('🗑️ Removing', toRemove, 'oldest memories');
-            
-            // Sort by date
-            memories.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            // Remove oldest and their media
-            for (let i = 0; i < toRemove; i++) {
-                if (memories[i].mediaKey) {
-                    localStorage.removeItem(memories[i].mediaKey);
-                }
-            }
-            
-            // Remove from array
-            memories.splice(0, toRemove);
-            console.log('✅ Cleanup complete, remaining:', memories.length);
         }
         
         document.addEventListener('keydown', function(e) {
@@ -5273,15 +5262,27 @@ document.addEventListener('click', function(e){
         let userCoins = 0;
         let currentBotItem = null;
         
-        function loadShop() {
-            const userData = localStorage.getItem('arcadeUser');
-            if (userData) {
-                const user = JSON.parse(userData);
-                userCoins = user.coins || 0;
-                document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
-            }
-            renderShop();
+        function SB() { try { return parent.DKBackend; } catch (e) { return null; } }
+        function shopReady() {
+            return new Promise(function (res, rej) {
+                var B = SB(), n = 0;
+                (function w() {
+                    if (!B) return rej(new Error('Backend unavailable.'));
+                    if (B.client) return res(B);
+                    if (B.status === 'unconfigured' || B.status === 'offline' || n++ > 50) return rej(new Error('Cannot reach the server right now.'));
+                    setTimeout(w, 200);
+                })();
+            });
         }
+        // Balance comes from the server profile. Prices are enforced by the database, not by this page.
+        function refreshCoins() {
+            return shopReady().then(function (B) { return B.user ? B.myCoins() : null; }).then(function (r) {
+                userCoins = (r && r.data && r.data.points) || 0;
+                document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
+                renderShop();
+            }).catch(function () { renderShop(); });
+        }
+        function loadShop() { renderShop(); refreshCoins(); }
         
         function renderShop() {
             const container = document.getElementById('shop-items');
@@ -5420,19 +5421,15 @@ document.addEventListener('click', function(e){
                 });
             }
             
-            const userData = localStorage.getItem('arcadeUser');
-            if (userData) {
-                const user = JSON.parse(userData);
-                application.username = user.username;
-                application.email = user.email;
-            }
-            
-            const applications = JSON.parse(localStorage.getItem('badgeApplications') || '[]');
-            applications.push(application);
-            localStorage.setItem('badgeApplications', JSON.stringify(applications));
-            
-            showNotification('Application submitted! Staff will review it soon. 🎉', 'success');
-            closeModal();
+            const answers = {};
+            for (const [k, v] of formData.entries()) { if (k !== 'item_id') answers[k] = String(v).slice(0, 1000); }
+            shopReady().then(function (B) {
+                if (!B.user) throw new Error('Please log in first.');
+                return B.applyBadge(itemId, answers);
+            }).then(function () {
+                showNotification('Application submitted! Staff will review it soon. 🎉', 'success');
+                closeModal();
+            }).catch(function (err) { showNotification('❌ ' + (err.message || err), 'error'); });
         }
         
         function openBotPurchase(item) {
@@ -5460,97 +5457,27 @@ document.addEventListener('click', function(e){
             const serverId = document.getElementById('bot-server-id').value.trim();
             const serverName = document.getElementById('bot-server-name').value.trim();
             const months = parseInt(document.getElementById('bot-months').value);
-            
-            if (!serverId || !serverName) {
-                showNotification('Please fill in all fields!', 'error');
-                return;
-            }
-            
-            const totalCost = currentBotItem.price * months;
-            
-            if (userCoins < totalCost) {
-                showNotification('Not enough coins!', 'error');
-                return;
-            }
-            
-            const userData = localStorage.getItem('arcadeUser');
-            if (!userData) {
-                showNotification('Please login first!', 'error');
-                return;
-            }
-            
-            const user = JSON.parse(userData);
-            user.coins -= totalCost;
-            
-            const purchase = {
-                type: 'bot_subscription',
-                item_id: currentBotItem.id,
-                item_name: currentBotItem.name,
-                months: months,
-                server_id: serverId,
-                server_name: serverName,
-                total_cost: totalCost,
-                username: user.username,
-                email: user.email,
-                timestamp: new Date().toISOString(),
-                status: 'pending_activation'
-            };
-            
-            const purchases = JSON.parse(localStorage.getItem('botPurchases') || '[]');
-            purchases.push(purchase);
-            localStorage.setItem('botPurchases', JSON.stringify(purchases));
-            
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            localStorage.setItem('user_' + user.username, JSON.stringify(user));
-            
-            userCoins = user.coins;
-            document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
-            
-            showNotification(`✅ Purchased ${currentBotItem.name} for ${months} month(s)! Staff will activate within 24 hours.`, 'success');
-            closeBotModal();
-            renderShop();
+            if (!serverId || !serverName) { showNotification('Please fill in all fields!', 'error'); return; }
+            const item = currentBotItem;
+            shopReady().then(function (B) {
+                if (!B.user) throw new Error('Please log in first.');
+                return B.purchaseBot(item.id, months, serverId, serverName);
+            }).then(function () {
+                showNotification('✅ Purchased ' + item.name + ' for ' + months + ' month(s)! Staff will activate it within 24 hours.', 'success');
+                closeBotModal();
+                return refreshCoins();
+            }).catch(function (err) { showNotification('❌ ' + (err.message || err), 'error'); });
         }
         
-        function purchaseItem(itemId, price) {
-            const userData = localStorage.getItem('arcadeUser');
-            if (!userData) {
-                showNotification('Please login first!', 'error');
-                return;
-            }
-            
-            const user = JSON.parse(userData);
-            
-            if (user.coins < price) {
-                showNotification('Not enough coins!', 'error');
-                return;
-            }
-            
-            user.coins -= price;
-            
-            if (!user.inventory) user.inventory = [];
-            if (!user.badges) user.badges = [];
-            
+        function purchaseItem(itemId, price) { // price argument is ignored: the server uses its own price list
             const item = shopItems.find(i => i.id === itemId);
-            
-            if (item.category === 'badges') {
-                if (!user.badges.includes(itemId)) {
-                    user.badges.push(itemId);
-                }
-            } else {
-                user.inventory.push({
-                    item_id: itemId,
-                    purchased_at: new Date().toISOString()
-                });
-            }
-            
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            localStorage.setItem('user_' + user.username, JSON.stringify(user));
-            
-            userCoins = user.coins;
-            document.getElementById('coin-balance').textContent = userCoins.toLocaleString();
-            
-            showNotification(`✅ Purchased ${item.name}!`, 'success');
-            renderShop();
+            shopReady().then(function (B) {
+                if (!B.user) throw new Error('Please log in first.');
+                return B.purchaseItem(itemId);
+            }).then(function () {
+                showNotification('✅ Purchased ' + (item ? item.name : 'item') + '!', 'success');
+                return refreshCoins();
+            }).catch(function (err) { showNotification('❌ ' + (err.message || err), 'error'); });
         }
         
         function showNotification(message, type = 'info') {
@@ -6028,7 +5955,47 @@ document.addEventListener('click', function(e){
             .custom-player { height: 60vh; }
             .nav-bar { flex-direction: column; }
         }
-    </style>
+            /* ===== DIANE TV ===== */
+        .dtv { max-width: 1100px; margin: 0 auto 50px; padding: 24px; border: 2px solid var(--neon-blue, #00f3ff); border-radius: 20px; background: rgba(5,5,16,.78); box-shadow: 0 0 30px rgba(0,243,255,.18); }
+        .dtv-head { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .dtv-head h2 { font-family: 'Orbitron', sans-serif; font-size: 1.8em; color: var(--neon-blue, #00f3ff); text-align: center; }
+        .dtv-badge { background: #e11; color: #fff; font: 700 .85em 'Orbitron', sans-serif; padding: 5px 12px; border-radius: 14px; letter-spacing: 1px; }
+        .dtv-badge[hidden], .dtv [hidden] { display: none !important; }
+        .dtv-note { text-align: center; opacity: .75; font-size: .9em; margin: 8px 0 16px; }
+        .dtv-tabs { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 16px; }
+        .dtv-tab { padding: 10px 18px; border-radius: 24px; border: 2px solid var(--neon-purple, #bf00ff); background: rgba(191,0,255,.08); color: #fff; font: 700 .85em 'Orbitron', sans-serif; cursor: pointer; transition: background .2s, box-shadow .2s; }
+        .dtv-tab:hover { background: rgba(191,0,255,.3); }
+        .dtv-tab[aria-selected="true"] { background: var(--neon-purple, #bf00ff); box-shadow: 0 0 18px var(--neon-purple, #bf00ff); }
+        .dtv-stage { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; overflow: hidden; }
+        .dtv-stage iframe, .dtv-stage > div#dtv-player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+        .dtv-shield { position: absolute; inset: 0; z-index: 3; background: transparent; cursor: default; display: flex; align-items: center; justify-content: center; }
+        .dtv-shield.tune { background: rgba(0,0,0,.55); cursor: pointer; }
+        .dtv-tune { display: none; padding: 14px 28px; border-radius: 30px; border: 2px solid #fff; background: #e11; color: #fff; font: 700 1.1em 'Orbitron', sans-serif; cursor: pointer; }
+        .dtv-shield.tune .dtv-tune { display: block; }
+        .dtv-fs { position: absolute; right: 10px; bottom: 10px; z-index: 4; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.5); background: rgba(0,0,0,.6); color: #fff; cursor: pointer; font-size: .85em; }
+        .dtv-fallback { position: absolute; inset: 0; z-index: 5; background: #0a0a18; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 20px; text-align: center; }
+        .dtv-fallback a, .dtv-open { color: var(--neon-blue, #00f3ff); font-weight: 700; }
+        .dtv-now { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; justify-content: space-between; margin: 14px 0 4px; padding: 10px 14px; border-radius: 10px; background: rgba(0,243,255,.08); font-size: .95em; }
+        .dtv-now b { color: var(--neon-blue, #00f3ff); font-family: 'Orbitron', sans-serif; }
+        .dtv-btn { padding: 8px 16px; border-radius: 20px; border: 2px solid var(--neon-green, #39ff14); background: transparent; color: var(--neon-green, #39ff14); font: 700 .8em 'Orbitron', sans-serif; cursor: pointer; }
+        .dtv-btn:hover { background: rgba(57,255,20,.15); }
+        .dtv-guide h3 { font-family: 'Orbitron', sans-serif; font-size: 1em; color: var(--neon-purple, #bf00ff); margin: 18px 0 8px; letter-spacing: 1px; }
+        .dtv-sched { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+        .dtv-sched li { display: grid; grid-template-columns: 150px 1fr auto; gap: 12px; align-items: baseline; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,.04); }
+        .dtv-sched li.now { background: rgba(225,17,17,.18); border-left: 4px solid #e11; }
+        .dtv-sched li.next { border-left: 4px solid var(--neon-blue, #00f3ff); }
+        .dtv-sched .t { font-size: .85em; opacity: .8; }
+        .dtv-tag { font: 700 .7em 'Orbitron', sans-serif; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,.12); }
+        .dtv-lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+        .dtv-item { text-align: left; padding: 12px; border-radius: 10px; border: 2px solid rgba(0,243,255,.3); background: rgba(255,255,255,.04); color: #fff; cursor: pointer; }
+        .dtv-item:hover { border-color: var(--neon-blue, #00f3ff); }
+        .dtv-item.active { border-color: var(--neon-green, #39ff14); background: rgba(57,255,20,.1); }
+        .dtv-item strong { display: block; margin-bottom: 4px; }
+        .dtv-item small { opacity: .75; }
+        .dtv-empty, .dtv-msg { text-align: center; opacity: .8; padding: 10px; }
+        .dtv-msg.err { color: #ff8080; opacity: 1; }
+        @media (max-width: 640px) { .dtv { padding: 14px; } .dtv-head h2 { font-size: 1.3em; } .dtv-sched li { grid-template-columns: 1fr; gap: 2px; } }
+</style>
 </head>
 <body>
     <nav class="nav-bar">
@@ -6054,7 +6021,22 @@ document.addEventListener('click', function(e){
             <p>Get +25 XP for every movie you watch! Level up while enjoying classics!</p>
         </div>
         
-        <div class="live-player-section">
+                <section class="dtv" id="dtv" aria-label="Diane TV">
+            <div class="dtv-head"><h2>📺 DIANE TV</h2><span class="dtv-badge" id="dtv-live" hidden>● LIVE</span></div>
+            <p class="dtv-note">An independent fan tribute channel from The Diane Keaton Legacy Entertainment Center. It is not owned, operated or endorsed by Diane Keaton.</p>
+            <div class="dtv-tabs" id="dtv-tabs" role="tablist" aria-label="Channels"></div>
+            <div class="dtv-stage" id="dtv-stage">
+                <div id="dtv-player"></div>
+                <div class="dtv-shield" id="dtv-shield" hidden><button class="dtv-tune" id="dtv-tune" type="button">▶ TUNE IN LIVE</button></div>
+                <button class="dtv-fs" id="dtv-fs" type="button" title="Fullscreen">⛶ Fullscreen</button>
+                <div class="dtv-fallback" id="dtv-fallback" hidden></div>
+            </div>
+            <div class="dtv-now" id="dtv-now"></div>
+            <div class="dtv-msg" id="dtv-msg" hidden></div>
+            <div class="dtv-guide" id="dtv-guide"></div>
+        </section>
+
+<div class="live-player-section">
             <div class="live-indicator">
                 <div class="live-dot"></div>
                 <h2 class="live-title">📡 PLUTO TV LIVE - 24/7 STREAMING</h2>
@@ -6069,6 +6051,7 @@ document.addEventListener('click', function(e){
                 allow="autoplay; encrypted-media"
                 frameborder="0">
             </iframe>
+            <p style="text-align:center;margin-top:14px;"><a class="dtv-open" href="https://pluto.tv/en/live-tv/pluto-tv-classic-movies" target="_blank" rel="noopener">Open Pluto TV in a new tab ↗</a><br><span style="opacity:.7;font-size:.9em;">If the player above stays blank, Pluto TV is blocking embedding. Use this link instead.</span></p>
         </div>
 
         <div class="section-header youtube">
@@ -6259,6 +6242,205 @@ document.addEventListener('click', function(e){
         });
         
         loadMovies();
+        /* ===== DIANE TV: ONE reusable YouTube player. Channel switches call loadVideoById on the same player:
+           no iframe is ever re-created, so there is no flicker and no stacked/duplicate players. ===== */
+        (function () {
+            'use strict';
+            var $ = function (id) { return document.getElementById(id); };
+            var B = null, player = null, apiState = 'idle', apiWaiters = [];
+            var S = { channels: [], items: [], programs: [], chId: null, mode: 'vod', vid: null, vidMode: null, itemId: null, progId: null, userVod: false, hold: false, wantPlay: false, token: 0, liveTimer: null };
+
+            function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+            function ytId(x) { if (!x) return null; var s = String(x).trim(); if (/^[\w-]{11}$/.test(s)) return s; var m = s.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : null; }
+            function fmt(iso) { return new Date(iso).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }); }
+            function fmtT(iso) { return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+            function msg(t, err) { var el = $('dtv-msg'); el.textContent = t || ''; el.className = 'dtv-msg' + (err ? ' err' : ''); el.hidden = !t; }
+            function chById(id) { return S.channels.filter(function (c) { return c.id === id; })[0]; }
+            function chItems(id) { return S.items.filter(function (i) { return i.channel_id === id; }).sort(function (a, b) { return a.position - b.position; }); }
+            function chProgs(id) { return S.programs.filter(function (p) { return p.channel_id === id; }).sort(function (a, b) { return new Date(a.starts_at) - new Date(b.starts_at); }); }
+            function nowNext(id, t) {
+                var cur = null, next = null, ps = chProgs(id);
+                for (var i = 0; i < ps.length; i++) {
+                    var s = +new Date(ps[i].starts_at), e = +new Date(ps[i].ends_at);
+                    if (s <= t && t < e) cur = ps[i]; else if (s > t && !next) next = ps[i];
+                }
+                return { cur: cur, next: next };
+            }
+
+            /* ---- YouTube IFrame API (loaded once) ---- */
+            function loadApi(cb) {
+                if (window.YT && window.YT.Player) return cb(true);
+                if (apiState === 'failed') return cb(false);
+                apiWaiters.push(cb);
+                if (apiState === 'loading') return;
+                apiState = 'loading';
+                var flush = function (ok) { apiState = ok ? 'ready' : 'failed'; var w = apiWaiters; apiWaiters = []; w.forEach(function (f) { f(ok); }); };
+                var prev = window.onYouTubeIframeAPIReady;
+                window.onYouTubeIframeAPIReady = function () { try { if (prev) prev(); } catch (e) {} flush(true); };
+                var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.onerror = function () { flush(false); };
+                document.head.appendChild(s);
+                setTimeout(function () { if (apiState === 'loading') flush(false); }, 10000);
+            }
+            function ensurePlayer(cb) {
+                if (player) return cb(player);
+                loadApi(function (ok) {
+                    if (!ok) return cb(null);
+                    if (player) return cb(player);
+                    var vars = { rel: 0, playsinline: 1, modestbranding: 1 };
+                    try { var o = window.origin || (parent.location && parent.location.origin); if (o && /^https?:/.test(o)) vars.origin = o; } catch (e) {}
+                    player = new YT.Player('dtv-player', { width: '100%', height: '100%', playerVars: vars,
+                        events: { onReady: function () { cb(player); }, onStateChange: onState, onError: onErr } });
+                });
+            }
+
+            /* ---- player events ---- */
+            function onState(e) {
+                var st = e.data;
+                if (S.hold) return;
+                if (S.mode === 'live') {
+                    if (st === YT.PlayerState.PAUSED) { try { player.playVideo(); } catch (_) {} }          /* live TV cannot be paused */
+                    else if (st === YT.PlayerState.ENDED) { setTimeout(function () { S.vidMode = null; evaluate(); }, 600); }
+                } else if (st === YT.PlayerState.ENDED) { playNext(); }
+                chrome();
+            }
+            function onErr() {
+                var v = S.vid, link = v ? '<a href="https://www.youtube.com/watch?v=' + esc(v) + '" target="_blank" rel="noopener">Open on YouTube ↗</a>' : '';
+                showFallback('This video cannot be played here (it may be private, removed, or have embedding turned off).', link);
+            }
+            function showFallback(text, linkHtml) { var f = $('dtv-fallback'); f.innerHTML = '<div>' + esc(text) + '</div>' + (linkHtml || ''); f.hidden = false; $('dtv-live').hidden = true; }
+            function hideFallback() { $('dtv-fallback').hidden = true; }
+            function chrome() { /* LIVE bar + click shield exist ONLY while a scheduled program is actually playing */
+                var live = S.mode === 'live', st = -2;
+                try { st = player && player.getPlayerState ? player.getPlayerState() : -2; } catch (e) {}
+                var playing = st === 1 || st === 3;
+                $('dtv-live').hidden = !(live && playing && $('dtv-fallback').hidden);
+                var sh = $('dtv-shield'); sh.hidden = !live || !$('dtv-fallback').hidden; sh.classList.toggle('tune', live && !playing);
+            }
+
+            /* ---- playback ---- */
+            function startVideo(vid, startSec, autoplay) {
+                var token = ++S.token;
+                ensurePlayer(function (p) {
+                    if (token !== S.token) return;                                                     /* a newer switch superseded this one */
+                    if (!p) return showFallback('The YouTube player could not load. Check your connection or any content blocker.', '<a href="https://www.youtube.com/watch?v=' + esc(vid) + '" target="_blank" rel="noopener">Open on YouTube ↗</a>');
+                    hideFallback(); S.vid = vid;
+                    var o = { videoId: vid }; if (startSec > 0) o.startSeconds = startSec;
+                    if (autoplay) p.loadVideoById(o); else p.cueVideoById(o);
+                    setTimeout(chrome, 1200);
+                });
+            }
+            function evaluate() {
+                clearTimeout(S.liveTimer);
+                var id = S.chId; if (!id) return;
+                var t = Date.now(), nn = nowNext(id, t);
+                if (nn.cur && !S.userVod) {
+                    S.mode = 'live';
+                    if (S.progId !== nn.cur.id || S.vidMode !== 'live') {
+                        S.progId = nn.cur.id; S.vidMode = 'live'; msg('');
+                        var v = ytId(nn.cur.media_url);
+                        if (v) startVideo(v, Math.max(0, Math.floor((t - new Date(nn.cur.starts_at)) / 1000)), true);
+                        else showFallback('"' + nn.cur.title + '" is not a YouTube source and cannot be embedded.', nn.cur.media_url ? '<a href="' + esc(nn.cur.media_url) + '" target="_blank" rel="noopener">Open in a new tab ↗</a>' : '');
+                    }
+                    S.liveTimer = setTimeout(evaluate, Math.max(1000, new Date(nn.cur.ends_at) - t) + 300);
+                } else {
+                    var wasLive = S.mode === 'live';
+                    S.mode = 'vod'; S.progId = null;
+                    if (wasLive || S.vidMode === null) { var ap = wasLive || S.wantPlay; S.wantPlay = false; var its = chItems(id); if (its.length) selectItem(its[0].id, ap, false); else noContent(); }
+                }
+                renderNow(); renderGuide(); chrome();
+            }
+            function noContent() { S.vid = null; S.vidMode = null; try { if (player) player.stopVideo(); } catch (e) {} showFallback('No programming on this channel yet.', ''); }
+            function selectItem(itemId, autoplay, fromUser) {
+                var it = S.items.filter(function (i) { return i.id === itemId; })[0]; if (!it) return;
+                if (fromUser && S.mode === 'live') { S.userVod = true; clearTimeout(S.liveTimer); }
+                S.mode = 'vod'; S.itemId = itemId; S.progId = null;
+                var v = ytId(it.video_id) || ytId(it.url);
+                if (!v) { S.vidMode = 'vod'; S.vid = null; showFallback('"' + it.title + '" is not a YouTube video.', it.url ? '<a href="' + esc(it.url) + '" target="_blank" rel="noopener">Open in a new tab ↗</a>' : ''); }
+                else if (!(S.vid === v && S.vidMode === 'vod')) { S.vidMode = 'vod'; msg(''); startVideo(v, 0, autoplay); }
+                renderNow(); renderGuide(); chrome();
+            }
+            function playNext() {
+                var its = chItems(S.chId); if (!its.length) return;
+                var i = 0; its.forEach(function (x, n) { if (x.id === S.itemId) i = n; });
+                selectItem(its[(i + 1) % its.length].id, true, false);
+            }
+            function selectChannel(id, byUser) {
+                if (!chById(id) || id === S.chId) return;                                                              /* same channel: do nothing, never reload */
+                S.chId = id; S.userVod = false; S.itemId = null; S.vidMode = null; S.progId = null; S.mode = 'vod'; S.wantPlay = !!byUser;
+                renderTabs(); evaluate();
+            }
+
+            /* ---- rendering ---- */
+            function renderTabs() {
+                $('dtv-tabs').innerHTML = S.channels.map(function (c) {
+                    return '<button type="button" role="tab" class="dtv-tab" data-ch="' + esc(c.id) + '" aria-selected="' + (c.id === S.chId) + '">' + esc(c.number) + ' · ' + esc(c.name) + '</button>';
+                }).join('');
+            }
+            function renderNow() {
+                var id = S.chId, el = $('dtv-now'); if (!id) { el.innerHTML = ''; return; }
+                var nn = nowNext(id, Date.now()), h = '';
+                if (S.mode === 'live' && nn.cur) h = '<span><b>NOW:</b> ' + esc(nn.cur.title) + ' (' + fmtT(nn.cur.starts_at) + ' – ' + fmtT(nn.cur.ends_at) + ')</span>';
+                else { var it = S.items.filter(function (i) { return i.id === S.itemId; })[0]; h = '<span><b>ON DEMAND:</b> ' + (it ? esc(it.title) + (it.year ? ' (' + esc(it.year) + ')' : '') : 'choose a video below') + '</span>'; }
+                if (nn.next) h += '<span><b>NEXT:</b> ' + esc(nn.next.title) + ' at ' + fmt(nn.next.starts_at) + '</span>';
+                if (S.userVod && nn.cur) h += '<button type="button" class="dtv-btn" id="dtv-golive">⟲ BACK TO LIVE</button>';
+                el.innerHTML = h;
+            }
+            function renderGuide() {
+                var id = S.chId, el = $('dtv-guide'); if (!id) { el.innerHTML = ''; return; }
+                var t = Date.now(), nn = nowNext(id, t), h = '';
+                var ps = chProgs(id).filter(function (p) { return new Date(p.ends_at) > t; }).slice(0, 12);
+                if (ps.length) h += '<h3>SCHEDULE</h3><ul class="dtv-sched">' + ps.map(function (p) {
+                    var cls = nn.cur && nn.cur.id === p.id ? 'now' : (nn.next && nn.next.id === p.id ? 'next' : '');
+                    return '<li class="' + cls + '"><span class="t">' + fmt(p.starts_at) + ' – ' + fmtT(p.ends_at) + '</span><span>' + esc(p.title) + (p.description ? '<br><small>' + esc(p.description) + '</small>' : '') + '</span>' + (cls ? '<span class="dtv-tag">' + (cls === 'now' ? 'NOW' : 'NEXT') + '</span>' : '<span></span>') + '</li>';
+                }).join('') + '</ul>';
+                var its = chItems(id);
+                h += '<h3>ON-DEMAND LIBRARY</h3>' + (its.length ? '<div class="dtv-lib">' + its.map(function (i) {
+                    return '<button type="button" class="dtv-item' + (S.mode === 'vod' && i.id === S.itemId ? ' active' : '') + '" data-item="' + esc(i.id) + '"><strong>' + esc(i.title) + '</strong><small>' + esc(i.year || '') + (i.description ? ' · ' + esc(i.description) : '') + '</small></button>';
+                }).join('') + '</div>' : '<p class="dtv-empty">No videos on this channel yet.</p>');
+                el.innerHTML = h;
+            }
+
+            /* ---- data ---- */
+            function load() {
+                return Promise.all([B.tvChannels(), B.tvAllItems(), B.tvPrograms()]).then(function (r) {
+                    for (var i = 0; i < r.length; i++) if (r[i].error) throw r[i].error;
+                    S.channels = r[0].data || []; S.items = r[1].data || []; S.programs = r[2].data || [];
+                });
+            }
+            function refresh() {
+                load().then(function () {
+                    if (!chById(S.chId)) { S.chId = null; if (S.channels.length) { S.chId = S.channels[0].id; S.vidMode = null; } }
+                    renderTabs(); if (S.chId) evaluate(); else { renderNow(); renderGuide(); }
+                }).catch(function () {});
+            }
+            function start() {
+                load().then(function () {
+                    if (!S.channels.length) { msg('No channels have been set up yet. An administrator can add them in the Admin Panel.'); return; }
+                    S.chId = S.channels[0].id; renderTabs(); evaluate();
+                    var t; try { B.tvSubscribe(function () { clearTimeout(t); t = setTimeout(refresh, 400); }); } catch (e) {}
+                    setInterval(function () { if (!S.hold) { var nn = S.chId ? nowNext(S.chId, Date.now()) : {}; if (S.mode === 'live' && (!nn.cur || nn.cur.id !== S.progId)) evaluate(); else { renderNow(); renderGuide(); } } }, 15000);
+                }).catch(function () { msg('Diane TV could not load the channel list from the server. Please try again later.', true); });
+            }
+
+            /* ---- wiring ---- */
+            $('dtv-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-ch]'); if (b) selectChannel(b.getAttribute('data-ch'), true); });
+            $('dtv-guide').addEventListener('click', function (e) { var b = e.target.closest('[data-item]'); if (b) selectItem(b.getAttribute('data-item'), true, true); });
+            $('dtv-now').addEventListener('click', function (e) { if (e.target.id === 'dtv-golive') { S.userVod = false; S.vidMode = null; evaluate(); } });
+            $('dtv-tune').addEventListener('click', function () { try { player.unMute(); player.playVideo(); } catch (e) {} setTimeout(chrome, 500); });
+            $('dtv-fs').addEventListener('click', function () { var s = $('dtv-stage'); (s.requestFullscreen || s.webkitRequestFullscreen || function () {}).call(s); });
+            /* never let two videos play at once: pause Diane TV while the on-demand modal below is open */
+            var _open = window.openMovie, _close = window.closeVideo;
+            if (typeof _open === 'function') window.openMovie = function () { S.hold = true; try { if (player) player.pauseVideo(); } catch (e) {} return _open.apply(this, arguments); };
+            if (typeof _close === 'function') window.closeVideo = function () { var r = _close.apply(this, arguments); if (S.hold) { S.hold = false; if (S.mode === 'live') { S.vidMode = null; evaluate(); } } return r; };
+
+            var tries = 0;
+            (function wait() {
+                try { B = parent.DKBackend; } catch (e) { B = null; }
+                if (B && B.status === 'unconfigured') { msg('Diane TV needs the site backend, which is not configured.', true); return; }
+                if (B && B.client) return start();
+                if (tries++ < 75) setTimeout(wait, 200); else msg('Diane TV could not reach the backend. Please refresh.', true);
+            })();
+        })();
     <\/script>
 </body>
 </html>
@@ -6992,7 +7174,6 @@ document.addEventListener('click', function(e){
             <a href="achievements.html" class="nav-link">ACHIEVEMENTS</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="Settings.html" class="nav-link">SETTINGS ⚙️</a>
             <button class="nav-link logout-btn" onclick="logout()" style="display: none;" id="logoutBtn">LOGOUT</button>
         </div>
@@ -7192,154 +7373,79 @@ document.addEventListener('click', function(e){
             document.getElementById('authError').classList.remove('show');
         }
         
+        // ---- Real Supabase auth (replaces the old localStorage accounts) ----
+        function PB() { try { return parent.DKBackend; } catch (e) { return null; } }
+        function pReady() {
+            return new Promise(function (res, rej) {
+                var B = PB(), n = 0;
+                (function w() {
+                    if (!B) return rej(new Error('Backend unavailable.'));
+                    if (B.client) return res(B);
+                    if (B.status === 'unconfigured' || B.status === 'offline' || n++ > 50) return rej(new Error('Cannot reach the server right now.'));
+                    setTimeout(w, 200);
+                })();
+            });
+        }
         function handleLogin(e) {
             e.preventDefault();
             hideError();
-            if (parent.DKBackend && parent.DKBackend.status !== 'unconfigured') { /* Supabase Auth; no local-account fallback once configured */
-                parent.DKBackend.login(document.getElementById('loginUsername').value.trim(), document.getElementById('loginPassword').value)
-                    .then(function () { initProfile(); }).catch(function (err) { showError(err.message); });
-                return;
-            }
-            
-            const username = document.getElementById('loginUsername').value.trim();
+            const email = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
-            
-            // Check if user exists
-            const userKey = 'user_' + username;
-            const userData = localStorage.getItem(userKey);
-            
-            if (!userData) {
-                // Try finding by email
-                let found = false;
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key.startsWith('user_')) {
-                        const user = JSON.parse(localStorage.getItem(key));
-                        if (user.email === username) {
-                            if (user.password === password) {
-                                localStorage.setItem('arcadeUser', JSON.stringify(user));
-                                initProfile();
-                                return;
-                            } else {
-                                showError('Invalid password!');
-                                return;
-                            }
-                        }
-                    }
-                }
-                showError('User not found!');
-                return;
-            }
-            
-            const user = JSON.parse(userData);
-            
-            if (user.password !== password) {
-                showError('Invalid password!');
-                return;
-            }
-            
-            // Login successful
-            localStorage.setItem('arcadeUser', JSON.stringify(user));
-            initProfile();
+            if (email.indexOf('@') < 0) { showError('Sign in with your email address. Usernames are for display only.'); return; }
+            pReady().then(function (B) { return B.login(email, password); })
+                .then(function () { initProfile(); })
+                .catch(function (err) { showError(err.message || 'Login failed.'); });
         }
         
         function handleRegister(e) {
             e.preventDefault();
             hideError();
-            if (parent.DKBackend && parent.DKBackend.status !== 'unconfigured') {
-                var _pw = document.getElementById('regPassword').value;
-                if (_pw !== document.getElementById('regConfirmPassword').value) { showError('Passwords do not match!'); return; }
-                if (_pw.length < 6) { showError('Password must be at least 6 characters!'); return; }
-                parent.DKBackend.register(document.getElementById('regUsername').value.trim(), document.getElementById('regEmail').value.trim(), _pw)
-                    .then(function (r) { if (r.needsConfirm) { showError('Check your email to confirm your account, then sign in.'); } else { initProfile(); } })
-                    .catch(function (err) { showError(err.message); });
-                return;
-            }
-            
             const username = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regConfirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                showError('Passwords do not match!');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters!');
-                return;
-            }
-            
-            // Check if username exists
-            if (localStorage.getItem('user_' + username)) {
-                showError('Username already taken!');
-                return;
-            }
-            
-            // Check if email exists
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('user_')) {
-                    const user = JSON.parse(localStorage.getItem(key));
-                    if (user.email === email) {
-                        showError('Email already registered!');
-                        return;
-                    }
-                }
-            }
-            
-            // Create new user - USE unlockedAchievements FIELD
-            const newUser = {
-                username: username,
-                email: email,
-                password: password,
-                xp: 0,
-                coins: 0,
-                level: 1,
-                gamesPlayed: 0,
-                moviesWatched: 0,
-                unlockedAchievements: [], // FIXED: Use correct field name
-                badges: [],
-                inventory: [],
-                joinDate: new Date().toISOString(),
-                avatar: null,
-                banner: null,
-                gamesHistory: {},
-                moviesHistory: {}
-            };
-            
-            // Save to localStorage
-            localStorage.setItem('user_' + username, JSON.stringify(newUser));
-            localStorage.setItem('arcadeUser', JSON.stringify(newUser));
-            
-            showNotification('Account created successfully!', 'success');
-            setTimeout(() => initProfile(), 1000);
+            if (password !== confirmPassword) { showError('Passwords do not match!'); return; }
+            if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) { showError('Username must be 3–20 letters, numbers or _.'); return; }
+            if (password.length < 8) { showError('Password must be at least 8 characters!'); return; }
+            pReady().then(function (B) { return B.register(username, email, password); })
+                .then(function (r) {
+                    if (r.needsConfirm) { showError('Account created. Check your email to confirm it, then log in.'); switchTab('login'); }
+                    else initProfile();
+                })
+                .catch(function (err) { showError(err.message || 'Sign-up failed.'); });
         }
         
         function initProfile() {
-            document.getElementById('authContainer').style.display = 'none';
-            document.getElementById('profileContainer').classList.add('active');
-            document.getElementById('logoutBtn').style.display = 'block';
-            loadProfile();
+            pReady().then(function (B) {
+                return B.syncCache().then(function (u) {
+                    if (!u) return;
+                    document.getElementById('authContainer').style.display = 'none';
+                    document.getElementById('profileContainer').classList.add('active');
+                    document.getElementById('logoutBtn').style.display = 'block';
+                    loadProfile();
+                    // Achievements are granted by the server only; re-sync once if it awarded anything.
+                    B.evaluateAchievements().then(function (r) {
+                        if (r && r.granted > 0) return B.syncCache().then(loadProfile);
+                    }).catch(function () {});
+                });
+            }).catch(function () {});
         }
         
         function checkAuth() {
-            const user = localStorage.getItem('arcadeUser');
-            if (user) {
-                initProfile();
-            }
+            pReady().then(function (B) {
+                var t = 0;
+                (function w() {
+                    if (B.user) return initProfile();
+                    if (t++ < 10) setTimeout(w, 150); // session restore is async
+                })();
+            }).catch(function () {});
         }
         
         // PROFILE FUNCTIONS
+        // The localStorage copy is a read-only display cache that B.syncCache() overwrites from the server.
         function getUser() {
             const user = localStorage.getItem('arcadeUser');
             return user ? JSON.parse(user) : null;
-        }
-        
-        function saveUser(userData) {
-            localStorage.setItem('arcadeUser', JSON.stringify(userData));
-            localStorage.setItem('user_' + userData.username, JSON.stringify(userData));
         }
         
         function calculateLevel(xp) {
@@ -7378,79 +7484,31 @@ document.addEventListener('click', function(e){
             }).join('');
         }
         function loadBoosts() {
-    const user = getUser();
-    if (!user) return;
-    
-    const container = document.getElementById('userBoosts');
-    const now = new Date().getTime();
-    
-    // Check inventory for active boosts
-    const activeBoosts = (user.inventory || []).filter(item => {
-        if (!item.item_id) return false;
-        if (!item.item_id.includes('boost')) return false;
-        if (!item.purchased_at) return false;
-        
-        // Calculate expiration time based on boost type
-        const purchaseTime = new Date(item.purchased_at).getTime();
-        let duration = 0;
-        
-        if (item.item_id.includes('24h')) duration = 24 * 60 * 60 * 1000;
-        else if (item.item_id.includes('3d')) duration = 3 * 24 * 60 * 60 * 1000;
-        else if (item.item_id.includes('7d')) duration = 7 * 24 * 60 * 60 * 1000;
-        else if (item.item_id.includes('14d')) duration = 14 * 24 * 60 * 60 * 1000;
-        else if (item.item_id.includes('30d')) duration = 30 * 24 * 60 * 60 * 1000;
-        
-        return (purchaseTime + duration) > now;
-    });
-    
-    if (activeBoosts.length === 0) {
-        container.innerHTML = `
-            <div class="no-boosts" style="width: 100%; text-align: center; padding: 30px; opacity: 0.7;">
-                <p>No active boosts!</p>
-                <a href="shop.html" class="buy-badges-link" style="background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));">🪙 BUY BOOSTS IN SHOP</a>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = activeBoosts.map(boost => {
-        const purchaseTime = new Date(boost.purchased_at).getTime();
-        let duration = 0;
-        let boostName = 'Boost';
-        let boostIcon = '⚡';
-        
-        // Determine duration and name
-        if (boost.item_id.includes('24h')) { duration = 24 * 60 * 60 * 1000; boostName += ' (24h)'; }
-        else if (boost.item_id.includes('3d')) { duration = 3 * 24 * 60 * 60 * 1000; boostName += ' (3d)'; }
-        else if (boost.item_id.includes('7d')) { duration = 7 * 24 * 60 * 60 * 1000; boostName += ' (7d)'; }
-        else if (boost.item_id.includes('14d')) { duration = 14 * 24 * 60 * 60 * 1000; boostName += ' (14d)'; }
-        else if (boost.item_id.includes('30d')) { duration = 30 * 24 * 60 * 60 * 1000; boostName += ' (30d)'; }
-        
-        if (boost.item_id.includes('xp')) { boostName = 'XP ' + boostName; boostIcon = '⚡'; }
-        else if (boost.item_id.includes('coin')) { boostName = 'Coin ' + boostName; boostIcon = '💰'; }
-        else if (boost.item_id.includes('combo')) { boostName = 'Combo ' + boostName; boostIcon = '🔥'; }
-        else if (boost.item_id.includes('mega')) { boostName = 'MEGA ' + boostName; boostIcon = '💥'; }
-        else if (boost.item_id.includes('ultra')) { boostName = 'ULTRA ' + boostName; boostIcon = '🌟'; }
-        else if (boost.item_id.includes('legendary')) { boostName = 'LEGENDARY ' + boostName; boostIcon = '👑'; }
-        
-        const expiresAt = purchaseTime + duration;
-        const timeLeft = expiresAt - now;
-        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-        const daysLeft = Math.floor(hoursLeft / 24);
-        
-        let timeDisplay = '';
-        if (daysLeft > 0) timeDisplay = `${daysLeft}d ${hoursLeft % 24}h left`;
-        else timeDisplay = `${hoursLeft}h left`;
-        
-        return `
-            <div class="badge-item" style="border-color: var(--neon-green);" title="${boostName}">
-                <div class="badge-icon">${boostIcon}</div>
-                <div class="badge-name">${boostName}</div>
-                <div style="font-size: 0.6em; color: var(--neon-green); margin-top: 5px;">${timeDisplay}</div>
-            </div>
-        `;
-    }).join('');
-}
+            const container = document.getElementById('userBoosts');
+            if (!container) return;
+            pReady().then(function (B) { return B.myBoosts(); }).then(function (r) {
+                const rows = (r && r.data) || [];
+                if (rows.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-boosts" style="width: 100%; text-align: center; padding: 30px; opacity: 0.7;">
+                            <p>No active boosts!</p>
+                            <a href="shop.html" class="buy-badges-link" style="background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));">🪙 BUY BOOSTS IN SHOP</a>
+                        </div>`;
+                    return;
+                }
+                const now = Date.now();
+                container.innerHTML = rows.map(function (b) {
+                    const id = String(b.item_id);
+                    let icon = '⚡', name = id.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+                    if (id.includes('coin')) icon = '💰'; else if (id.includes('combo')) icon = '🔥'; else if (id.includes('mega')) icon = '💥'; else if (id.includes('ultra')) icon = '🌟'; else if (id.includes('legendary')) icon = '👑';
+                    const hoursLeft = Math.max(0, Math.floor((new Date(b.expires_at).getTime() - now) / 3600000));
+                    const t = hoursLeft >= 24 ? Math.floor(hoursLeft / 24) + 'd ' + (hoursLeft % 24) + 'h left' : hoursLeft + 'h left';
+                    return `<div class="badge-item" style="border-color: var(--neon-green);" title="${name}">
+                        <div class="badge-icon">${icon}</div><div class="badge-name">${name}</div>
+                        <div style="font-size: 0.6em; color: var(--neon-green); margin-top: 5px;">${t}</div></div>`;
+                }).join('');
+            }).catch(function () {});
+        }
         
         function loadAchievements() {
     const user = getUser();
@@ -7496,42 +7554,8 @@ document.addEventListener('click', function(e){
     `;
 }
         
-        function checkAchievements(user) {
-            // FIXED: Use unlockedAchievements instead of achievements
-            if (!user.unlockedAchievements) user.unlockedAchievements = [];
-            
-            if (user.gamesPlayed >= 1 && !user.unlockedAchievements.includes('first_game')) {
-                user.unlockedAchievements.push('first_game');
-                user.xp += 10;
-            }
-            if (user.gamesPlayed >= 10 && !user.unlockedAchievements.includes('game_master')) {
-                user.unlockedAchievements.push('game_master');
-                user.xp += 50;
-            }
-            if (user.moviesWatched >= 5 && !user.unlockedAchievements.includes('movie_buff')) {
-                user.unlockedAchievements.push('movie_buff');
-                user.xp += 25;
-            }
-            if (user.coins >= 1000 && !user.unlockedAchievements.includes('coin_collector')) {
-                user.unlockedAchievements.push('coin_collector');
-                user.xp += 100;
-            }
-            const level = calculateLevel(user.xp);
-            if (level >= 10 && !user.unlockedAchievements.includes('level_10')) {
-                user.unlockedAchievements.push('level_10');
-                user.xp += 200;
-            }
-            if (user.badges && user.badges.length >= 1 && !user.unlockedAchievements.includes('badge_hunter')) {
-                user.unlockedAchievements.push('badge_hunter');
-                user.xp += 50;
-            }
-            if (user.avatar && user.banner && !user.unlockedAchievements.includes('profile_perfect')) {
-                user.unlockedAchievements.push('profile_perfect');
-                user.xp += 25;
-            }
-            
-            saveUser(user);
-        }
+        // Achievements and their XP are granted by the server (evaluate_achievements); the browser can no longer award them.
+        function checkAchievements() {}
         
         function loadProfile() {
             const user = getUser();
@@ -7567,15 +7591,15 @@ document.addEventListener('click', function(e){
             
             loadBadges();
             loadAchievements();
-            checkAchievements(user);
+            loadBoosts();
         }
         
         function previewAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
             
-            if (file.size > 1000 * 1024 * 1024) {
-                showNotification('File too large! Max 1000MB', 'error');
+            if (file.size > 50 * 1024 * 1024) {
+                showNotification('File too large! Max 50MB', 'error');
                 return;
             }
             
@@ -7592,8 +7616,8 @@ document.addEventListener('click', function(e){
             const file = event.target.files[0];
             if (!file) return;
             
-            if (file.size > 1000 * 1024 * 1024) {
-                showNotification('File too large! Max 1000MB', 'error');
+            if (file.size > 50 * 1024 * 1024) {
+                showNotification('File too large! Max 50MB', 'error');
                 return;
             }
             
@@ -7606,44 +7630,28 @@ document.addEventListener('click', function(e){
             reader.readAsDataURL(file);
         }
         
+        function saveProfileImage(kind, dataUrl, modalId, imgId, doneMsg) {
+            pReady().then(function (B) {
+                if (!B.user) throw new Error('Please log in first.');
+                return fetch(dataUrl).then(function (r) { return r.blob(); })
+                    .then(function (blob) { return B.uploadProfileImage(blob, kind); })
+                    .then(function (url) { return B.updateProfile(kind === 'avatar' ? { avatar_url: url } : { banner_url: url }).then(function (r) { if (r && r.error) throw r.error; return url; }); })
+                    .then(function (url) { document.getElementById(imgId).src = url; return B.syncCache(); });
+            }).then(function () {
+                closeModal(modalId); showNotification(doneMsg, 'success'); loadProfile();
+                return pReady().then(function (B) { return B.evaluateAchievements(); }).then(function (r) { if (r && r.granted > 0) return PB().syncCache().then(loadProfile); });
+            }).catch(function (err) { showNotification('❌ ' + ((err && err.message) || err), 'error'); });
+        }
         function saveAvatar() {
-            if (!avatarFile) {
-                showNotification('Please select an image first', 'error');
-                return;
-            }
-            
-            const user = getUser();
-            if (!user) return;
-            
-            user.avatar = avatarFile;
-            saveUser(user);
-            
-            document.getElementById('userAvatar').src = avatarFile;
-            closeModal('avatarModal');
-            showNotification('Avatar updated!', 'success');
-            avatarFile = null;
-            checkAchievements(user);
-            loadProfile();
+            if (!avatarFile) { showNotification('Please select an image first', 'error'); return; }
+            const f = avatarFile; avatarFile = null;
+            saveProfileImage('avatar', f, 'avatarModal', 'userAvatar', 'Avatar updated!');
         }
         
         function saveBanner() {
-            if (!bannerFile) {
-                showNotification('Please select an image first', 'error');
-                return;
-            }
-            
-            const user = getUser();
-            if (!user) return;
-            
-            user.banner = bannerFile;
-            saveUser(user);
-            
-            document.getElementById('profileBanner').src = bannerFile;
-            closeModal('bannerModal');
-            showNotification('Banner updated!', 'success');
-            bannerFile = null;
-            checkAchievements(user);
-            loadProfile();
+            if (!bannerFile) { showNotification('Please select an image first', 'error'); return; }
+            const f = bannerFile; bannerFile = null;
+            saveProfileImage('banner', f, 'bannerModal', 'profileBanner', 'Banner updated!');
         }
         
         function openAvatarModal() {
@@ -7663,10 +7671,9 @@ document.addEventListener('click', function(e){
         }
         
         function logout() {
-            try { parent.DKBackend && parent.DKBackend.logout(); } catch (e) {}
             if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('arcadeUser');
-                window.__reload();
+                var done = function () { localStorage.removeItem('arcadeUser'); localStorage.removeItem('isLoggedIn'); window.__reload(); };
+                try { parent.DKBackend.logout().then(done, done); } catch (e) { done(); }
             }
         }
         
@@ -8063,14 +8070,15 @@ document.addEventListener('click', function(e){
         <div class="form-content active" id="login-form">
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label>USERNAME OR EMAIL</label>
-                    <input type="text" id="login-username" placeholder="Enter username or email" required>
+                    <label>EMAIL</label>
+                    <input type="email" id="login-username" placeholder="Enter your email" required>
                 </div>
                 <div class="form-group">
                     <label>PASSWORD</label>
                     <input type="password" id="login-password" placeholder="Enter password" required>
                 </div>
                 <button type="submit" class="submit-btn">🎮 LOGIN</button>
+                <p style="text-align:center;margin-top:12px"><a href="#" style="color:#00f3ff" onclick="handleForgot(event)">Forgot password?</a></p>
             </form>
         </div>
         
@@ -8087,7 +8095,7 @@ document.addEventListener('click', function(e){
                 </div>
                 <div class="form-group">
                     <label>PASSWORD</label>
-                    <input type="password" id="signup-password" placeholder="Create password" required minlength="6">
+                    <input type="password" id="signup-password" placeholder="Create password" required minlength="8">
                 </div>
                 <div class="form-group">
                     <label>CONFIRM PASSWORD</label>
@@ -8130,96 +8138,61 @@ document.addEventListener('click', function(e){
             hideMessages();
         }
         
-        // Handle Login
+        // ---- Real Supabase auth (parent.DKBackend). No fake accounts, no localStorage login. ----
+        function BK() { try { return parent.DKBackend; } catch (e) { return null; } }
+        function whenReady(cb) {
+            var B = BK();
+            if (!B) return showError('Backend unavailable. Reload the page.');
+            if (B.client) return cb(B);
+            showSuccess('Connecting…');
+            var t = setInterval(function () {
+                if (B.client) { clearInterval(t); hideMessages(); cb(B); }
+                else if (B.status === 'offline' || B.status === 'unconfigured') { clearInterval(t); showError('Cannot reach the server right now. Try again shortly.'); }
+            }, 300);
+        }
         function handleLogin(e) {
             e.preventDefault();
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-            
-            // TODO: Replace with actual API call
-            // For now, simulate login with localStorage
-            
-            if (username && password) {
-                // Simulate successful login
-                const userData = {
-                    username: username,
-                    email: username.includes('@') ? username : username + '@arcade.com',
-                    level: 1,
-                    xp: 0,
-                    coins: 100,
-                    achievements: [],
-                    gamesPlayed: 0,
-                    highScores: {},
-                    joinDate: new Date().toISOString()
-                };
-                
-                localStorage.setItem('arcadeUser', JSON.stringify(userData));
-                localStorage.setItem('isLoggedIn', 'true');
-                
-                showSuccess('Login successful! Redirecting...');
-                setTimeout(() => {
-                    window.__go('profile.html');
-                }, 1500);
-            } else {
-                showError('Please fill in all fields!');
-            }
+            var email = document.getElementById('login-username').value.trim();
+            var password = document.getElementById('login-password').value;
+            if (!email || !password) return showError('Please fill in all fields!');
+            if (email.indexOf('@') < 0) return showError('Sign in with your email address. Usernames are for display only.');
+            whenReady(function (B) {
+                B.login(email, password).then(function () {
+                    showSuccess('Login successful! Redirecting...');
+                    setTimeout(function () { window.__go('profile.html'); }, 800);
+                }).catch(function (err) { showError(err.message || 'Login failed.'); });
+            });
         }
-        
-        // Handle Signup
         function handleSignup(e) {
             e.preventDefault();
-            const username = document.getElementById('signup-username').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const confirm = document.getElementById('signup-confirm').value;
-            
-            if (password !== confirm) {
-                showError('Passwords do not match!');
-                return;
-            }
-            
-            if (username.length < 3) {
-                showError('Username must be at least 3 characters!');
-                return;
-            }
-            
-            // TODO: Replace with actual API call
-            // For now, create user in localStorage
-            
-            const userData = {
-                username: username,
-                email: email,
-                level: 1,
-                xp: 0,
-                coins: 100,
-                achievements: [{
-                    id: 'annie_hall',
-                    name: 'Annie Hall',
-                    description: 'Played your first game!',
-                    icon: '🎬',
-                    unlocked: true,
-                    unlockedAt: new Date().toISOString()
-                }],
-                gamesPlayed: 0,
-                highScores: {},
-                joinDate: new Date().toISOString()
-            };
-            
-            localStorage.setItem('arcadeUser', JSON.stringify(userData));
-            localStorage.setItem('isLoggedIn', 'true');
-            
-            showSuccess('Account created! Redirecting to your profile...');
-            setTimeout(() => {
-                window.__go('profile.html');
-            }, 1500);
+            var username = document.getElementById('signup-username').value.trim();
+            var email = document.getElementById('signup-email').value.trim();
+            var password = document.getElementById('signup-password').value;
+            var confirm = document.getElementById('signup-confirm').value;
+            if (password !== confirm) return showError('Passwords do not match!');
+            if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) return showError('Username must be 3–20 letters, numbers or _.');
+            if (password.length < 8) return showError('Password must be at least 8 characters.');
+            whenReady(function (B) {
+                B.register(username, email, password).then(function (r) {
+                    if (r.needsConfirm) showSuccess('Account created. Check your email to confirm it, then log in.');
+                    else { showSuccess('Account created! Redirecting to your profile...'); setTimeout(function () { window.__go('profile.html'); }, 800); }
+                }).catch(function (err) { showError(err.message || 'Sign-up failed.'); });
+            });
         }
-        
-        // Social Login
+        function handleForgot(ev) {
+            ev.preventDefault();
+            var email = document.getElementById('login-username').value.trim();
+            if (email.indexOf('@') < 0) return showError('Type your email address in the login box first, then click "Forgot password".');
+            whenReady(function (B) {
+                B.resetPassword(email).then(function (r) {
+                    if (r && r.error) showError(r.error.message); else showSuccess('If that email has an account, a reset link is on its way.');
+                }).catch(function (err) { showError(err.message || 'Could not send reset email.'); });
+            });
+        }
         function socialLogin(provider) {
-            showError(`${provider} login coming soon! Use email/password for now.`);
-            // TODO: Implement OAuth
+            showError(provider + ' sign-in is not enabled yet. Use email and password.');
         }
-        
+
         // Show Error
         function showError(message) {
             const errorEl = document.getElementById('error-msg');
@@ -8242,13 +8215,14 @@ document.addEventListener('click', function(e){
             document.getElementById('success-msg').style.display = 'none';
         }
         
-        // Check if already logged in
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            showSuccess('Already logged in! Redirecting...');
-            setTimeout(() => {
-                window.__go('profile.html');
-            }, 1000);
-        }
+        // Already signed in? (real Supabase session)
+        (function () {
+            var B = BK(); if (!B) return;
+            var t = setInterval(function () {
+                if (B.client && B.status === 'online') { clearInterval(t); if (B.user) { showSuccess('Already logged in! Redirecting...'); setTimeout(function () { window.__go('profile.html'); }, 600); } }
+            }, 400);
+            setTimeout(function () { clearInterval(t); }, 10000);
+        })();
     <\/script>
 </body>
 </html>
@@ -8566,7 +8540,6 @@ document.addEventListener('click', function(e){
             <a href="shop.html" class="nav-link">COIN SHOP</a>
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="admin.html" class="nav-link admin-link" id="adminLink" style="display: none;">🛡️ ADMIN PANEL</a>
         </div>
     </nav>
@@ -8671,7 +8644,7 @@ document.addEventListener('click', function(e){
     <script>
         const ADMIN_EMAILS = [
             'tannerkurrasch@gmail.com',
-            'kurraschgaminmerchstore@gmail.com',
+            'kurraschgamingmerchstore@gmail.com',
             'gamekillerszone@gmail.com'
         ];
         
@@ -8703,9 +8676,7 @@ document.addEventListener('click', function(e){
             document.getElementById('statGames').textContent = (currentUser.gamesPlayed || 0).toLocaleString();
             
             // Show admin link if user is admin
-            if (ADMIN_EMAILS.includes(currentUser.email)) {
-                document.getElementById('adminLink').style.display = 'block';
-            }
+            try { parent.DKBackend.isAdmin().then(function (ok) { if (ok) document.getElementById('adminLink').style.display = 'block'; }); } catch (e) {}
         }
         
         function savePassword() {
@@ -8746,7 +8717,8 @@ document.addEventListener('click', function(e){
         
         function deleteAccount() {
             if (!currentUser) return;
-            
+            alert('Account deletion needs a server-side function that has not been deployed yet. Please contact an administrator to delete your account.');
+            return;
             // Remove all user data from localStorage
             localStorage.removeItem('arcadeUser');
             localStorage.removeItem('user_' + currentUser.username);
@@ -9150,7 +9122,25 @@ document.addEventListener('click', function(e){
             .admin-nav { flex-direction: column; }
             .user-table { font-size: 0.8em; }
         }
-    </style>
+            /* ===== TV PROGRAMMING (admin) ===== */
+        .tv-row { display: flex; flex-wrap: wrap; gap: 12px; }
+        .tv-row > .form-group { flex: 1 1 180px; }
+        .tv-sub { font-family: 'Orbitron', sans-serif; color: var(--neon-purple); margin: 26px 0 10px; font-size: 1.05em; }
+        .tv-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        .tv-table th, .tv-table td { padding: 9px 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.1); font-size: .92em; vertical-align: middle; }
+        .tv-table tr.sel { background: rgba(0,243,255,.1); }
+        .tv-table tr[data-chrow] { cursor: pointer; }
+        .tv-mini { padding: 5px 10px; margin: 0 2px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.06); color: #fff; cursor: pointer; }
+        .tv-mini:hover { background: rgba(255,255,255,.2); }
+        .tv-mini.danger { border-color: #ff5555; color: #ff8888; }
+        .tv-scroll { overflow-x: auto; }
+        .tv-alert { display: none; padding: 10px 14px; border-radius: 8px; margin: 10px 0; }
+        .tv-alert.show { display: block; }
+        .tv-alert.ok { background: rgba(57,255,20,.15); border: 1px solid var(--neon-green); }
+        .tv-alert.err { background: rgba(255,0,0,.15); border: 1px solid #ff5555; }
+        .tv-nownext { padding: 12px 16px; border-radius: 10px; background: rgba(0,243,255,.08); margin: 10px 0; line-height: 1.7; }
+        .tv-ok { color: var(--neon-green); } .tv-bad { color: #ff8080; } .tv-dim { opacity: .65; }
+</style>
 </head>
 <body>
     <div class="admin-header">
@@ -9166,9 +9156,60 @@ document.addEventListener('click', function(e){
             <button class="admin-tab" onclick="showSection('moderation')">⚖️ MODERATION</button>
             <button class="admin-tab" onclick="showSection('rewards')">🎁 GIVE REWARDS</button>
             <button class="admin-tab" onclick="showSection('content')">📄 CONTENT</button>
+            <button class="admin-tab" onclick="showSection('tv')">📺 TV PROGRAMMING</button>
         </div>
         
-        <\!-- USER MANAGEMENT -->
+                <div class="admin-section" id="tv">
+            <div class="admin-panel">
+                <h2 class="panel-header">📺 TV Programming</h2>
+                <div class="tv-alert" id="tvAlert" role="status"></div>
+
+                <h3 class="tv-sub">1 · Channels</h3>
+                <div class="tv-scroll"><table class="tv-table"><thead><tr><th>#</th><th>Name</th><th>Kind</th><th>Active</th><th>Actions</th></tr></thead><tbody id="tvChBody"></tbody></table></div>
+                <div class="tv-row">
+                    <div class="form-group"><label class="form-label" for="tvChNumber">Number</label><input class="form-input" id="tvChNumber" type="number" min="1"></div>
+                    <div class="form-group"><label class="form-label" for="tvChName">Name</label><input class="form-input" id="tvChName" maxlength="80"></div>
+                    <div class="form-group"><label class="form-label" for="tvChKind">Kind</label><select class="form-select" id="tvChKind"><option value="youtube">youtube</option><option value="pluto">pluto</option><option value="northstar">northstar</option><option value="other">other</option></select></div>
+                    <div class="form-group"><label class="form-label" for="tvChDesc">Description</label><input class="form-input" id="tvChDesc" maxlength="200"></div>
+                    <div class="form-group"><label class="form-label" for="tvChActive">Active</label><select class="form-select" id="tvChActive"><option value="true">Yes (visible)</option><option value="false">No (hidden)</option></select></div>
+                </div>
+                <button class="btn btn-primary" onclick="tvSaveChannel()" id="tvChSave">💾 SAVE CHANNEL</button>
+                <button class="btn btn-warning" onclick="tvClearChannelForm()">NEW / CLEAR</button>
+
+                <h3 class="tv-sub">2 · Videos on <span id="tvSelName">(select a channel above)</span></h3>
+                <div class="tv-scroll"><table class="tv-table"><thead><tr><th>Order</th><th>Title</th><th>Year</th><th>Video</th><th>Check</th><th>Actions</th></tr></thead><tbody id="tvItBody"></tbody></table></div>
+                <div class="tv-row">
+                    <div class="form-group"><label class="form-label" for="tvItUrl">YouTube link or video ID</label><input class="form-input" id="tvItUrl" placeholder="https://www.youtube.com/watch?v=..."></div>
+                    <div class="form-group"><label class="form-label" for="tvItTitle">Title</label><input class="form-input" id="tvItTitle" maxlength="200"></div>
+                    <div class="form-group"><label class="form-label" for="tvItYear">Year</label><input class="form-input" id="tvItYear" maxlength="8"></div>
+                    <div class="form-group"><label class="form-label" for="tvItDesc">Description</label><input class="form-input" id="tvItDesc" maxlength="300"></div>
+                </div>
+                <button class="btn btn-primary" onclick="tvSaveItem()">💾 SAVE VIDEO</button>
+                <button class="btn btn-success" onclick="tvLookupTitle()">🔎 LOOK UP REAL TITLE</button>
+                <button class="btn btn-warning" onclick="tvVerifyItems()">✅ VERIFY ALL VIDEOS ON CHANNEL</button>
+                <button class="btn btn-warning" onclick="tvClearItemForm()">NEW / CLEAR</button>
+
+                <h3 class="tv-sub">3 · Schedule (guide) for <span id="tvSelName2">(select a channel above)</span></h3>
+                <div class="tv-nownext" id="tvNowNext"></div>
+                <div class="tv-scroll"><table class="tv-table"><thead><tr><th>Start</th><th>End</th><th>Title</th><th>Source</th><th>Actions</th></tr></thead><tbody id="tvPrBody"></tbody></table></div>
+                <div class="tv-row">
+                    <div class="form-group"><label class="form-label" for="tvPrFrom">Fill from channel video</label><select class="form-select" id="tvPrFrom" onchange="tvPrFill()"></select></div>
+                    <div class="form-group"><label class="form-label" for="tvPrTitle">Program title</label><input class="form-input" id="tvPrTitle" maxlength="200"></div>
+                    <div class="form-group"><label class="form-label" for="tvPrUrl">Video link</label><input class="form-input" id="tvPrUrl" placeholder="YouTube link"></div>
+                </div>
+                <div class="tv-row">
+                    <div class="form-group"><label class="form-label" for="tvPrDesc">Description</label><input class="form-input" id="tvPrDesc" maxlength="300"></div>
+                    <div class="form-group"><label class="form-label" for="tvPrStart">Starts (your local time)</label><input class="form-input" id="tvPrStart" type="datetime-local" onchange="tvPrCalcEnd()"></div>
+                    <div class="form-group"><label class="form-label" for="tvPrDur">Duration (minutes)</label><input class="form-input" id="tvPrDur" type="number" min="1" oninput="tvPrCalcEnd()"></div>
+                    <div class="form-group"><label class="form-label" for="tvPrEnd">Ends (or set directly)</label><input class="form-input" id="tvPrEnd" type="datetime-local"></div>
+                </div>
+                <button class="btn btn-primary" onclick="tvSaveProgram()">💾 SAVE PROGRAM</button>
+                <button class="btn btn-warning" onclick="tvClearProgramForm()">NEW / CLEAR</button>
+
+            </div>
+        </div>
+
+<\!-- USER MANAGEMENT -->
         <div class="admin-section active" id="users">
             <div class="admin-panel">
                 <h2 class="panel-header">👥 User Management</h2>
@@ -9330,31 +9371,24 @@ document.addEventListener('click', function(e){
     <script>
         const ADMIN_EMAILS = [
             'tannerkurrasch@gmail.com',
-            'kurraschgaminmerchstore@gmail.com',
+            'kurraschgamingmerchstore@gmail.com',
             'gamekillerszone@gmail.com'
         ];
         
-        function checkAdminAccess() {
-            const userData = localStorage.getItem('arcadeUser');
-            if (!userData) {
-                alert('Access Denied: Please login first');
-                window.__go('index.html');
-                return false;
-            }
-            
-            const user = JSON.parse(userData);
-            if (!ADMIN_EMAILS.includes(user.email)) {
-                alert('Access Denied: Admin privileges required');
-                window.__go('index.html');
-                return false;
-            }
-            
-            document.getElementById('adminEmail').textContent = user.email;
-            loadUsers();
-            loadApplications();
-            loadBotSubscriptions();
-            loadContent();
-            updateNotificationBadges();
+        function checkAdminAccess() { /* trusted check: the Supabase `admins` table, not localStorage or an email list */
+            var B = parent.DKBackend;
+            function deny(m) { alert(m); window.__go('index.html'); return false; }
+            if (!B) return deny('Access Denied: backend unavailable');
+            var tries = 0;
+            (function wait() {
+                if (!B.ready && tries++ < 50) return setTimeout(wait, 200);
+                if (!B.user) return deny('Access Denied: Please login first');
+                B.isAdmin().then(function (ok) {
+                    if (!ok) return deny('Access Denied: Admin privileges required');
+                    document.getElementById('adminEmail').textContent = B.user.email;
+                    loadUsers(); loadApplications(); loadBotSubscriptions(); loadContent(); updateNotificationBadges(); tvAdminInit();
+                }).catch(function () { deny('Access Denied: could not verify admin status'); });
+            })();
             return true;
         }
 
@@ -10160,6 +10194,158 @@ document.addEventListener('click', function(e){
             setTimeout(() => alert.classList.remove('show'), 5000);
         }
         
+        /* ===== TV PROGRAMMING (admin). Everything is saved to Supabase; RLS + is_admin() enforce admin-only on the server. ===== */
+        var TV = { channels: [], items: [], programs: [], chId: null, itemId: null, progId: null, chEditId: null, timer: null };
+        function tvB() { return parent.DKBackend; }
+        function tvEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+        function tvById(id) { return document.getElementById(id); }
+        function tvSay(text, isErr) { var el = tvById('tvAlert'); el.textContent = text; el.className = 'tv-alert show ' + (isErr ? 'err' : 'ok'); clearTimeout(el._t); el._t = setTimeout(function () { el.classList.remove('show'); }, 9000); }
+        function tvFail(e) { tvSay('❌ ' + ((e && e.message) || String(e)), true); }
+        function tvYt(x) { if (!x) return null; var s = String(x).trim(); if (/^[\w-]{11}$/.test(s)) return s; var m = s.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : null; }
+        function tvLocalInput(iso) { var d = new Date(iso), p = function (n) { return String(n).padStart(2, '0'); }; return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); }
+        function tvShow(iso) { return iso ? new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
+        function tvCh() { return TV.channels.filter(function (c) { return c.id === TV.chId; })[0]; }
+        function tvChItems() { return TV.items.filter(function (i) { return i.channel_id === TV.chId; }).sort(function (a, b) { return a.position - b.position; }); }
+        function tvChProgs() { return TV.programs.filter(function (p) { return p.channel_id === TV.chId; }).sort(function (a, b) { return new Date(a.starts_at) - new Date(b.starts_at); }); }
+        function tvChk(r) { if (r && r.error) throw r.error; return r; }
+
+        function tvAdminInit() {
+            var B = tvB(); if (!B || !B.client) return;
+            tvReload().catch(tvFail);
+            if (!TV.timer) TV.timer = setInterval(tvRenderNowNext, 30000);
+        }
+        function tvReload() {
+            var B = tvB();
+            return Promise.all([B.tvAdminChannels(), B.tvAllItems(), B.tvPrograms()]).then(function (r) {
+                r.forEach(tvChk);
+                TV.channels = r[0].data || []; TV.items = r[1].data || []; TV.programs = r[2].data || [];
+                if (!tvCh()) TV.chId = TV.channels.length ? TV.channels[0].id : null;
+                tvRenderAll();
+            });
+        }
+        function tvRenderAll() { tvRenderChannels(); tvRenderItems(); tvRenderPrograms(); tvRenderNowNext(); }
+
+        /* ---- channels ---- */
+        function tvRenderChannels() {
+            tvById('tvChBody').innerHTML = TV.channels.map(function (c, i) {
+                return '<tr data-chrow="1" class="' + (c.id === TV.chId ? 'sel' : '') + '" onclick="tvSelectChannel(\'' + c.id + '\')"><td>' + c.number + '</td><td>' + tvEsc(c.name) + '</td><td>' + tvEsc(c.kind) + '</td><td>' + (c.is_active ? '✅' : '⛔ hidden') + '</td><td onclick="event.stopPropagation()">' +
+                    '<button class="tv-mini" ' + (i === 0 ? 'disabled' : '') + ' onclick="tvMoveChannel(' + i + ',-1)" aria-label="Move up">▲</button><button class="tv-mini" ' + (i === TV.channels.length - 1 ? 'disabled' : '') + ' onclick="tvMoveChannel(' + i + ',1)" aria-label="Move down">▼</button>' +
+                    '<button class="tv-mini" onclick="tvEditChannel(\'' + c.id + '\')">✎ Edit</button><button class="tv-mini danger" onclick="tvDeleteChannel(\'' + c.id + '\')">🗑</button></td></tr>';
+            }).join('') || '<tr><td colspan="5" class="tv-dim">No channels yet.</td></tr>';
+            var c = tvCh(); tvById('tvSelName').textContent = tvById('tvSelName2').textContent = c ? c.name : '(select a channel above)';
+        }
+        function tvSelectChannel(id) { TV.chId = id; tvClearItemForm(); tvClearProgramForm(); tvRenderAll(); }
+        function tvClearChannelForm() { TV.chEditId = null; ['tvChName', 'tvChDesc'].forEach(function (i) { tvById(i).value = ''; }); tvById('tvChNumber').value = TV.channels.reduce(function (m, c) { return Math.max(m, c.number); }, 0) + 1; tvById('tvChKind').value = 'youtube'; tvById('tvChActive').value = 'true'; }
+        function tvEditChannel(id) { var c = TV.channels.filter(function (x) { return x.id === id; })[0]; if (!c) return; TV.chEditId = id; tvById('tvChNumber').value = c.number; tvById('tvChName').value = c.name; tvById('tvChKind').value = c.kind; tvById('tvChDesc').value = c.description || ''; tvById('tvChActive').value = String(c.is_active); tvById('tvChName').focus(); }
+        function tvSaveChannel() {
+            var name = tvById('tvChName').value.trim(), num = parseInt(tvById('tvChNumber').value, 10);
+            if (!name) return tvSay('❌ Channel name is required.', true);
+            if (!(num > 0)) return tvSay('❌ Channel number must be 1 or more.', true);
+            var row = { number: num, name: name, kind: tvById('tvChKind').value, description: tvById('tvChDesc').value.trim() || null, is_active: tvById('tvChActive').value === 'true' };
+            if (TV.chEditId) row.id = TV.chEditId;
+            tvB().tvSaveChannel(row).then(tvChk).then(function (r) { TV.chId = r.data.id; tvSay('✅ Channel saved to Supabase.'); tvClearChannelForm(); return tvReload(); })
+                .catch(function (e) { tvFail(/duplicate|unique/i.test(e.message || '') ? new Error('Another channel already uses that number.') : e); });
+        }
+        function tvDeleteChannel(id) {
+            var c = TV.channels.filter(function (x) { return x.id === id; })[0]; if (!c) return;
+            if (!confirm('Delete channel "' + c.name + '"?\n\nThis also deletes all its videos and scheduled programs.')) return;
+            tvB().tvRemoveChannel(id).then(tvChk).then(function () { tvSay('✅ Channel deleted.'); return tvReload(); }).catch(tvFail);
+        }
+        function tvMoveChannel(i, d) {
+            var a = TV.channels.slice(), j = i + d; if (j < 0 || j >= a.length) return;
+            var t = a[i]; a[i] = a[j]; a[j] = t;
+            tvB().tvReorderChannels(a.map(function (c) { return c.id; })).then(tvChk).then(function () { tvSay('✅ Channel order saved.'); return tvReload(); }).catch(tvFail);
+        }
+
+        /* ---- videos (sources) ---- */
+        function tvRenderItems() {
+            var its = tvChItems();
+            tvById('tvItBody').innerHTML = its.map(function (it, i) {
+                return '<tr><td><button class="tv-mini" ' + (i === 0 ? 'disabled' : '') + ' onclick="tvMoveItem(' + i + ',-1)" aria-label="Move up">▲</button><button class="tv-mini" ' + (i === its.length - 1 ? 'disabled' : '') + ' onclick="tvMoveItem(' + i + ',1)" aria-label="Move down">▼</button></td><td>' + tvEsc(it.title) + '</td><td>' + tvEsc(it.year || '') + '</td><td>' + (it.video_id ? '<a href="https://www.youtube.com/watch?v=' + tvEsc(it.video_id) + '" target="_blank" rel="noopener" style="color:var(--neon-blue)">' + tvEsc(it.video_id) + '</a>' : tvEsc(it.url || '')) + '</td><td id="tvChk_' + it.id + '" class="tv-dim">not checked</td><td><button class="tv-mini" onclick="tvEditItem(\'' + it.id + '\')">✎</button><button class="tv-mini danger" onclick="tvDeleteItem(\'' + it.id + '\')">🗑</button></td></tr>';
+            }).join('') || '<tr><td colspan="6" class="tv-dim">' + (TV.chId ? 'No videos on this channel yet.' : 'Select a channel.') + '</td></tr>';
+            tvById('tvPrFrom').innerHTML = '<option value="">— choose —</option>' + its.map(function (it) { return '<option value="' + it.id + '">' + tvEsc(it.title) + '</option>'; }).join('');
+        }
+        function tvClearItemForm() { TV.itemId = null; ['tvItUrl', 'tvItTitle', 'tvItYear', 'tvItDesc'].forEach(function (i) { tvById(i).value = ''; }); }
+        function tvEditItem(id) { var it = TV.items.filter(function (x) { return x.id === id; })[0]; if (!it) return; TV.itemId = id; tvById('tvItUrl').value = it.url || it.video_id || ''; tvById('tvItTitle').value = it.title; tvById('tvItYear').value = it.year || ''; tvById('tvItDesc').value = it.description || ''; tvById('tvItTitle').focus(); }
+        function tvSaveItem() {
+            if (!TV.chId) return tvSay('❌ Select a channel first.', true);
+            var src = tvById('tvItUrl').value.trim(), title = tvById('tvItTitle').value.trim();
+            if (!src) return tvSay('❌ Paste a YouTube link or video ID.', true);
+            if (!title) return tvSay('❌ Title is required. Use "Look up real title" to fetch it from YouTube.', true);
+            var vid = tvYt(src), pos = tvChItems().reduce(function (m, i) { return Math.max(m, i.position); }, 0) + 1;
+            var row = { channel_id: TV.chId, title: title, year: tvById('tvItYear').value.trim() || null, description: tvById('tvItDesc').value.trim() || null, video_id: vid, url: vid ? 'https://www.youtube.com/watch?v=' + vid : src };
+            if (TV.itemId) { row.id = TV.itemId; var old = TV.items.filter(function (x) { return x.id === TV.itemId; })[0]; if (old) row.position = old.position; } else row.position = pos;
+            tvB().tvSaveItem(row).then(tvChk).then(function () { tvSay('✅ Video saved to Supabase.'); tvClearItemForm(); return tvReload(); }).catch(tvFail);
+        }
+        function tvDeleteItem(id) { if (!confirm('Remove this video from the channel?')) return; tvB().tvRemoveItem(id).then(tvChk).then(function () { tvSay('✅ Video removed.'); return tvReload(); }).catch(tvFail); }
+        function tvMoveItem(i, d) {
+            var a = tvChItems(), j = i + d; if (j < 0 || j >= a.length) return;
+            var t = a[i]; a[i] = a[j]; a[j] = t;
+            tvB().tvReorder(TV.chId, a.map(function (x) { return x.id; })).then(tvChk).then(function () { return tvReload(); }).catch(tvFail);
+        }
+        /* YouTube oEmbed returns the REAL title, and fails for removed/private/non-embeddable videos, so it doubles as an availability check. */
+        function tvOembed(vid) {
+            return fetch('https://www.youtube.com/oembed?format=json&url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + vid))
+                .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+        }
+        function tvLookupTitle() {
+            var vid = tvYt(tvById('tvItUrl').value); if (!vid) return tvSay('❌ Paste a valid YouTube link or 11-character ID first.', true);
+            tvOembed(vid).then(function (j) { tvById('tvItTitle').value = j.title; tvSay('✅ Title from YouTube: ' + j.title + '  (the year and description are still yours to fill in)'); })
+                .catch(function (e) { tvSay('❌ YouTube would not confirm this video (' + e.message + '). It may be removed, private, or have embedding disabled.', true); });
+        }
+        function tvVerifyItems() {
+            var its = tvChItems(); if (!its.length) return tvSay('Nothing to verify on this channel.', true);
+            its.forEach(function (it) {
+                var cell = tvById('tvChk_' + it.id), vid = it.video_id; if (!cell) return;
+                if (!vid) { cell.textContent = 'not YouTube'; return; }
+                cell.className = 'tv-dim'; cell.textContent = 'checking…';
+                tvOembed(vid).then(function (j) {
+                    var same = j.title.toLowerCase().indexOf(String(it.title).toLowerCase()) >= 0 || String(it.title).toLowerCase().indexOf(j.title.toLowerCase()) >= 0;
+                    cell.className = same ? 'tv-ok' : 'tv-bad'; cell.textContent = same ? '✓ available' : '⚠ YouTube title: ' + j.title;
+                }).catch(function () { cell.className = 'tv-bad'; cell.textContent = '✗ unavailable / not embeddable'; });
+            });
+        }
+
+        /* ---- schedule / guide ---- */
+        function tvRenderPrograms() {
+            var ps = tvChProgs();
+            tvById('tvPrBody').innerHTML = ps.map(function (p) {
+                return '<tr><td>' + tvShow(p.starts_at) + '</td><td>' + tvShow(p.ends_at) + '</td><td>' + tvEsc(p.title) + '</td><td>' + tvEsc(tvYt(p.media_url) || p.media_url) + '</td><td><button class="tv-mini" onclick="tvEditProgram(\'' + p.id + '\')">✎</button><button class="tv-mini danger" onclick="tvDeleteProgram(\'' + p.id + '\')">🗑</button></td></tr>';
+            }).join('') || '<tr><td colspan="5" class="tv-dim">' + (TV.chId ? 'Nothing scheduled. With no schedule the channel plays its videos on demand.' : 'Select a channel.') + '</td></tr>';
+        }
+        function tvRenderNowNext() {
+            var el = tvById('tvNowNext'); if (!TV.chId) { el.textContent = ''; return; }
+            var t = Date.now(), cur = null, next = null;
+            tvChProgs().forEach(function (p) { var s = +new Date(p.starts_at), e = +new Date(p.ends_at); if (s <= t && t < e) cur = p; else if (s > t && !next) next = p; });
+            el.innerHTML = '<b>Playing now:</b> ' + (cur ? tvEsc(cur.title) + ' <span class="tv-dim">(until ' + tvShow(cur.ends_at) + ')</span>' : '<span class="tv-dim">nothing scheduled right now (channel plays on demand)</span>') +
+                '<br><b>Up next:</b> ' + (next ? tvEsc(next.title) + ' <span class="tv-dim">(' + tvShow(next.starts_at) + ')</span>' : '<span class="tv-dim">nothing scheduled</span>');
+        }
+        function tvClearProgramForm() { TV.progId = null; ['tvPrTitle', 'tvPrUrl', 'tvPrDesc', 'tvPrStart', 'tvPrDur', 'tvPrEnd'].forEach(function (i) { tvById(i).value = ''; }); tvById('tvPrFrom').value = ''; }
+        function tvPrFill() {
+            var it = TV.items.filter(function (x) { return x.id === tvById('tvPrFrom').value; })[0]; if (!it) return;
+            tvById('tvPrTitle').value = it.title; tvById('tvPrUrl').value = it.url || it.video_id || ''; tvById('tvPrDesc').value = it.description || '';
+            if (it.duration_seconds) { tvById('tvPrDur').value = Math.round(it.duration_seconds / 60); tvPrCalcEnd(); }
+        }
+        function tvPrCalcEnd() { var s = tvById('tvPrStart').value, d = parseInt(tvById('tvPrDur').value, 10); if (s && d > 0) tvById('tvPrEnd').value = tvLocalInput(+new Date(s) + d * 60000); }
+        function tvEditProgram(id) { var p = TV.programs.filter(function (x) { return x.id === id; })[0]; if (!p) return; TV.progId = id; tvById('tvPrTitle').value = p.title; tvById('tvPrUrl').value = p.media_url; tvById('tvPrDesc').value = p.description || ''; tvById('tvPrStart').value = tvLocalInput(p.starts_at); tvById('tvPrEnd').value = tvLocalInput(p.ends_at); tvById('tvPrDur').value = Math.round((new Date(p.ends_at) - new Date(p.starts_at)) / 60000); tvById('tvPrTitle').focus(); }
+        function tvSaveProgram() {
+            if (!TV.chId) return tvSay('❌ Select a channel first.', true);
+            var title = tvById('tvPrTitle').value.trim(), url = tvById('tvPrUrl').value.trim(), s = tvById('tvPrStart').value, e = tvById('tvPrEnd').value;
+            if (!title) return tvSay('❌ Program title is required.', true);
+            if (!url) return tvSay('❌ A video link is required.', true);
+            if (!s || !e) return tvSay('❌ Set a start time and either a duration or an end time.', true);
+            var st = new Date(s), en = new Date(e);
+            if (!(en > st)) return tvSay('❌ The end time must be after the start time.', true);
+            var vid = tvYt(url), media = vid ? 'https://www.youtube.com/watch?v=' + vid : url;
+            var clash = tvChProgs().filter(function (p) { return p.id !== TV.progId && new Date(p.starts_at) < en && new Date(p.ends_at) > st; })[0];
+            if (clash && !confirm('This overlaps "' + clash.title + '" (' + tvShow(clash.starts_at) + ' – ' + tvShow(clash.ends_at) + ').\nSave anyway?')) return;
+            var row = { channel_id: TV.chId, title: title, description: tvById('tvPrDesc').value.trim() || null, media_url: media, starts_at: st.toISOString(), ends_at: en.toISOString(), position: tvChProgs().length };
+            if (TV.progId) row.id = TV.progId;
+            tvB().tvSaveProgram(row).then(tvChk).then(function () { tvSay('✅ Program saved to Supabase. The guide updates live for viewers.'); tvClearProgramForm(); return tvReload(); }).catch(tvFail);
+        }
+        function tvDeleteProgram(id) { if (!confirm('Delete this scheduled program?')) return; tvB().tvRemoveProgram(id).then(tvChk).then(function () { tvSay('✅ Program deleted.'); return tvReload(); }).catch(tvFail); }
+
+        tvClearChannelForm();
         checkAdminAccess();
     <\/script>
 </body>
@@ -10750,7 +10936,6 @@ document.addEventListener('click', function(e){
             <a href="memories.html" class="nav-link">Memories</a> 
             <a href="leaderboard.html" class="nav-link">LEADERBOARD</a>
             <a href="movies.html" class="nav-link">MOVIES 🎬</a>
-            <a href="tv.html" class="nav-link">TV 📺</a>
             <a href="profile.html" class="nav-link">MY PROFILE</a>
             <a href="terms.html" class="nav-link">TERMS</a>
             <a href="privacy.html" class="nav-link">PRIVACY</a>
@@ -10852,7 +11037,7 @@ document.addEventListener('click', function(e){
         </div>
         
         <p style="margin-top: 40px; font-size: 0.9em; opacity: 0.6;">
-            © 2026 Diane Keaton Memorial Arcade • Powered by AI & Love<br>
+            © 2025 Diane Keaton Memorial Arcade • Powered by AI & Love<br>
             Self-Learning AI • Educational Tool • Classic Game Preservation<br>
             Created with ❤️ by Game Killers Studio™
         </p>
@@ -12008,7 +12193,7 @@ document.addEventListener('click', function(e){
     </div>
     
     <div class="footer">
-        <p>💜 Diane Keaton Memorial Arcade © 2026</p>
+        <p>💜 Diane Keaton Memorial Arcade © 2025</p>
         <p style="margin-top: 10px;">Operated by Kurrasch Gaming Merch Stores LLC & Kurrasch Systems</p>
         <p style="margin-top: 20px; font-size: 0.9em;">
             <a href="index.html" style="color: var(--neon-blue); text-decoration: none;">Home</a> • 
@@ -12049,153 +12234,6 @@ document.addEventListener('click', function(e){
 </html>
 </script>
 
-<script type="text/plain" id="page-tv"><!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Diane Keaton Legacy Entertainment Center | TV</title>
-<script>
-window.__SEARCH = "";
-window.__go = function(r){ try{ parent.__arcadeGo(r); }catch(e){} };
-function __pushTitle(){ try{ parent.document.title = document.title; }catch(e){} }
-document.addEventListener('DOMContentLoaded', __pushTitle);
-document.addEventListener('click', function(e){
-  var a = e.target.closest && e.target.closest('a[href]'); if(!a) return;
-  var h = a.getAttribute('href') || '';
-  if (/^(https?:|mailto:|javascript:)/i.test(h)) return;
-  if (/\.html?(\?|#|$)/i.test(h)) { e.preventDefault(); window.__go(h); }
-}, true);
-<\/script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#050510;color:#fff;font-family:Roboto,Arial,sans-serif;min-height:100vh}
-nav{display:flex;gap:18px;flex-wrap:wrap;padding:14px 20px;background:#0a0a1c;border-bottom:1px solid #00f3ff55}
-nav a{color:#00f3ff;text-decoration:none;font-weight:700;letter-spacing:1px}
-h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
-#msg{padding:8px 20px;color:#ffcc66}
-.wrap{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:16px;padding:12px 20px}
-@media(max-width:850px){.wrap{grid-template-columns:1fr}}
-.player{aspect-ratio:16/9;background:#000;border:2px solid #00f3ff;border-radius:8px;overflow:hidden}
-.player>div,.player iframe{width:100%;height:100%}
-#now{margin-top:8px;font-weight:700}#now small{display:block;color:#9ab;font-weight:400}
-.guide{background:#0b0b20;border:1px solid #243;border-radius:8px;overflow:auto;max-height:70vh}
-.ch{display:flex;gap:10px;padding:10px;border-bottom:1px solid #223;cursor:pointer}
-.ch:hover,.ch.on{background:#142038}
-.ch img{width:48px;height:48px;object-fit:contain;background:#111;border-radius:6px}
-.num{font:900 1.3em Orbitron,monospace;color:#00f3ff;min-width:34px}
-.ch small{color:#9ab;display:block}
-.admin{margin:12px 20px 30px;background:#0b0b20;border:1px solid #bf00ff88;border-radius:8px;padding:14px}
-.admin h2{color:#bf00ff;margin-bottom:8px}
-.admin input,.admin textarea{background:#111;color:#fff;border:1px solid #345;border-radius:4px;padding:6px;margin:3px 3px 3px 0}
-.admin button{background:#00f3ff;color:#000;border:0;border-radius:4px;padding:6px 10px;font-weight:700;cursor:pointer;margin:3px}
-.admin button.x{background:#ff4466;color:#fff}
-.it{display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #223}
-.it span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hide{display:none}
-</style></head><body>
-<nav><a href="index.html">HOME</a><a href="movies.html">MOVIES</a><a href="leaderboard.html">LEADERBOARDS</a><a href="tv.html">TV</a></nav>
-<h1>📺 TV</h1><div id="msg">Connecting…</div>
-<div class="wrap">
-  <div><div class="player"><div id="yt"></div></div><div id="now">Pick a channel</div></div>
-  <div class="guide" id="guide"></div>
-</div>
-<div class="admin hide" id="admin">
-  <h2>Admin — channel programming</h2>
-  <div id="achan"></div>
-  <details open><summary>Add / edit channel</summary>
-    <input id="cn" type="number" placeholder="Number" style="width:90px"><input id="cname" placeholder="Name">
-    <input id="clogo" placeholder="Logo URL"><br><textarea id="cdesc" placeholder="Description" rows="2" cols="50"></textarea><br>
-    <button id="csave">Save channel</button><span id="cid" class="hide"></span></details>
-  <div id="aitems"></div>
-  <div id="addrow" class="hide"><input id="yurl" placeholder="YouTube link" size="38"><input id="ytitle" placeholder="Title (auto if blank)">
-    <input id="ystart" type="datetime-local" title="Optional scheduled start"><button id="yadd">Add video</button></div>
-</div>
-<script src="https://www.youtube.com/iframe_api"><\/script>
-<script>
-(function(){
-  var B = parent.DKBackend, chans = [], items = {}, cur = null, curIdx = 0, player = null, playerReady = false, isAdmin = false, pendingLoad = null;
-  function $(i){return document.getElementById(i)}
-  function esc(s){var d=document.createElement('i');d.textContent=s==null?'':s;return d.innerHTML}
-  function msg(t){$('msg').textContent=t||''}
-  function ytId(u){var m=String(u).match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(u)?u:null)}
-
-  window.onYouTubeIframeAPIReady = function(){
-    player = new YT.Player('yt',{width:'100%',height:'100%',playerVars:{rel:0,playsinline:1},events:{
-      onReady:function(){playerReady=true;if(pendingLoad)pendingLoad();},
-      onStateChange:function(e){if(e.data===0)advance();},
-      onError:function(){msg('That video could not be played; skipping.');setTimeout(advance,1500);}
-    }});
-  };
-  function play(){ // reuses the ONE player; never recreates it
-    var list=items[cur]||[]; if(!list.length){$('now').innerHTML='This channel has no programming yet.';return}
-    curIdx=((curIdx%list.length)+list.length)%list.length; var it=list[curIdx];
-    var go=function(){player.loadVideoById(it.youtube_id)};
-    if(playerReady)go();else pendingLoad=go;
-    var nx=list[(curIdx+1)%list.length];
-    $('now').innerHTML='Now playing: '+esc(it.title)+'<small>'+esc(it.description||'')+'</small><small>Next: '+esc(nx.title)+'</small>';
-    render();
-  }
-  function advance(){ // transition point: refetch so admin changes apply between videos
-    if(!cur)return; var oldId=(items[cur]||[])[curIdx]; oldId=oldId&&oldId.id;
-    loadItems(cur).then(function(){var l=items[cur]||[];var i=l.findIndex(function(x){return x.id===oldId});curIdx=(i>=0?i:curIdx-1)+1;play()});
-  }
-  function render(){
-    $('guide').innerHTML=chans.map(function(c){var l=items[c.id]||[],i=c.id===cur?curIdx:0,n=l[i%(l.length||1)],x=l.length?l[(i+1)%l.length]:null;
-      return '<div class="ch'+(c.id===cur?' on':'')+'" data-id="'+c.id+'">'+(c.logo_url?'<img src="'+esc(c.logo_url)+'" alt="">':'')+'<div class="num">'+c.number+'</div><div><b>'+esc(c.name)+'</b>'+
-      '<small>'+esc(c.description||'')+'</small><small>'+(n?'Now: '+esc(n.title):'No programming')+'</small>'+(x&&l.length>1?'<small>Next: '+esc(x.title)+'</small>':'')+
-      (n&&n.starts_at?'<small>Scheduled: '+new Date(n.starts_at).toLocaleString()+'</small>':'')+'</div></div>'}).join('')||'<div style="padding:14px">No channels yet.</div>';
-    if(isAdmin)renderAdmin();
-  }
-  function loadItems(id){return B.tvItems(id).then(function(r){if(r.error)throw r.error;items[id]=r.data||[]})}
-  function loadAll(){
-    return B.tvChannels().then(function(r){if(r.error)throw r.error;chans=r.data||[];return Promise.all(chans.map(function(c){return loadItems(c.id)}))}).then(function(){render();msg('')})
-      .catch(function(e){msg('Could not load channels: '+(e.message||e))});
-  }
-  $('guide').addEventListener('click',function(e){var d=e.target.closest('.ch');if(!d)return;if(cur!==d.dataset.id){cur=d.dataset.id;curIdx=0;play()}});
-
-  /* ---- admin (UI only; the database enforces who may write) ---- */
-  var editCh=null;
-  function renderAdmin(){
-    $('achan').innerHTML='<button data-n="1">+ New channel</button>'+chans.map(function(c){return '<button data-e="'+c.id+'">Edit #'+c.number+' '+esc(c.name)+'</button>'}).join('');
-    $('addrow').classList.toggle('hide',!editCh);
-    var l=editCh?(items[editCh]||[]):[];
-    $('aitems').innerHTML=l.map(function(it,i){return '<div class="it"><span>'+(i+1)+'. '+esc(it.title)+' ['+it.youtube_id+']</span>'+
-      '<button data-p="'+it.id+'">▶</button><button data-u="'+i+'">↑</button><button data-d="'+i+'">↓</button><button class="x" data-r="'+it.id+'">✕</button></div>'}).join('');
-  }
-  function fail(r){if(r&&r.error){msg('Save failed: '+r.error.message);return true}return false}
-  $('admin').addEventListener('click',function(e){var t=e.target,l=editCh?(items[editCh]||[]):[];
-    if(t.dataset.n){editCh=null;$('cn').value=$('cname').value=$('clogo').value=$('cdesc').value='';renderAdmin()}
-    else if(t.dataset.e){editCh=t.dataset.e;var c=chans.find(function(x){return x.id===editCh});$('cn').value=c.number;$('cname').value=c.name;$('clogo').value=c.logo_url||'';$('cdesc').value=c.description||'';renderAdmin()}
-    else if(t.dataset.p){cur=editCh;curIdx=l.findIndex(function(x){return x.id===t.dataset.p});play()}
-    else if(t.dataset.r){B.tvRemoveItem(t.dataset.r).then(function(r){if(!fail(r))loadItems(editCh).then(render)})}
-    else if(t.dataset.u||t.dataset.d){var i=+(t.dataset.u||t.dataset.d),j=t.dataset.u?i-1:i+1;if(j<0||j>=l.length)return;
-      var ids=l.map(function(x){return x.id});var tmp=ids[i];ids[i]=ids[j];ids[j]=tmp;
-      B.tvReorder(editCh,ids).then(function(r){if(!fail(r))loadItems(editCh).then(render)})}
-  });
-  $('csave').onclick=function(){
-    var ch={number:+$('cn').value,name:$('cname').value.trim(),description:$('cdesc').value.trim()||null,logo_url:$('clogo').value.trim()||null};
-    if(!ch.number||!ch.name){msg('Channel needs a number and a name.');return}
-    if(editCh&&chans.some(function(c){return c.id===editCh&&c.number===ch.number||c.id===editCh}))ch.id=editCh;
-    B.tvSaveChannel(ch).then(function(r){if(!fail(r)){editCh=r.data.id;return loadAll()}})};
-  $('yadd').onclick=function(){
-    var id=ytId($('yurl').value.trim());if(!id){msg('That is not a YouTube link.');return}
-    var title=$('ytitle').value.trim(),st=$('ystart').value;
-    var t=title?Promise.resolve(title):fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent('https://www.youtube.com/watch?v='+id)).then(function(r){return r.json()}).then(function(j){return j.title}).catch(function(){return null});
-    t.then(function(tt){if(!tt){msg('Could not look up the title; type one in.');return}
-      var pos=(items[editCh]||[]).length;
-      return B.tvSaveItem({channel_id:editCh,position:pos,youtube_id:id,title:tt,thumbnail_url:'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',starts_at:st?new Date(st).toISOString():null})
-        .then(function(r){if(!fail(r)){$('yurl').value=$('ytitle').value='';return loadItems(editCh).then(render)}})})};
-
-  function start(){
-    if(!B||B.status==='unconfigured'){msg('Backend is not configured, so channels cannot load.');return}
-    if(!B.client){msg('Connecting…');return}
-    loadAll().then(function(){return B.isAdmin()}).then(function(a){isAdmin=a;$('admin').classList.toggle('hide',!a);if(a)renderAdmin()});
-    var t;B.tvSubscribe(function(){clearTimeout(t);t=setTimeout(function(){ // live guide update; player is not touched
-      loadAll().then(function(){if(cur&&!chans.some(function(c){return c.id===cur})){cur=null;$('now').textContent='This channel was removed.'}})},400)});
-  }
-  if(B){var started=false;var once=function(){if(!started&&B.client){started=true;start()}};B.onStatus(once);once();setTimeout(function(){if(!started)start()},3000)}else msg('Backend missing.');
-})();
-<\/script></body></html>
-</script>
-
 <script>
 /* ============================================================
    Diane's Arcade — single-file shell
@@ -12204,7 +12242,7 @@ h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
    Routes:  #/home  #/game?game=motherload  #/profile  etc.
    ============================================================ */
 (function () {
-  var FILE_ROUTES = {"index.html": "home", "game.html": "game", "achievements.html": "achievements", "leaderboard.html": "leaderboard", "memories.html": "memories", "shop.html": "shop", "movies.html": "movies", "profile.html": "profile", "login.html": "login", "settings.html": "settings", "admin.html": "admin", "bot.html": "bot", "termsofservice.html": "terms", "terms.html": "terms", "privacypolicy.html": "privacy", "privacy.html": "privacy", "tv.html": "tv"};
+  var FILE_ROUTES = {"index.html": "home", "game.html": "game", "achievements.html": "achievements", "leaderboard.html": "leaderboard", "memories.html": "memories", "shop.html": "shop", "movies.html": "movies", "profile.html": "profile", "login.html": "login", "settings.html": "settings", "admin.html": "admin", "bot.html": "bot", "termsofservice.html": "terms", "terms.html": "terms", "privacypolicy.html": "privacy", "privacy.html": "privacy"};
   var stage = document.getElementById('stage');
   var boot = document.getElementById('boot');
   var current = { route: null, search: '' };
@@ -12212,7 +12250,7 @@ h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
   function pageSource(route) {
     var el = document.getElementById('page-' + route);
     if (!el) return null;
-    return el.textContent.replace(/<\\\/script/g, '</script').replace(/<\\!--/g, '<!--');
+    return el.textContent.replace(/<\\\/script/g, '<' + '/script').replace(/<\\!--/g, '<' + '!--');
   }
 
   function parseHash() {
@@ -12239,7 +12277,7 @@ h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
         if (p.route === 'home' && location.hash === '#/home-games') d.getElementById('games') && d.getElementById('games').scrollIntoView();
       } catch (e) {}
     };
-    stage.srcdoc = window.__dianeInject ? window.__dianeInject(p.route, html) : html;
+    var __h = window.__dianeInject ? window.__dianeInject(p.route, html) : html; stage.srcdoc = __h.replace(/<head>/i, function(m){ return m + '<' + 'script>(function(){var w=window,q=[],last=null,ok={};function host(){var h=document.getElementById(\'dk-toasts\');if(h)return h;h=document.createElement(\'div\');h.id=\'dk-toasts\';h.style.cssText=\'position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:2147483647;display:flex;flex-direction:column;gap:8px;width:min(92vw,440px);pointer-events:none\';(document.body||document.documentElement).appendChild(h);return h}w.alert=function(m){var t=document.createElement(\'div\');t.setAttribute(\'role\',\'status\');t.textContent=String(m==null?\'\':m);t.style.cssText=\'pointer-events:auto;background:#0a0a1fee;color:#fff;border:1px solid #00f3ff;border-radius:12px;padding:12px 16px;font:14px/1.4 Roboto,sans-serif;white-space:pre-line;box-shadow:0 0 18px #00f3ff55;cursor:pointer\';t.onclick=function(){t.remove()};host().appendChild(t);setTimeout(function(){t.remove()},5500)};document.addEventListener(\'click\',function(e){last=e.target},true);w.confirm=function(m){m=String(m);if(ok[m]){delete ok[m];return true}var el=last;var o=document.createElement(\'div\');o.style.cssText=\'position:fixed;inset:0;background:#000a;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:16px\';var b=document.createElement(\'div\');b.style.cssText=\'background:#0a0a1f;color:#fff;border:1px solid #bf00ff;border-radius:14px;padding:20px;max-width:440px;width:100%;font:15px/1.45 Roboto,sans-serif;white-space:pre-line\';b.textContent=m;var r=document.createElement(\'div\');r.style.cssText=\'display:flex;gap:10px;justify-content:flex-end;margin-top:16px\';function btn(t,c){var x=document.createElement(\'button\');x.textContent=t;x.style.cssText=\'padding:10px 18px;border-radius:8px;border:0;font:700 14px Orbitron,sans-serif;cursor:pointer;background:\'+c+\';color:#fff\';return x}var n=btn(\'Cancel\',\'#333\'),y=btn(\'Confirm\',\'#bf00ff\');n.onclick=function(){o.remove()};y.onclick=function(){o.remove();ok[m]=true;setTimeout(function(){if(el&&el.click)el.click();setTimeout(function(){delete ok[m]},500)},0)};r.appendChild(n);r.appendChild(y);b.appendChild(r);o.appendChild(b);(document.body||document.documentElement).appendChild(o);y.focus();return false};})();<\/script>'; });
   }
 
   // Convert an old-style link ("profile.html", "game.html?game=x", "#games") into a route
@@ -12263,7 +12301,7 @@ h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
 /* ===== DIANE — AI Tribute Host (Gemini-powered) ===== */
 (function () {
   'use strict';
-  var FOUNDERS = ['tannerkurrasch@gmail.com', 'kurraschgaminmerchstore@gmail.com', 'gamekillerszone@gmail.com'];
+  var FOUNDERS = ['tannerkurrasch@gmail.com', 'kurraschgamingmerchstore@gmail.com', 'gamekillerszone@gmail.com'];
   var BUILTIN_EXTRAS = [ // games that existed in /games but had no card
     { id: 'dr_compactor', name: 'DR. COMPACTOR', file: 'dr-compactor.swf' },
     { id: 'snowline_winter', name: 'SNOW LINE WINTER', file: 'Snow Line - A free Winter Game.swf' }
@@ -12305,12 +12343,12 @@ h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
   window.__dianeInject = function (route, html) {
     var s = '';
     if (route === 'home') {
-      s = "<script>(function(){var G=" + JSON.stringify(extras()).replace(/</g, '\\u003c') + ";function e(x){var d=document.createElement('i');d.textContent=x;return d.innerHTML}" +
+      s = "<" + "script>(function(){var G=" + JSON.stringify(extras()).replace(/</g, '\\u003c') + ";function e(x){var d=document.createElement('i');d.textContent=x;return d.innerHTML}" +
         "function go(){var g=document.querySelector('.games-grid');if(!g)return;G.forEach(function(x){if(g.querySelector('a[href=\"game.html?game='+x.id+'\"]'))return;var d=document.createElement('div');d.className='game-card';" +
         "d.innerHTML='<div class=\"game-image\" style=\"display:flex;align-items:center;justify-content:center;font-size:4em;background:linear-gradient(135deg,#1a0a3a,#0a2a3a)\">\uD83C\uDFAE</div><div class=\"game-content\"><h3>'+e(x.name)+'</h3><p class=\"game-creator\">'+(x.by?'added by '+e(x.by):'Arcade classic')+'</p><p>'+(x.by?'Fresh pick from Diane.':'Back in the lineup.')+'</p><a href=\"game.html?game='+encodeURIComponent(x.id)+'\" class=\"play-btn\">PLAY NOW</a></div>';g.appendChild(d)})}" +
         "if(document.readyState!=='loading')go();else document.addEventListener('DOMContentLoaded',go)})();<\/script>";
     } else if (route === 'movies') {
-      s = "<script>window.addEventListener('load',function(){try{var o=openMovie;openMovie=function(m,p){o(m,p);try{parent.__dianeWatch(m.title)}catch(e){}}}catch(e){}});<\/script>";
+      s = "<" + "script>window.addEventListener('load',function(){try{var o=openMovie;openMovie=function(m,p){o(m,p);try{parent.__dianeWatch(m.title)}catch(e){}}}catch(e){}});<\/script>";
     }
     var i = html.lastIndexOf('</body>');
     return s && i > -1 ? html.slice(0, i) + s + html.slice(i) : html;
@@ -12387,7 +12425,7 @@ h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
   function showOverlay(h, b) {
     if (!overlay) { overlay = document.createElement('div'); overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(5,5,16,.97);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font:16px Roboto,sans-serif;padding:24px'; document.body.appendChild(overlay); }
     overlay.innerHTML = '<div style="max-width:420px"><div style="font:900 1.6em Orbitron,monospace;color:#ff00ff;margin-bottom:12px">' + h + '</div><div>' + b + '</div><button id="dLogout" style="margin-top:20px;padding:10px 22px;border:1px solid #00f3ff;background:none;color:#00f3ff;border-radius:8px;cursor:pointer">Log out</button></div>';
-    overlay.querySelector('#dLogout').onclick = function () { LS.removeItem('arcadeUser'); LS.removeItem('isLoggedIn'); location.hash = '#/home'; location.reload(); };
+    overlay.querySelector('#dLogout').onclick = function () { var d = function () { LS.removeItem('arcadeUser'); LS.removeItem('isLoggedIn'); location.hash = '#/home'; location.reload(); }; try { window.DKBackend.logout().then(d, d); } catch (e) { d(); } };
   }
   function hideOverlay() { if (overlay) { overlay.remove(); overlay = null; } }
   var BAD = /\b(f+u+c+k+\w*|sh[i1]+t\w*|b[i1]tch\w*|n[i1]gg\w*|f[a4]gg?[o0]t\w*|cunt\w*|retard\w*|kys|kill yourself)\b/i;
@@ -12448,16 +12486,11 @@ h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
       (isStaff(r) ? "This user is staff. If they ask you to add a game, moderate a user, or audit games, reply briefly AND end with one line exactly like '@@CMD: add game Name file.swf' or '@@CMD: mute username 10 reason' or '@@CMD: audit games'. " : "This user is not staff; never output @@CMD lines.");
   }
   var hist = J('dianeHist', []);
-  function gemini(text, u) {
-    var c = cfg(); if (!c.key) return Promise.reject('nokey');
+  function gemini(text, u) { /* server-side AI: key lives in Supabase secrets, never in the browser */
+    var B = window.DKBackend; if (!B || !B.client || !B.user) return Promise.reject('signin');
     hist.push({ role: 'user', parts: [{ text: text }] }); hist = hist.slice(-12);
-    return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + (c.model || 'gemini-2.0-flash') + ':generateContent?key=' + encodeURIComponent(c.key), {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: persona(u) }] }, contents: hist, generationConfig: { temperature: 0.9, maxOutputTokens: 300 } })
-    }).then(function (x) { return x.json(); }).then(function (d) {
-      var o = d.candidates && d.candidates[0] && d.candidates[0].content.parts.map(function (p) { return p.text; }).join('');
-      if (!o) throw new Error('empty'); hist.push({ role: 'model', parts: [{ text: o }] }); S('dianeHist', hist.slice(-12)); return o;
-    });
+    return B.client.functions.invoke('diane-chat', { body: { message: text, history: hist.slice(0, -1), page: location.hash, username: u && u.username } })
+      .then(function (r) { if (r.error || !r.data || !r.data.reply) throw new Error('ai'); var o = r.data.reply; hist.push({ role: 'model', parts: [{ text: o }] }); S('dianeHist', hist.slice(-12)); return o; });
   }
   var JOKES = ['I tried to organize my hat collection alphabetically. Now I can\'t find my hats or the alphabet.', 'Why did the Flash game go to therapy? Too many unresolved plugins.', 'I wear gloves to play arcade games. Fashion first, high scores second. la-di-da!'];
   function local(text, u) {
@@ -12549,12 +12582,7 @@ h1{font:900 1.6em Orbitron,monospace;color:#00f3ff;padding:18px 20px 4px}
     if (!list) return null; var d = document.createElement('div'); d.className = 'dm ' + (user ? 'u' : 'd'); d.innerHTML = user ? esc(html) : html;
     list.appendChild(d); list.scrollTop = list.scrollHeight; if (!user && !box.classList.contains('on') && !raw) btn.style.boxShadow = '0 0 26px #39ff14'; return d;
   }
-  function desk() {
-    var u = me(); if (role(u) !== 'founder') return say('Diane\'s Desk is for the founders only.');
-    var c = cfg(), k = prompt('Gemini API key (stored only in this browser; leave blank to clear):', c.key || '');
-    if (k === null) return; var m = prompt('Gemini model:', c.model || 'gemini-2.0-flash'); if (m === null) return;
-    S('dianeCfg', { key: k.trim(), model: m.trim() || 'gemini-2.0-flash' }); say(k.trim() ? '\u2728 Gemini is connected. I feel sharper already!' : 'Gemini key cleared. I\'ll use my built-in personality.');
-  }
+  function desk() { say('The AI key is now stored securely on the server (Supabase secret GEMINI_API_KEY). Nothing to enter here.'); }
   function handle(text) {
     var u = me(); say(text, true);
     if (u && muted(u)) return say('You\'re muted for now, so I can\'t chat. It\'ll pass soon.');

@@ -1,0 +1,9 @@
+{
+  "_help": "Optional. Add an entry per game file to set its title, description, creator or image. Anything you leave out is filled in automatically from the file name.",
+  "dr-compactor.swf": {
+    "title": "DR. COMPACTOR",
+    "description": "Describe the game here.",
+    "creator": "",
+    "image": ""
+  }
+}

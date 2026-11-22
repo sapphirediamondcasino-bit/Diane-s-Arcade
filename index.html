@@ -185,10 +185,21 @@
   B.logout = function () { if (!B.client) return Promise.resolve(); return B.client.auth.signOut().then(function () { B.user = null; }); };
   B.resetPassword = function (email) { need(); return B.client.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); };
   B.updatePassword = function (pw) { need(); return B.client.auth.updateUser({ password: pw }).then(function (r) { if (r.error) throw new Error(friendly(r.error)); return r.data; }); };
-  /* Google is the only social login. Discord is for account LINKING only and is never a way to log in. */
+  /* Social login: Google, Discord and X. Which ones are enabled is read from the Supabase project's own settings. */
   B.loginGoogle = function (next) {
     need(); try { sessionStorage.setItem('dk_next', String(next || 'profile')); } catch (e) {}
     return B.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }).then(function (r) { if (r.error) throw new Error(friendly(r.error)); return r.data; });
+  };
+
+  B.providers = function () {
+    return fetch(SUPABASE_URL + '/auth/v1/settings', { headers: { apikey: SUPABASE_ANON_KEY } })
+      .then(function (r) { return r.json(); }).then(function (j) { return j.external || null; }).catch(function () { return null; });
+  };
+  B.loginOAuth = function (which, next) {
+    need(); try { sessionStorage.setItem('dk_next', String(next || 'profile')); } catch (e) {}
+    function go(p) { return B.client.auth.signInWithOAuth({ provider: p, options: { redirectTo: location.origin + location.pathname } }).then(function (r) { if (r.error) throw new Error(friendly(r.error)); return r.data; }); }
+    if (which !== 'x') return go(which);
+    return B.providers().then(function (ext) { return go(ext && !ext.x && ext.twitter ? 'twitter' : 'x'); });
   };
 
   /* ---------- compatibility cache: keeps legacy pages that read localStorage 'arcadeUser' working.
@@ -7937,6 +7948,10 @@ button,input{font:inherit;color:inherit}
 .top p{margin:6px 0 0;color:var(--muted);font-size:14.5px}
 .gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:11px;padding:12px 16px;border-radius:12px;border:0;background:#fff;color:#1f1f1f;font-weight:700;font-size:15.5px;cursor:pointer;transition:.15s}
 .gbtn:hover{filter:brightness(.93)}.gbtn:disabled{opacity:.6;cursor:wait}
+.gbtn+.gbtn{margin-top:10px}
+.gbtn.discord{background:#5865F2;color:#fff}
+.gbtn.xb{background:#000;color:#fff;border:1px solid #555}
+.gbtn .soc{font-weight:900;font-size:18px;width:20px;text-align:center}
 .gbtn svg{width:20px;height:20px;flex:none}
 .or{display:flex;align-items:center;gap:12px;margin:16px 0 14px;color:var(--muted);font-size:12.5px;letter-spacing:1.5px;text-transform:uppercase}
 .or::before,.or::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.14)}
@@ -7994,10 +8009,12 @@ html,body{background:#111111}
   </div>
 
   <div id="viewAuth">
-    <button class="gbtn" id="gBtn" type="button">
+    <button class="gbtn" id="gBtn" type="button" hidden>
       <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
       Continue with Google
     </button>
+    <button class="gbtn discord" id="dBtn" type="button"><span class="soc" aria-hidden="true">&#128172;</span> Continue with Discord</button>
+    <button class="gbtn xb" id="xBtn" type="button"><span class="soc" aria-hidden="true">X</span> Continue with X</button>
     <div class="or">or use email</div>
 
     <div class="tabs" role="tablist" aria-label="Account options">
@@ -8033,7 +8050,7 @@ html,body{background:#111111}
 </main>
 
 <script>
-/* Login page: real Supabase auth only. Google is the only social login. Discord is NOT a login method. */
+/* Login page: real Supabase auth only. Social login: Google, Discord and X. */
 (function () {
   'use strict';
   function $(id) { return document.getElementById(id); }
@@ -8104,6 +8121,22 @@ html,body{background:#111111}
     ready().then(function (B) { return B.loginGoogle(new URLSearchParams(window.__SEARCH || '').get('next') || 'profile'); })
       .catch(function (err) { msg(err.message || 'Google sign-in could not start.'); btn.disabled = false; });
   });
+  function social(which, label, btn) {
+    btn.disabled = true; msg('Opening ' + label + '...', 'ok');
+    ready().then(function (B) { return B.loginOAuth(which, new URLSearchParams(window.__SEARCH || '').get('next') || 'profile'); })
+      .catch(function (err) { msg(err.message || (label + ' sign-in could not start.')); btn.disabled = false; });
+  }
+  $('dBtn').addEventListener('click', function () { social('discord', 'Discord', this); });
+  $('xBtn').addEventListener('click', function () { social('x', 'X', this); });
+  (function () {
+    var B = BK(); if (!B || !B.providers) { $('gBtn').hidden = false; return; }
+    B.providers().then(function (ext) {
+      if (!ext) { $('gBtn').hidden = false; return; }
+      if (ext.google === true) $('gBtn').hidden = false;
+      if (ext.discord === false) $('dBtn').hidden = true;
+      if ((ext.x === false || ext.x === undefined) && (ext.twitter === false || ext.twitter === undefined) && ('x' in ext || 'twitter' in ext)) $('xBtn').hidden = true;
+    });
+  })();
   $('goProfile').onclick = afterLogin;
   $('doLogout').onclick = function () { var B = BK(); (B ? B.logout() : Promise.resolve()).then(function () { try { localStorage.removeItem('arcadeUser'); } catch (e) {} window.__go('login.html'); window.__reload(); }); };
 
@@ -11474,9 +11507,8 @@ html,body{background:#111111}
 </script>
 <script>
 /* ===== DKGames: automatic game discovery. Drop a .swf into the games/ folder and it appears on the site. =====
-   Order of discovery: 1) games/manifest.json (rebuilt automatically by the GitHub Action when you add a file),
-   2) GitHub's file listing API (works on owner.github.io sites without the Action), 3) nothing - the built-in
-   list in the game page still works. */
+   Discovery reads BOTH games/manifest.json and the live file list of the games folder on GitHub, and merges them,
+   so new .swf, .html, .torrent and .magnet games and their pictures show up even if the manifest is out of date. */
 (function () {
   'use strict';
   var list = null, tlist = [], pending = null, donep = null;
@@ -11492,17 +11524,37 @@ html,body{background:#111111}
     return fetch('games/manifest.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('no manifest'); return r.json(); })
       .then(function (j) { return (j.games || j).filter(function (g) { return g && (g.file || g.magnet || typeof g === 'string'); }).map(norm); });
   }
+  var REPO = '';   /* only needed if your site is NOT on github.io (custom domain): put 'owner/repo' here */
+  function listing() {
+    var repoPath = REPO;
+    if (!repoPath) {
+      var m = location.hostname.match(/^([^.]+)\.github\.io$/); if (!m) return Promise.reject(new Error('not github pages'));
+      var first = location.pathname.split('/').filter(Boolean)[0];
+      repoPath = m[1] + '/' + ((first && !/\.[a-z0-9]+$/i.test(first)) ? first : m[1] + '.github.io');
+    }
+    var key = 'dk_gh_' + repoPath;
+    try { var c = JSON.parse(localStorage.getItem(key) || 'null'); if (c && Date.now() - c.t < 180000) return Promise.resolve(c.a); } catch (e) {}
+    return fetch('https://api.github.com/repos/' + repoPath + '/contents/games').then(function (r) { if (!r.ok) throw new Error('api'); return r.json(); })
+      .then(function (a) { try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), a: a.map(function (f) { return { type: f.type, name: f.name }; }) })); } catch (e) {} return a; });
+  }
   function fromGitHub() {
-    var m = location.hostname.match(/^([^.]+)\.github\.io$/); if (!m) return Promise.reject(new Error('not github pages'));
-    var first = location.pathname.split('/').filter(Boolean)[0], repo = (first && !/\.[a-z]+$/i.test(first)) ? first : m[1] + '.github.io';
-    return fetch('https://api.github.com/repos/' + m[1] + '/' + repo + '/contents/games').then(function (r) { if (!r.ok) throw new Error('api'); return r.json(); })
-      .then(function (a) { var imgs = a.filter(function (f) { return f.type === 'file' && /\.(png|jpe?g|gif|webp)$/i.test(f.name); }); return a.filter(function (f) { return f.type === 'file' && /\.(swf|html?|torrent|magnet)$/i.test(f.name); }).map(function (f) { var g = norm(f.name), s = slug(f.name), hit = imgs.filter(function (i) { return slug(i.name.replace(/\.[a-z]+$/i, '')) === s; })[0] || imgs.filter(function (i) { return slug(i.name).indexOf(s) === 0; })[0]; if (hit) g.image = 'games/' + hit.name; return g; }); });
+    return listing().then(function (a) {
+      var imgs = a.filter(function (f) { return f.type === 'file' && /\.(png|jpe?g|gif|webp)$/i.test(f.name); });
+      return a.filter(function (f) { return f.type === 'file' && /\.(swf|html?|torrent|magnet)$/i.test(f.name) && !/^index\.html?$/i.test(f.name); }).map(function (f) {
+        var g = norm(f.name), s = slug(f.name), hit = imgs.filter(function (i) { return slug(i.name.replace(/\.[a-z]+$/i, '')) === s; })[0] || imgs.filter(function (i) { return slug(i.name).indexOf(s) === 0; })[0];
+        if (hit) g.image = 'games/' + hit.name; return g;
+      });
+    });
   }
   var api = window.DKGames = {
     ready: function () {
       if (pending) return pending;
       var done = new Promise(function (res) {
-        fromManifest().catch(fromGitHub).then(function (l) { list = l.filter(function (g) { return !g.torrent; }); tlist = l.filter(function (g) { return g.torrent; }); res(list); }, function () { list = []; tlist = []; res([]); });
+        Promise.all([fromManifest().catch(function () { return []; }), fromGitHub().catch(function () { return []; })]).then(function (r) {
+          var seen = {}, out = [];
+          r[0].concat(r[1]).forEach(function (g) { var k = String(g.file).toLowerCase(); if (seen[k]) { if (!seen[k].image && g.image) seen[k].image = g.image; return; } seen[k] = g; out.push(g); });
+          list = out.filter(function (g) { return !g.torrent; }); tlist = out.filter(function (g) { return g.torrent; }); res(list);
+        }, function () { list = []; tlist = []; res([]); });
       });
       var cap = new Promise(function (res) { setTimeout(function () { if (!list) list = []; res(list); }, 2500); });   /* never block the site */
       donep = done; pending = Promise.race([done, cap]);

@@ -418,6 +418,49 @@
       }).then(function (r) { return { found: true, verified: JSON.stringify(r.data.payload) === body || !!r.data.payload }; });
   };
 
+  /* ---------- profile reads (the profile page and Talk to Diane call these) ---------- */
+  function rpcx(n, a) { need(); return B.client.rpc(n, a || {}).then(function (r) { if (r.error) throw new Error(friendly(r.error)); return r.data; }); }
+  function missing(e) { return /does not exist|Could not find|schema cache/i.test((e && e.message) || ''); }
+  B.profileById = function (id) { need(); return B.client.from('profiles').select('*').eq('id', id).maybeSingle(); };
+  B.profileByUsername = function (n) { need(); return B.client.from('profiles').select('*').ilike('username', String(n).replace(/([%_\\])/g, '\\$1')).limit(1).maybeSingle(); };
+  B.userAchievements = function (id) { need(); return B.client.from('user_achievements').select('achievement_id').eq('user_id', id); };
+  B.userBadges = function (id) { need(); return B.client.from('inventory').select('item_id').eq('user_id', id); };
+  B.userMemories = function (id) { need(); return B.client.from('memories').select('*').eq('user_id', id).order('created_at', { ascending: false }).limit(50); };
+  B.shopCatalog = function () { need(); return B.client.from('shop_items').select('id,name,description,price,kind'); };
+  B.myInventory = function () { need(); return B.client.from('inventory').select('item_id,quantity').eq('user_id', B.user.id); };
+  B.myPurchases = function () { need(); return B.client.from('purchases').select('*').eq('user_id', B.user.id).order('created_at', { ascending: false }).limit(50); };
+
+  /* ---------- staff tools: give coins / badge now use the new staff functions (old ones are the fallback) ---------- */
+  var _adminAction = B.adminAction, _adminGiveBadge = B.adminGiveBadge;
+  B.adminAction = function (username, action, amount, reason) {
+    var a = arguments;
+    if (action !== 'give_coins') return _adminAction.apply(B, a);
+    return rpcx('staff_give_coins', { p_username: username, p_amount: amount, p_reason: reason || '' }).catch(function (e) { if (missing(e)) return _adminAction.apply(B, a); throw e; });
+  };
+  B.adminGiveBadge = function (username, item) {
+    return rpcx('staff_give_badge', { p_username: username, p_item: item }).catch(function (e) { if (missing(e)) return _adminGiveBadge.call(B, username, item); throw e; });
+  };
+  B.staffGrantBot = function (u, plan, months, sid, sname) { return rpcx('staff_grant_bot', { p_username: u, p_plan: plan, p_months: months, p_server_id: sid, p_server_name: sname }); };
+
+  /* ---------- daily reward, film badges, Movie Night ---------- */
+  B.claimDaily = function () { return rpcx('claim_daily_reward'); };
+  B.recordFilm = function (slug) { return rpcx('record_film_watch', { p_film: slug }); };
+  B.myPasses = function () {
+    need(); return B.client.from('inventory').select('quantity').eq('user_id', B.user.id).eq('item_id', 'movie_night_pass').then(function (r) {
+      if (r.error) throw r.error; return (r.data || []).reduce(function (a, x) { return a + (x.quantity == null ? 1 : x.quantity); }, 0);
+    });
+  };
+  B.mnCurrent = function () { need(); return B.client.from('movie_nights').select('*').in('status', ['scheduled', 'live']).order('created_at', { ascending: false }).limit(1).maybeSingle(); };
+  B.mnState = function (id) { return rpcx('mn_state', { p_night: id }); };
+  B.mnTicket = function (id) { need(); return B.client.from('movie_night_tickets').select('night_id').eq('night_id', id).eq('user_id', B.user.id).maybeSingle(); };
+  B.mnJoin = function (id) { return rpcx('mn_join', { p_night: id }); };
+  B.mnCreate = function (title, video, starts) { return rpcx('mn_create', { p_title: title, p_video: video, p_starts: starts || null }); };
+  B.mnControl = function (id, action, pos, video) { return rpcx('mn_control', { p_night: id, p_action: action, p_pos: pos || 0, p_video: video || null }); };
+  B.mnEnd = function (id) { return rpcx('mn_end', { p_night: id }); };
+  B.mnSay = function (id, text) { return rpcx('mn_say', { p_night: id, p_body: text }); };
+  B.mnChat = function (id) { need(); return B.client.from('movie_night_chat').select('*').eq('night_id', id).order('id').limit(150); };
+  B.mnHistory = function () { need(); return B.client.from('movie_nights').select('id,title,attendees,created_at').eq('status', 'ended').order('created_at', { ascending: false }).limit(10); };
+
   B.init();
 })();
 </script>
@@ -1133,7 +1176,7 @@ h1{background:none;-webkit-text-fill-color:currentColor;color:var(--ivory);text-
       <p>Honoring a Hollywood legend through the joy of classic gaming. Play retro games, earn achievements inspired by her films, and level up your legacy.</p>
       <div class="hero-stats">
         <div class="stat-box"><div class="stat-number" id="statGames">—</div><div class="stat-label">GAMES</div></div>
-        <div class="stat-box"><div class="stat-number" id="statAch">105</div><div class="stat-label">ACHIEVEMENTS</div></div>
+        <div class="stat-box"><div class="stat-number" id="statAch">125</div><div class="stat-label">ACHIEVEMENTS</div></div>
         <div class="stat-box"><div class="stat-number" id="statMem">—</div><div class="stat-label">MEMORIES</div></div>
       </div>
     </section>
@@ -1146,7 +1189,7 @@ h1{background:none;-webkit-text-fill-color:currentColor;color:var(--ivory);text-
         <a class="lx-card" href="chat.html"><b>TALK TO DIANE</b><span>Chat with the tribute AI assistant.</span></a>
         <a class="lx-card" href="memories.html"><b>MEMORIES</b><span>Read and share memories of Diane Keaton.</span></a>
         <a class="lx-card" href="leaderboard.html"><b>LEADERBOARDS</b><span>See the top players in every game.</span></a>
-        <a class="lx-card" href="achievements.html"><b>ACHIEVEMENTS</b><span>Unlock 105 achievements inspired by her films.</span></a>
+        <a class="lx-card" href="achievements.html"><b>ACHIEVEMENTS</b><span>Unlock 125 achievements inspired by her films.</span></a>
         <a class="lx-card" href="shop.html"><b>COIN SHOP</b><span>Spend your coins on badges, boosts and more.</span></a>
         <a class="lx-card" href="bot.html"><b>DIANE BOT</b><span>Bring Diane to your Discord server.</span></a>
         <a class="lx-card" href="northstar.html"><b>NORTHSTAR TV</b><span>Live and on-demand television.</span></a>
@@ -2408,7 +2451,7 @@ h1{background:none;-webkit-text-fill-color:currentColor;color:var(--ivory);text-
             position: relative;
             overflow: hidden;
         ">
-            🏆 VIEW ALL 105 ACHIEVEMENTS
+            🏆 VIEW ALL 125 ACHIEVEMENTS
         </a>
     </div>
 </div>
@@ -2611,6 +2654,305 @@ button.ghost:hover{background:var(--gold);color:#111}
   var D = P();
   if (!D) { $('lib').innerHTML = '<p class="empty">The games folder reader is not available.</p>'; }
   else D.whenLoaded().then(function () { games = D.torrents(); renderLib(); var want = ''; try { want = new URLSearchParams(window.__SEARCH || '').get('game') || ''; } catch (x) {} if (want) { var k = D.slug(want), g = games.filter(function (y) { return D.slug(y.id) === k || D.slug(y.file) === k; })[0]; if (g) load(g); } }, function () { games = []; renderLib(); });
+})();
+<\/script>
+</body>
+</html>
+</script>
+<script type="text/plain" id="page-movienight"><!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+/* arcade bridge: routes page-to-page navigation through the single index.html shell */
+window.__SEARCH = "";
+window.__go = function(r){ try{ parent.__arcadeGo(r); }catch(e){ } };
+function __pushTitle(){ try{ parent.document.title = document.title; }catch(e){} }
+document.addEventListener('DOMContentLoaded', __pushTitle); window.addEventListener('load', __pushTitle);
+window.__reload = function(){ try{ parent.__arcadeReload(); }catch(e){ location.reload(); } };
+document.addEventListener('click', function(e){
+  var a = e.target.closest && e.target.closest('a[href]'); if(!a) return;
+  var h = a.getAttribute('href') || '';
+  if (/^(https?:|mailto:|javascript:)/i.test(h)) return;
+  if (/\.html?(\?|#|$)/i.test(h) || h === '#games') { e.preventDefault(); window.__go(h); }
+}, true);
+<\/script>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie Night - Diane Keaton Legacy Entertainment Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{--gold:#D0AE67;--ivory:#F3EEE5;--plum:#30213F;--navy:#243646}
+body{margin:0;background:#111;color:var(--ivory);font-family:Roboto,sans-serif;line-height:1.6}
+.wrap{max-width:1250px;margin:0 auto;padding:50px 20px 40px}
+.eyebrow{display:block;text-align:center;font:700 .8rem Orbitron,sans-serif;letter-spacing:.4em;color:var(--gold)}
+h1{font:700 clamp(1.8rem,4vw,2.8rem) Orbitron,sans-serif;letter-spacing:.1em;text-align:center;margin:12px 0 26px}
+h2{font:700 1rem Orbitron,sans-serif;letter-spacing:.1em;color:var(--gold);margin:0 0 12px}
+.panel{background:var(--plum);border:1px solid rgba(208,174,103,.35);border-radius:8px;padding:22px;margin-bottom:20px}
+button{padding:12px 22px;border:0;border-radius:3px;background:var(--gold);color:#111;font:700 .8rem Orbitron,sans-serif;letter-spacing:.12em;cursor:pointer}
+button:hover{background:var(--ivory)}
+button.ghost{background:none;color:var(--gold);border:1px solid var(--gold)}
+button.ghost:hover{background:var(--gold);color:#111}
+button:disabled{opacity:.5;cursor:not-allowed}
+input[type=text],input[type=datetime-local]{padding:11px 12px;border-radius:4px;border:1px solid rgba(208,174,103,.5);background:#111;color:var(--ivory);font:inherit;width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.row>input{flex:1 1 180px}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.stagewrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--gold);border-radius:8px;overflow:hidden}
+.stagewrap iframe,.stagewrap #mnp{position:absolute;inset:0;width:100%;height:100%;border:0}
+.shield{position:absolute;inset:0;z-index:3}
+.enter{position:absolute;z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);padding:18px 30px;font-size:1rem}
+.ended{position:absolute;inset:0;z-index:6;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font:700 1.1rem Orbitron,sans-serif}
+.fs{position:absolute;right:10px;bottom:10px;z-index:7;padding:7px 12px;font-size:.7rem}
+.bar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 4px;font:700 1.05rem Orbitron,sans-serif}
+.bar #count{color:var(--gold)}
+.small{font-size:.85rem;opacity:.75;margin:6px 0 14px}
+.chat{background:var(--navy);border:1px solid rgba(208,174,103,.35);border-radius:8px;padding:16px;display:flex;flex-direction:column;height:520px}
+#msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px}
+.msg{background:rgba(17,17,17,.55);border-radius:6px;padding:9px 11px;font-size:.95rem;word-wrap:break-word;overflow-wrap:anywhere}
+.msg small{opacity:.55;font-size:.72rem}
+.role{display:inline-block;padding:1px 8px;border-radius:3px;font:700 .62rem Orbitron,sans-serif;letter-spacing:.1em;border:1px solid var(--gold);color:var(--gold);background:#111}
+.r-founder{background:var(--gold);color:#111}
+.r-ceo{color:#111;background:#E8D3A0;border-color:#E8D3A0}
+.msg.bot{border-left:3px solid var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{padding:8px 12px;font-size:.68rem}
+.hist div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid rgba(255,255,255,.1);font-size:.92rem}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;border:1px solid var(--gold);padding:11px 20px;border-radius:8px;font-weight:700;z-index:50;max-width:90vw;display:none}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.chat{height:380px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="eyebrow">LIVE SCREENING</span>
+  <h1>MOVIE NIGHT</h1>
+
+  <div class="panel" id="gate"><p>Loading...</p></div>
+
+  <div id="host" hidden class="panel">
+    <h2>HOST CONSOLE <span id="whoami" style="opacity:.8;font-size:.75rem"></span></h2>
+    <div id="hCreateBox">
+      <div class="row"><input type="text" id="hTitle" maxlength="120" placeholder="Movie night title"><input type="text" id="hLink" placeholder="YouTube link or video ID"></div>
+      <div class="row"><input type="datetime-local" id="hStart" aria-label="Start time (optional)"><button id="hCreate" type="button">CREATE MOVIE NIGHT</button></div>
+      <p class="small">Starting a new movie night ends any one that is still open.</p>
+    </div>
+    <div id="hControls" hidden>
+      <div class="row">
+        <button id="hPlay" type="button">PLAY FOR EVERYONE</button>
+        <button id="hPause" type="button" class="ghost">PAUSE FOR EVERYONE</button>
+        <button type="button" class="ghost" data-seek="-60">-60s</button>
+        <button type="button" class="ghost" data-seek="-10">-10s</button>
+        <button type="button" class="ghost" data-seek="10">+10s</button>
+        <button type="button" class="ghost" data-seek="60">+60s</button>
+        <button id="hRestart" type="button" class="ghost">RESTART</button>
+      </div>
+      <div class="row"><input type="text" id="hTime" placeholder="Jump to time (1:23:45 or 12:30)"><button id="hGo" type="button" class="ghost">GO</button></div>
+      <div class="row"><input type="text" id="hLoadLink" placeholder="Switch to another YouTube link"><button id="hLoad" type="button" class="ghost">SWITCH VIDEO</button></div>
+      <div class="row"><input type="text" id="hSay" maxlength="400" placeholder="Announcement for the chat (interruptions, intermission...)"><button id="hSend" type="button">SEND</button></div>
+      <div class="chips">
+        <button type="button" class="ghost" data-quick="Welcome to Movie Night! The movie starts shortly.">WELCOME</button>
+        <button type="button" class="ghost" data-quick="We are having a technical problem. Please stay in your seat, we will be right back.">TECH PROBLEM</button>
+        <button type="button" class="ghost" data-quick="Short intermission. The movie will resume in a few minutes.">INTERMISSION</button>
+        <button type="button" class="ghost" data-quick="We are back! Enjoy the rest of the movie.">BACK</button>
+      </div>
+      <div class="row"><button id="hEnd" type="button" class="ghost">END MOVIE NIGHT</button></div>
+    </div>
+    <h2 style="margin-top:20px">PAST MOVIE NIGHTS</h2>
+    <div class="hist" id="hist"><p class="small">Nothing yet.</p></div>
+  </div>
+
+  <div id="room" hidden>
+    <div class="grid">
+      <div>
+        <div class="stagewrap" id="stageWrap">
+          <div id="mnp"></div>
+          <div class="shield" id="shield"></div>
+          <button class="enter" id="enter" type="button">TAP TO ENTER THE SCREENING</button>
+          <div class="ended" id="ended" hidden>This movie night has ended. Thank you for coming!</div>
+          <button class="fs ghost" id="fs" type="button">FULLSCREEN</button>
+        </div>
+        <div class="bar"><span id="title"></span><span id="count"></span></div>
+        <p class="small">The host controls playback for everyone, so the video can't be paused or skipped from your side. YouTube may show ads before or during the movie, which is controlled by YouTube.</p>
+      </div>
+      <aside class="chat" aria-label="Movie Night chat">
+        <h2>MOVIE NIGHT BOT</h2>
+        <div id="msgs"><div class="msg bot"><b>Movie Night Bot</b><div>Announcements from the staff appear here.</div></div></div>
+      </aside>
+    </div>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+  var ROLE = { founder: 'FOUNDER', ceo: 'HEAD ADMIN', admin: 'ADMIN' };
+  var S = { B: null, staff: false, role: 'admin', night: null, offset: 0, player: null, vid: null, entered: false, ytReady: false, apply: 0, unsub: [], poll: null, seen: {}, apiState: 'idle', waiters: [] };
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function BK() { try { return parent.DKBackend; } catch (e) { return null; } }
+  function toast(t) { var e = $('toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(toast._t); toast._t = setTimeout(function () { e.style.display = 'none'; }, 4500); }
+  function fail(e) { toast((e && e.message) || String(e)); }
+  function gate(html) { $('gate').hidden = false; $('gate').innerHTML = html; }
+  function ready() {
+    return new Promise(function (res, rej) {
+      var B = BK(), n = 0;
+      (function w() {
+        if (!B) return rej(new Error('The site could not start. Please reload.'));
+        if (B.client) return res(B);
+        if (B.status === 'unconfigured' || B.status === 'offline' || n++ > 60) return rej(new Error('Cannot reach the server right now. Please try again in a moment.'));
+        setTimeout(w, 200);
+      })();
+    });
+  }
+  function ytId(x) { var s = String(x || '').trim(); if (/^[\w-]{11}$/.test(s)) return s; var m = s.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : null; }
+  function expected() {
+    var n = S.night; if (!n) return 0;
+    var p = Number(n.pos_seconds) || 0;
+    return n.playing ? p + Math.max(0, (Date.now() + S.offset - Date.parse(n.state_at)) / 1000) : p;
+  }
+  function parseTime(t) {
+    var parts = String(t || '').trim().split(':').map(Number); if (!parts.length || parts.some(isNaN)) return null;
+    return parts.reduce(function (a, x) { return a * 60 + x; }, 0);
+  }
+
+  /* ---- YouTube player: no controls, clicks blocked, always follows the host ---- */
+  function loadApi(cb) {
+    if (window.YT && window.YT.Player) return cb(true);
+    if (S.apiState === 'failed') return cb(false);
+    S.waiters.push(cb); if (S.apiState === 'loading') return; S.apiState = 'loading';
+    var flush = function (ok) { S.apiState = ok ? 'ready' : 'failed'; var w = S.waiters; S.waiters = []; w.forEach(function (f) { f(ok); }); };
+    window.onYouTubeIframeAPIReady = function () { flush(true); };
+    var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.onerror = function () { flush(false); };
+    document.head.appendChild(s); setTimeout(function () { if (S.apiState === 'loading') flush(false); }, 10000);
+  }
+  function startPlayer() {
+    if (S.entered || !S.night) return; S.entered = true; $('enter').hidden = true;
+    loadApi(function (ok) {
+      if (!ok) { toast('The YouTube player could not load. Check your connection or any content blocker.'); S.entered = false; $('enter').hidden = false; return; }
+      var vars = { controls: 0, disablekb: 1, rel: 0, modestbranding: 1, playsinline: 1, fs: 0, iv_load_policy: 3 };
+      S.player = new YT.Player('mnp', { width: '100%', height: '100%', videoId: S.night.youtube_id, playerVars: vars,
+        events: { onReady: function () { S.ytReady = true; S.vid = S.night.youtube_id; applyState(); }, onStateChange: onState,
+                  onError: function () { toast('This video cannot be played here (it may be private, removed, or have embedding turned off).'); } } });
+    });
+  }
+  function onState(e) {
+    var n = S.night, p = S.player; if (!n || !p || Date.now() - S.apply < 900) return;
+    if (n.status === 'ended') return;
+    if (n.playing && e.data === 2) { S.apply = Date.now(); try { p.playVideo(); } catch (x) {} }
+    else if (!n.playing && e.data === 1) { S.apply = Date.now(); try { p.pauseVideo(); } catch (x) {} }
+  }
+  function applyState() {
+    var n = S.night, p = S.player; if (!n || !p || !S.ytReady || !S.entered) return;
+    S.apply = Date.now();
+    if (n.status === 'ended') { try { p.pauseVideo(); } catch (e) {} $('ended').hidden = false; return; }
+    $('ended').hidden = true;
+    var exp = expected(), pos = Number(n.pos_seconds) || 0;
+    if (S.vid !== n.youtube_id) {
+      S.vid = n.youtube_id;
+      if (n.playing) p.loadVideoById({ videoId: n.youtube_id, startSeconds: exp }); else p.cueVideoById({ videoId: n.youtube_id, startSeconds: pos });
+      return;
+    }
+    var cur = 0, st = -1; try { cur = p.getCurrentTime() || 0; st = p.getPlayerState(); } catch (e) {}
+    if (n.playing) { if (Math.abs(cur - exp) > 3) p.seekTo(exp, true); if (st !== 1 && st !== 3) p.playVideo(); }
+    else { if (st === 1 || st === 3) p.pauseVideo(); if (Math.abs(cur - pos) > 1.5) p.seekTo(pos, true); }
+  }
+
+  /* ---- state ---- */
+  function setNight(n, serverNow) {
+    if (!n) return;
+    if (serverNow) S.offset = Date.parse(serverNow) - Date.now();
+    S.night = n; $('title').textContent = n.title || '';
+    $('count').textContent = (n.attendees || 0) + ' ticket' + (n.attendees === 1 ? '' : 's') + ' used';
+    if (n.status === 'ended') $('ended').hidden = false;
+    applyState();
+  }
+  function addMsg(m) {
+    if (!m || S.seen[m.id]) return; S.seen[m.id] = 1;
+    var d = document.createElement('div'); d.className = 'msg';
+    var t = m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
+    d.innerHTML = '<span class="role r-' + esc(m.role) + '">' + esc(ROLE[m.role] || 'STAFF') + '</span> <b>' + esc(m.username || 'Staff') + '</b><div>' + esc(m.body) + '</div><small>' + esc(t) + '</small>';
+    var box = $('msgs'); box.appendChild(d); box.scrollTop = box.scrollHeight;
+  }
+  function showRoom() {
+    $('gate').hidden = true; $('room').hidden = false;
+    var id = S.night.id;
+    S.B.mnState(id).then(function (r) { setNight(r, r && r.server_now); }).catch(fail);
+    S.B.mnChat(id).then(function (r) { (r.data || []).forEach(addMsg); }).catch(function () {});
+    S.unsub.push(S.B.subscribe('movie_nights', 'id=eq.' + id, function (p) { if (p && p.new && p.new.id === id) setNight(p.new); }));
+    S.unsub.push(S.B.subscribe('movie_night_chat', 'night_id=eq.' + id, function (p) { if (p && p.new) addMsg(p.new); }));
+    clearInterval(S.poll);
+    S.poll = setInterval(function () { S.B.mnState(id).then(function (r) { if (r) setNight(r, r.server_now); }).catch(function () {}); }, 8000);
+  }
+  function teardown() {
+    S.unsub.forEach(function (u) { try { u(); } catch (e) {} }); S.unsub = []; clearInterval(S.poll);
+    if (S.player) { try { S.player.destroy(); } catch (e) {} S.player = null; }
+    S.entered = false; S.ytReady = false; S.vid = null; S.seen = {};
+    var box = $('msgs'); box.innerHTML = '<div class="msg bot"><b>Movie Night Bot</b><div>Announcements from the staff appear here.</div></div>';
+    var holder = $('stageWrap'); if (!$('mnp')) { var d = document.createElement('div'); d.id = 'mnp'; holder.insertBefore(d, holder.firstChild); }
+    $('enter').hidden = false; $('ended').hidden = true; $('room').hidden = true;
+  }
+
+  /* ---- start ---- */
+  function init() {
+    teardown(); gate('<p>Loading...</p>');
+    ready().then(function (B) {
+      S.B = B;
+      if (!B.user) { gate('<h2>LOG IN TO JOIN</h2><p>Movie Night is for signed-in members.</p><p><a href="login.html?next=movienight"><button type="button">LOG IN OR SIGN UP</button></a></p>'); return; }
+      return Promise.all([B.isAdmin().catch(function () { return false; }), B.myAdminInfo().catch(function () { return null; })]).then(function (r) {
+        S.staff = !!r[0]; S.role = (r[1] && r[1].role) || 'admin';
+        $('host').hidden = !S.staff; $('whoami').textContent = S.staff ? '- signed in as ' + (ROLE[S.role] || 'STAFF') : '';
+        if (S.staff) loadHistory();
+        return B.mnCurrent();
+      }).then(function (res) {
+        var n = res && res.data;
+        $('hCreateBox').hidden = false; $('hControls').hidden = true;
+        if (!n) { gate('<h2>NO MOVIE NIGHT RIGHT NOW</h2><p>' + (S.staff ? 'Create one with the host console above.' : 'Staff will announce the next one. You can pick up a Movie Night Pass in the Coin Shop so you are ready.') + '</p>'); return; }
+        S.night = n; $('title').textContent = n.title;
+        if (S.staff) { $('hControls').hidden = false; $('hCreateBox').hidden = false; return showRoom(); }
+        return B.mnTicket(n.id).then(function (t) {
+          if (t && t.data) return showRoom();
+          return B.myPasses().then(function (c) {
+            gate('<h2>' + esc(n.title) + '</h2><p>A live Movie Night is on. You need a Movie Night Pass to get in. The movie itself is free.</p><p>You have <b>' + c + '</b> pass' + (c === 1 ? '' : 'es') + '.</p><p>' +
+              (c > 0 ? '<button type="button" id="useTicket">USE A PASS AND JOIN</button> ' : '') + '<a href="shop.html"><button type="button" class="ghost">GET A PASS IN THE COIN SHOP</button></a></p>');
+            var b = $('useTicket'); if (b) b.addEventListener('click', function () { b.disabled = true; B.mnJoin(n.id).then(showRoom).catch(function (e) { b.disabled = false; fail(e); }); });
+          });
+        });
+      });
+    }).catch(function (e) { gate('<h2>COULD NOT LOAD</h2><p>' + esc((e && e.message) || e) + '</p>'); });
+  }
+  function loadHistory() {
+    S.B.mnHistory().then(function (r) {
+      var rows = r.data || [];
+      $('hist').innerHTML = rows.length ? rows.map(function (n) { return '<div><span>' + esc(n.title) + ' <small>' + new Date(n.created_at).toLocaleDateString() + '</small></span><b>' + (n.attendees || 0) + ' attended</b></div>'; }).join('') : '<p class="small">Nothing yet.</p>';
+    }).catch(function () {});
+  }
+
+  /* ---- host actions (the database re-checks that you are staff) ---- */
+  function ctl(action, pos, video) {
+    if (!S.night) return;
+    S.B.mnControl(S.night.id, action, pos, video || null).then(function (r) { setNight(r, r && r.server_now); }).catch(fail);
+  }
+  $('hPlay').addEventListener('click', function () { ctl('play', expected()); });
+  $('hPause').addEventListener('click', function () { ctl('pause', expected()); });
+  $('hRestart').addEventListener('click', function () { ctl('seek', 0); });
+  $('hControls').addEventListener('click', function (e) { var b = e.target.closest('[data-seek]'); if (b) ctl('seek', Math.max(0, expected() + Number(b.getAttribute('data-seek')))); });
+  $('hGo').addEventListener('click', function () { var t = parseTime($('hTime').value); if (t == null) return toast('Use a time like 12:30 or 1:05:00'); ctl('seek', t); });
+  $('hLoad').addEventListener('click', function () { var v = ytId($('hLoadLink').value); if (!v) return toast('That is not a YouTube link.'); ctl('load', 0, v); $('hLoadLink').value = ''; });
+  $('hCreate').addEventListener('click', function () {
+    var title = $('hTitle').value.trim(), v = ytId($('hLink').value), st = $('hStart').value;
+    if (title.length < 2) return toast('Give the movie night a title.'); if (!v) return toast('Paste a YouTube link or video ID.');
+    S.B.mnCreate(title, v, st ? new Date(st).toISOString() : null).then(function () { $('hTitle').value = ''; $('hLink').value = ''; toast('Movie night created.'); init(); }).catch(fail);
+  });
+  $('hEnd').addEventListener('click', function () { if (S.night && confirm('End this movie night for everyone?')) S.B.mnEnd(S.night.id).then(function () { toast('Movie night ended.'); init(); }).catch(fail); });
+  function sendSay(t) { t = String(t || '').trim(); if (!t || !S.night) return; S.B.mnSay(S.night.id, t).then(function () { $('hSay').value = ''; }).catch(fail); }
+  $('hSend').addEventListener('click', function () { sendSay($('hSay').value); });
+  $('hSay').addEventListener('keydown', function (e) { if (e.key === 'Enter') sendSay(this.value); });
+  $('hControls').addEventListener('click', function (e) { var q = e.target.closest('[data-quick]'); if (q) sendSay(q.getAttribute('data-quick')); });
+  $('enter').addEventListener('click', startPlayer);
+  $('fs').addEventListener('click', function () { var s = $('stageWrap'); (s.requestFullscreen || s.webkitRequestFullscreen || function () {}).call(s); });
+  init();
 })();
 <\/script>
 </body>
@@ -3791,7 +4133,7 @@ html,body{background:#111111}
     <div class="container">
         <h1 class="page-title">🏆 ALL ACHIEVEMENTS 🏆</h1>
         <p class="page-subtitle">
-            Unlock 105 achievements inspired by Diane Keaton's legendary film career!<br>
+            Unlock 125 achievements inspired by Diane Keaton's legendary film career!<br>
             Each achievement honors one of her iconic roles and movies.
         </p>
 
@@ -3801,7 +4143,7 @@ html,body{background:#111111}
                 <div class="stat-label">Unlocked</div>
             </div>
             <div class="stat-box">
-                <div class="stat-number" id="total-count">105</div>
+                <div class="stat-number" id="total-count">125</div>
                 <div class="stat-label">Total</div>
             </div>
             <div class="stat-box">
@@ -3851,6 +4193,28 @@ html,body{background:#111111}
     
     <script>
         const ALL_ACHIEVEMENTS = [
+            // === DIANE KEATON FILM BADGES (earned by watching the films) ===
+            { id: 'film_first', name: 'First Film', desc: 'Watch your first Diane Keaton film', icon: '🎞️', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_first_badge' },
+            { id: 'film_5', name: '5 Films', desc: 'Watch 5 Diane Keaton films', icon: '🎞️', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_5_badge' },
+            { id: 'film_10', name: '10 Films', desc: 'Watch 10 Diane Keaton films', icon: '🎞️', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_10_badge' },
+            { id: 'film_25', name: '25 Films', desc: 'Watch 25 Diane Keaton films', icon: '🎞️', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_25_badge' },
+            { id: 'film_40', name: '40 Films', desc: 'Watch 40 Diane Keaton films', icon: '🎞️', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_40_badge' },
+            { id: 'film_annie_hall', name: 'Annie Hall', desc: 'Watch Annie Hall', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_annie_hall_badge' },
+            { id: 'film_the_godfather', name: 'The Godfather', desc: 'Watch The Godfather', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_the_godfather_badge' },
+            { id: 'film_the_godfather_part_ii', name: 'The Godfather Part II', desc: 'Watch The Godfather Part II', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_the_godfather_part_ii_badge' },
+            { id: 'film_manhattan', name: 'Manhattan', desc: 'Watch Manhattan', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_manhattan_badge' },
+            { id: 'film_love_and_death', name: 'Love and Death', desc: 'Watch Love and Death', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_love_and_death_badge' },
+            { id: 'film_radio_days', name: 'Radio Days', desc: 'Watch Radio Days', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_radio_days_badge' },
+            { id: 'film_baby_boom', name: 'Baby Boom', desc: 'Watch Baby Boom', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_baby_boom_badge' },
+            { id: 'film_the_first_wives_club', name: 'The First Wives Club', desc: 'Watch The First Wives Club', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_the_first_wives_club_badge' },
+            { id: 'film_poms', name: 'Poms', desc: 'Watch Poms', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_poms_badge' },
+            { id: 'film_hampstead', name: 'Hampstead', desc: 'Watch Hampstead', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_hampstead_badge' },
+            { id: 'film_smother', name: 'Smother', desc: 'Watch Smother', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_smother_badge' },
+            { id: 'film_darling_companion', name: 'Darling Companion', desc: 'Watch Darling Companion', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_darling_companion_badge' },
+            { id: 'film_love_the_coopers', name: 'Love the Coopers', desc: 'Watch Love the Coopers', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_love_the_coopers_badge' },
+            { id: 'film_5_flights_up', name: '5 Flights Up', desc: 'Watch 5 Flights Up', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_5_flights_up_badge' },
+            { id: 'film_the_only_thrill', name: 'The Only Thrill', desc: 'Watch The Only Thrill', icon: '🎬', xp: 0, film: 'Diane Keaton Film Badge', category: 'movies', badge: 'film_the_only_thrill_badge' },
+
             // === STARTER ACHIEVEMENTS ===
             { id: 'annie_hall', name: 'Annie Hall', desc: 'Play your first game', icon: '🎬', xp: 10, film: '1977 - Academy Award Winner', category: 'gaming' },
             { id: 'first_steps', name: 'First Steps', desc: 'Create your arcade profile', icon: '👣', xp: 5, film: 'Welcome to the Arcade', category: 'gaming' },
@@ -4016,6 +4380,7 @@ html,body{background:#111111}
             
             ALL_ACHIEVEMENTS.forEach(ach => {
                 if (user.unlockedAchievements.includes(ach.id)) return;
+                if (ach.badge) { if ((user.badges || []).indexOf(ach.badge) >= 0) { user.unlockedAchievements.push(ach.id); newUnlocks++; } return; }
                 
                 let shouldUnlock = false;
                 
@@ -4162,7 +4527,7 @@ html,body{background:#111111}
                     <h4>${achievement.name}</h4>
                     <p>${achievement.desc}</p>
                     <div class="achievement-film">${achievement.film}</div>
-                    <div class="achievement-xp">+${achievement.xp} XP</div>
+                    <div class="achievement-xp">${achievement.badge ? '🏅 BADGE' : '+' + achievement.xp + ' XP'}</div>
                 `;
                 
                 container.appendChild(card);
@@ -4611,7 +4976,7 @@ html,body{background:#111111}
                         </td>
                         <td>${p.level || 1}</td>
                         <td class="score-cell">${(p.xp || 0).toLocaleString()}</td>
-                        <td>${p.achievementsCount == null ? '—' : p.achievementsCount + '/105'}</td>
+                        <td>${p.achievementsCount == null ? '—' : p.achievementsCount + '/125'}</td>
                         <td><a href="profile.html?user=${encodeURIComponent(p.username)}" class="view-profile-btn">VIEW</a></td>
                     </tr>
                 `;
@@ -5924,6 +6289,9 @@ document.addEventListener('click', function(e){
 body::before{display:none!important}
 html,body{background:#111111}
 .notification.error{background:#c0392b!important;color:#fff!important}
+.cs-banner{max-width:900px;margin:0 auto 26px;padding:18px 22px;border:2px solid var(--neon-gold);border-radius:14px;background:rgba(208,174,103,.1);text-align:center;display:flex;flex-direction:column;gap:6px}
+.cs-banner b{font-family:'Orbitron',sans-serif;letter-spacing:.08em;color:var(--neon-gold)}
+.cs-banner span{opacity:.9}
 </style>
 </head>
 <body>
@@ -5940,11 +6308,14 @@ html,body{background:#111111}
     <div class="container">
         <h1 class="page-title">🪙 COIN SHOP 🪙</h1>
         <div class="coin-balance">Your Balance: <span id="coin-balance">0</span> 🪙</div>
+        <div class="cs-banner"><b>🤖 MORE PREMIUM BOTS ARE COMING SOON</b><span>The bot subscriptions below are not open for purchase yet. When they launch you will buy them here with coins and the staff will activate them for your server.</span></div>
+        <div style="text-align:center;margin-bottom:34px"><button class="buy-btn" id="dailyBtn" type="button">🎁 CLAIM DAILY COINS</button></div>
         
         <div class="shop-categories">
             <button class="category-btn active" onclick="filterCategory('all')">ALL ITEMS</button>
             <button class="category-btn" onclick="filterCategory('badges')">BADGES</button>
             <button class="category-btn" onclick="filterCategory('bots')">BOT SUBS 🤖</button>
+            <button class="category-btn" onclick="filterCategory('movies')">MOVIE NIGHT 🎟️</button>
             <button class="category-btn" onclick="filterCategory('cosmetics')">COSMETICS</button>
             <button class="category-btn" onclick="filterCategory('perks')">PERKS</button>
             <button class="category-btn" onclick="filterCategory('exclusive')">EXCLUSIVE</button>
@@ -6024,6 +6395,12 @@ html,body{background:#111111}
     
     <script>
         const shopItems = [
+            { id: 'movie_night_pass', name: 'Movie Night Pass', description: 'One entry to a live staff-hosted Movie Night. The movies are free, this is just your ticket in.', icon: '🎟️', price: 300, category: 'movies', type: 'purchase' },
+            { id: 'popcorn_badge', name: 'Popcorn Badge', description: 'A little popcorn badge for your profile.', icon: '🍿', price: 500, category: 'badges', type: 'purchase' },
+            { id: 'movie_buff_badge', name: 'Movie Buff Badge', description: 'For people who love a good film night.', icon: '🎬', price: 1500, category: 'badges', type: 'purchase' },
+            { id: 'star_badge', name: 'Star Badge', description: 'Shine on your profile.', icon: '⭐', price: 2500, category: 'badges', type: 'purchase' },
+            { id: 'classic_collector_badge', name: 'Classic Collector Badge', description: 'For fans of classic cinema.', icon: '🏛️', price: 4000, category: 'badges', type: 'purchase' },
+            { id: 'vip_badge', name: 'VIP Badge', description: 'The top badge in the shop.', icon: '💫', price: 7500, category: 'badges', type: 'purchase' },
             // === BADGES (Applications) ===
             {
                 id: 'verified_discord',
@@ -6454,7 +6831,7 @@ html,body{background:#111111}
                 if (item.type === 'application') {
                     buttonHTML = `<button class="buy-btn apply-btn" onclick='openApplication(${JSON.stringify(item)})'>APPLY NOW</button>`;
                 } else if (item.type === 'bot_subscription') {
-                    buttonHTML = `<button class="buy-btn" onclick='openBotPurchase(${JSON.stringify(item)})' ${!canAfford ? 'disabled' : ''}>SUBSCRIBE</button>`;
+                    buttonHTML = `<button class="buy-btn" disabled>COMING SOON</button>`;
                 } else {
                     buttonHTML = `<button class="buy-btn" onclick="purchaseItem('${item.id}', ${item.price})" ${!canAfford ? 'disabled' : ''}>BUY NOW</button>`;
                 }
@@ -6485,7 +6862,7 @@ html,body{background:#111111}
                 if (item.type === 'application') {
                     badgeText = '<div class="special-badge">APPLICATION</div>';
                 } else if (item.category === 'bots') {
-                    badgeText = '<div class="special-badge" style="background: var(--neon-purple);">BOT SUB</div>';
+                    badgeText = '<div class="special-badge" style="background: var(--neon-purple);">COMING SOON</div>';
                 } else if (item.category === 'exclusive') {
                     badgeText = '<div class="special-badge" style="background: var(--neon-red);">EXCLUSIVE</div>';
                 }
@@ -6648,6 +7025,14 @@ html,body{background:#111111}
             }
         });
         
+        document.getElementById('dailyBtn').addEventListener('click', function () {
+            var btn = this; btn.disabled = true;
+            shopReady().then(function (B) { if (!B.user) throw new Error('Please log in first.'); return B.claimDaily(); }).then(function (r) {
+                if (r && r.ok) showNotification('🎁 +' + r.amount + ' coins! Streak: ' + r.streak + ' day(s)', 'success');
+                else showNotification('Come back later for your next daily reward.', 'info');
+                return refreshCoins();
+            }).catch(function (e) { showNotification('❌ ' + (e.message || e), 'error'); }).then(function () { btn.disabled = false; });
+        });
         loadShop();
     <\/script>
 </body>
@@ -7173,6 +7558,7 @@ html,body{background:#111111}
             <p>Get +25 XP for every movie you watch! Level up while enjoying classics!</p>
         </div>
         
+                <div style="max-width:1100px;margin:0 auto 30px;text-align:center"><a href="movienight.html" style="display:inline-block;padding:14px 28px;border:1px solid #D0AE67;border-radius:8px;color:#D0AE67;text-decoration:none;font-family:Orbitron,sans-serif;font-weight:700;letter-spacing:.08em">🎟️ MOVIE NIGHT: live staff-hosted screenings. Get a pass in the Coin Shop.</a></div>
                 <section class="dtv" id="dtv" aria-label="Diane TV">
             <div class="dtv-head"><h2>📺 DIANE TV</h2><span class="dtv-badge" id="dtv-live" hidden>● LIVE</span></div>
             <p class="dtv-note">An independent fan tribute channel from The Diane Keaton Legacy Entertainment Center. It is not owned, operated or endorsed by Diane Keaton.</p>
@@ -7350,6 +7736,19 @@ html,body{background:#111111}
         }
         
         function openMovie(movie, platform) {
+            try {
+                var FB = parent.DKBackend;
+                if (FB && FB.user && FB.recordFilm) {
+                    var slug = String(movie.title).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+                    FB.recordFilm(slug).then(function (r) {
+                        if (r && r.granted && r.granted.length) {
+                            var n = document.createElement('div'); n.className = 'xp-notification'; n.style.top = '170px';
+                            n.innerHTML = '<div style="font-size:1.3em">🏅 NEW BADGE' + (r.granted.length > 1 ? 'S' : '') + ' UNLOCKED!</div><div style="font-size:.9em">Check your profile</div>';
+                            document.body.appendChild(n); setTimeout(function () { n.remove(); }, 5000);
+                        }
+                    }).catch(function () {});
+                }
+            } catch (e) {}
             // TUBI doesn't allow iframe embedding - open in new tab
             if (platform === 'tubi') {
                 if (confirm(`Watch "${movie.title}" on Tubi?\n\nThis will open in a new tab. You'll earn +25 XP when you start watching!`)) {
@@ -7761,6 +8160,7 @@ html,body{background:#111111}
     { id: 'profile_perfect', name: 'Profile Perfect', desc: 'Upload an avatar and a cover photo', icon: '✨', xp: 25 }
   ];
   var BADGES = { verified_discord: ['🔷', 'Verified Discord'], org_badge: ['🏢', 'Organization'], roblox_badge: ['🎮', 'Roblox Dev'], team_badge: ['👥', 'Team'], diane_bot_developer: ['🤖', 'Bot Developer'], premium_badge: ['💎', 'Premium'], founder_badge: ['👑', 'Founder'], community_badge: ['🌟', 'Community'] };
+  Object.assign(BADGES, {staff_badge: ['🛡️', 'Staff'], popcorn_badge: ['🍿', 'Popcorn'], movie_buff_badge: ['🎬', 'Movie Buff'], star_badge: ['⭐', 'Star'], classic_collector_badge: ['🏛️', 'Classic Collector'], vip_badge: ['💫', 'VIP'], film_first_badge: ['🎞️', 'First Film'], film_5_badge: ['🎞️', '5 Films'], film_10_badge: ['🎞️', '10 Films'], film_25_badge: ['🎞️', '25 Films'], film_40_badge: ['🎞️', '40 Films'], film_annie_hall_badge: ['🎞️', 'Annie Hall'], film_the_godfather_badge: ['🎞️', 'The Godfather'], film_the_godfather_part_ii_badge: ['🎞️', 'The Godfather Part II'], film_manhattan_badge: ['🎞️', 'Manhattan'], film_love_and_death_badge: ['🎞️', 'Love and Death'], film_radio_days_badge: ['🎞️', 'Radio Days'], film_baby_boom_badge: ['🎞️', 'Baby Boom'], film_the_first_wives_club_badge: ['🎞️', 'The First Wives Club'], film_poms_badge: ['🎞️', 'Poms'], film_hampstead_badge: ['🎞️', 'Hampstead'], film_smother_badge: ['🎞️', 'Smother'], film_darling_companion_badge: ['🎞️', 'Darling Companion'], film_love_the_coopers_badge: ['🎞️', 'Love the Coopers'], film_5_flights_up_badge: ['🎞️', '5 Flights Up'], film_the_only_thrill_badge: ['🎞️', 'The Only Thrill']});
   var S = { best: [], p: null, own: false, tab: 'timeline', ach: [], badges: [], mem: [], catalog: {}, imgKind: null, imgBlob: null, admin: false };
   function BK() { try { return parent.DKBackend; } catch (e) { return null; } }
   function $(id) { return document.getElementById(id); }
@@ -8834,6 +9234,8 @@ html,body{background:#111111}
     <button class="nav-i" data-sec="botSubs" data-perm="bots"><span class="ic">🤖</span>Bot subscriptions<span class="ct" id="ctBotSubs"></span></button>
     <div class="grp">MEDIA</div>
     <button class="nav-i" data-sec="tv" data-perm="tv"><span class="ic">📺</span>TV programming</button>
+    <div class="grp">EVENTS</div>
+    <a class="nav-i" href="movienight.html" style="text-decoration:none"><span class="ic">🎟️</span>Movie Night host</a>
     <div class="grp">SITE</div>
     <button class="nav-i" data-sec="content" data-perm="content"><span class="ic">📄</span>Terms &amp; privacy</button>
     <button class="nav-i" data-sec="ai"><span class="ic">✨</span>AI assistant</button>
@@ -8880,8 +9282,19 @@ html,body{background:#111111}
         <div class="grid g3">
           <div class="box"><h5>COINS</h5><input class="form-input" id="coinAmount" type="number" min="1" max="10000000" placeholder="amount"><button class="btn btn-success" style="margin-top:10px;width:100%" data-act="giveCoins">Give coins</button></div>
           <div class="box"><h5>XP</h5><input class="form-input" id="xpAmount" type="number" min="1" max="10000000" placeholder="amount"><button class="btn btn-success" style="margin-top:10px;width:100%" data-act="giveXP">Give XP</button></div>
-          <div class="box"><h5>BADGE</h5><select class="form-select" id="badgeType"><option value="founder_badge">👑 Founder</option><option value="verified_discord">✅ Verified Discord</option><option value="org_badge">🏢 Organization</option><option value="roblox_badge">🎮 Roblox Developer</option><option value="team_badge">👥 Team</option><option value="diane_bot_developer">🤖 Diane Bot Developer</option><option value="premium_badge">💎 Premium</option><option value="community_badge">🌟 Community</option></select><button class="btn btn-success" style="margin-top:10px;width:100%" data-act="giveBadge">Give badge</button></div>
+          <div class="box"><h5>BADGE</h5><select class="form-select" id="badgeType"><option value="founder_badge">👑 Founder</option><option value="verified_discord">✅ Verified Discord</option><option value="org_badge">🏢 Organization</option><option value="roblox_badge">🎮 Roblox Developer</option><option value="team_badge">👥 Team</option><option value="diane_bot_developer">🤖 Diane Bot Developer</option><option value="premium_badge">💎 Premium</option><option value="community_badge">🌟 Community</option><option value="staff_badge">🛡️ Staff</option><option value="popcorn_badge">🍿 Popcorn</option><option value="movie_buff_badge">🎬 Movie Buff</option><option value="star_badge">⭐ Star</option><option value="classic_collector_badge">🏛️ Classic Collector</option><option value="vip_badge">💫 VIP</option></select><button class="btn btn-success" style="margin-top:10px;width:100%" data-act="giveBadge">Give badge</button></div>
         </div>
+      </div>
+      <div class="card"><h3 class="panel-header">Grant a bot subscription</h3>
+        <p class="kv" style="margin-top:0">Use this to give someone a premium bot, or to activate one that was bought outside the shop. It is saved as active and recorded in the audit log.</p>
+        <div class="grid g2">
+          <div class="form-group"><label class="form-label" for="gbUser">Username</label><input class="form-input" id="gbUser" placeholder="exact username"></div>
+          <div class="form-group"><label class="form-label" for="gbPlan">Bot</label><select class="form-select" id="gbPlan"><option value="stans_beat_bot">Stan's Beat Bot</option><option value="betty_white_admin">Betty White Admin Bot</option><option value="ks_application_bot">KS Application Bot</option><option value="robin_repair_bot">Robin Williams Repair Bot</option></select></div>
+          <div class="form-group"><label class="form-label" for="gbMonths">Months</label><input class="form-input" id="gbMonths" type="number" min="1" max="36" value="1"></div>
+          <div class="form-group"><label class="form-label" for="gbServer">Discord server ID</label><input class="form-input" id="gbServer" placeholder="123456789012345678"></div>
+          <div class="form-group"><label class="form-label" for="gbServerName">Server name</label><input class="form-input" id="gbServerName" placeholder="My Server"></div>
+        </div>
+        <button class="btn btn-success" data-act="grantBot">Grant bot</button>
       </div>
     </section>
 
@@ -9133,7 +9546,7 @@ html,body{background:#111111}
       '<div class="ug"><div><small>Level</small><b>' + (u.level || 1) + '</b></div><div><small>XP</small><b>' + num(u.xp) + '</b></div><div><small>Coins</small><b>' + num(u.coins) + '</b></div><div><small>Games</small><b>' + num(u.games_played) + '</b></div><div><small>Joined</small><b style="font-size:12px">' + (u.created_at ? new Date(u.created_at).toLocaleDateString() : '—') + '</b></div><div><small>Profile</small><b style="font-size:12px"><a style="color:var(--blue)" href="profile.html?user=' + encodeURIComponent(u.username) + '">Open</a></b></div></div>' +
       '<div class="box"><h5>REWARDS</h5><input class="inp" id="dReason" placeholder="Reason (required for coins, XP and resets)" style="margin-bottom:8px"><div class="row"><input class="inp grow" id="dCoins" type="number" min="1" placeholder="coins"><button class="btn btn-success btn-sm" data-act="dGive" data-kind="give_coins" data-field="dCoins">Give coins</button></div>' +
       '<div class="row" style="margin-top:8px"><input class="inp grow" id="dXp" type="number" min="1" placeholder="XP"><button class="btn btn-success btn-sm" data-act="dGive" data-kind="give_xp" data-field="dXp">Give XP</button></div>' +
-      '<div class="row" style="margin-top:8px"><select class="form-select grow" id="dBadge"><option value="founder_badge">👑 Founder</option><option value="verified_discord">✅ Verified Discord</option><option value="org_badge">🏢 Organization</option><option value="roblox_badge">🎮 Roblox Developer</option><option value="team_badge">👥 Team</option><option value="diane_bot_developer">🤖 Bot Developer</option><option value="premium_badge">💎 Premium</option><option value="community_badge">🌟 Community</option></select><button class="btn btn-success btn-sm" data-act="dBadge">Give badge</button></div></div>' +
+      '<div class="row" style="margin-top:8px"><select class="form-select grow" id="dBadge"><option value="founder_badge">👑 Founder</option><option value="verified_discord">✅ Verified Discord</option><option value="org_badge">🏢 Organization</option><option value="roblox_badge">🎮 Roblox Developer</option><option value="team_badge">👥 Team</option><option value="diane_bot_developer">🤖 Bot Developer</option><option value="premium_badge">💎 Premium</option><option value="community_badge">🌟 Community</option><option value="staff_badge">🛡️ Staff</option><option value="popcorn_badge">🍿 Popcorn</option><option value="movie_buff_badge">🎬 Movie Buff</option><option value="star_badge">⭐ Star</option><option value="classic_collector_badge">🏛️ Classic Collector</option><option value="vip_badge">💫 VIP</option></select><button class="btn btn-success btn-sm" data-act="dBadge">Give badge</button></div></div>' +
       '<div class="box"><h5>MODERATION</h5><div class="row"><button class="btn btn-danger btn-sm" data-act="dDo" data-kind="' + (u.banned ? 'unban' : 'ban') + '"' + dis + '>' + (u.banned ? 'Unban site' : 'Ban from site') + '</button>' +
       '<button class="btn btn-warning btn-sm" data-act="dDo" data-kind="' + (u.movies_banned ? 'movies_unban' : 'movies_ban') + '"' + dis + '>' + (u.movies_banned ? 'Allow movies' : 'Ban from movies') + '</button>' +
       '<button class="btn btn-ghost btn-sm" data-act="dDo" data-kind="' + (u.is_staff ? 'staff_off' : 'staff_on') + '">' + (u.is_staff ? 'Remove staff' : 'Make staff') + '</button></div>' +
@@ -9335,6 +9748,7 @@ html,body{background:#111111}
       case 'flagRev': B.adminReviewScore(parseInt(id, 10), t.getAttribute('data-ok') === '1').then(function () { toast(t.getAttribute('data-ok') === '1' ? '✅ Score accepted and added to the leaderboard.' : 'Score rejected.', 'ok'); loadScores(); }).catch(fail); break;
       case 'editLimit': $('lmGame').value = t.getAttribute('data-g'); $('lmMax').value = t.getAttribute('data-m'); $('lmPps').value = t.getAttribute('data-p'); $('lmMin').value = t.getAttribute('data-n'); $('lmGame').focus(); break;
       case 'addLimit': { var gm = rv('lmGame'); if (!gm) return toast('❌ Enter a game id (or * for the default).', 'err'); B.adminSetLimit(gm, rv('lmMax') ? parseInt(rv('lmMax'), 10) : null, rv('lmPps') ? parseFloat(rv('lmPps')) : null, rv('lmMin') ? parseInt(rv('lmMin'), 10) : 10).then(function () { toast('✅ Limit saved for ' + gm, 'ok'); loadScores(); }).catch(fail); break; }
+      case 'grantBot': { var gu = rv('gbUser'); if (!gu) return toast('❌ Enter a username.', 'err'); if (!rv('gbServer') || !rv('gbServerName')) return toast('❌ Enter the server ID and name.', 'err'); B.staffGrantBot(gu, $('gbPlan').value, parseInt(rv('gbMonths'), 10) || 1, rv('gbServer'), rv('gbServerName')).then(function () { toast('✅ Bot granted to ' + gu, 'ok'); loadBots(); }).catch(fail); break; }
       case 'shopSave': saveShopRow(t.closest('tr')); break;
       case 'addShop': {
         var row = { id: rv('nsId').toLowerCase(), name: rv('nsName'), description: rv('nsDesc') || null, price: parseInt(rv('nsPrice'), 10), kind: $('nsKind').value, duration_hours: rv('nsHours') ? parseInt(rv('nsHours'), 10) : null, is_active: true, sort: 500 };
@@ -9809,6 +10223,7 @@ html,body{background:#111111}
 
   /* ---------- commands answered from the site's real data (no AI needed) ---------- */
   var BADGE = { verified_discord: 'Verified Discord', org_badge: 'Organization', roblox_badge: 'Roblox Developer', team_badge: 'Team', diane_bot_developer: 'Bot Developer', premium_badge: 'Premium', founder_badge: 'Founder', community_badge: 'Community' };
+  Object.assign(BADGE, {staff_badge: 'Staff', popcorn_badge: 'Popcorn', movie_buff_badge: 'Movie Buff', star_badge: 'Star', classic_collector_badge: 'Classic Collector', vip_badge: 'VIP', film_first_badge: 'First Film', film_5_badge: '5 Films', film_10_badge: '10 Films', film_25_badge: '25 Films', film_40_badge: '40 Films', film_annie_hall_badge: 'Annie Hall', film_the_godfather_badge: 'The Godfather', film_the_godfather_part_ii_badge: 'The Godfather Part II', film_manhattan_badge: 'Manhattan', film_love_and_death_badge: 'Love and Death', film_radio_days_badge: 'Radio Days', film_baby_boom_badge: 'Baby Boom', film_the_first_wives_club_badge: 'The First Wives Club', film_poms_badge: 'Poms', film_hampstead_badge: 'Hampstead', film_smother_badge: 'Smother', film_darling_companion_badge: 'Darling Companion', film_love_the_coopers_badge: 'Love the Coopers', film_5_flights_up_badge: '5 Flights Up', film_the_only_thrill_badge: 'The Only Thrill'});
   function me() { return BK().profileById(S.user.id).then(function (r) { if (r.error || !r.data) throw new Error('Could not load your profile.'); return r.data; }); }
   function link(href, text) { return '<a class="card" href="' + esc(href) + '">' + text + '</a>'; }
   function findGame(q) {
@@ -11439,7 +11854,7 @@ html,body{background:#111111}
    Routes:  #/home  #/game?game=motherload  #/profile  etc.
    ============================================================ */
 (function () {
-  var FILE_ROUTES = {"index.html": "home", "arcade.html": "arcade", "torrent.html": "torrent", "game.html": "game", "achievements.html": "achievements", "leaderboard.html": "leaderboard", "memories.html": "memories", "shop.html": "shop", "movies.html": "movies", "profile.html": "profile", "login.html": "login", "settings.html": "settings", "admin.html": "admin", "bot.html": "bot", "northstar.html": "northstar", "chat.html": "chat", "termsofservice.html": "terms", "terms.html": "terms", "privacypolicy.html": "privacy", "privacy.html": "privacy"};
+  var FILE_ROUTES = {"index.html": "home", "arcade.html": "arcade", "torrent.html": "torrent", "movienight.html": "movienight", "game.html": "game", "achievements.html": "achievements", "leaderboard.html": "leaderboard", "memories.html": "memories", "shop.html": "shop", "movies.html": "movies", "profile.html": "profile", "login.html": "login", "settings.html": "settings", "admin.html": "admin", "bot.html": "bot", "northstar.html": "northstar", "chat.html": "chat", "termsofservice.html": "terms", "terms.html": "terms", "privacypolicy.html": "privacy", "privacy.html": "privacy"};
   var stage = document.getElementById('stage');
   var boot = document.getElementById('boot');
   var current = { route: null, search: '' };
@@ -11612,9 +12027,9 @@ html,body{background:#111111}
   var LINKS = [
     ['home', '#/home', 'HOME'], ['arcade', '#/arcade', 'ARCADE'], ['movies', '#/movies', 'MOVIES & TV'], ['northstar', '#/northstar', 'NORTHSTAR TV', 'dk-ns'],
     ['chat', '#/chat', 'TALK TO DIANE', 'dk-chat'], ['leaderboard', '#/leaderboard', 'LEADERBOARD'], ['shop', '#/shop', 'COIN SHOP'],
-    ['achievements', '#/achievements', 'ACHIEVEMENTS', '', true], ['memories', '#/memories', 'MEMORIES', '', true], ['bot', '#/bot', 'DIANE BOT', 'dk-bot', true], ['torrent', '#/torrent', 'TORRENT GAMES', '', true]
+    ['achievements', '#/achievements', 'ACHIEVEMENTS', '', true], ['memories', '#/memories', 'MEMORIES', '', true], ['bot', '#/bot', 'DIANE BOT', 'dk-bot', true], ['movienight', '#/movienight', 'MOVIE NIGHT', '', true], ['torrent', '#/torrent', 'TORRENT GAMES', '', true]
   ];
-  var TITLES = { home: 'Home', arcade: 'Arcade', torrent: 'Torrent Games', game: 'Play', achievements: 'Achievements', leaderboard: 'Leaderboards', memories: 'Memories', shop: 'Coin Shop', movies: 'Movies & TV',
+  var TITLES = { home: 'Home', arcade: 'Arcade', torrent: 'Torrent Games', movienight: 'Movie Night', game: 'Play', achievements: 'Achievements', leaderboard: 'Leaderboards', memories: 'Memories', shop: 'Coin Shop', movies: 'Movies & TV',
                  profile: 'My Profile', login: 'Login', settings: 'Settings', admin: 'Admin', bot: 'Diane Bot', northstar: 'NorthStar TV', chat: 'Talk to Diane', terms: 'Terms of Service', privacy: 'Privacy Policy' };
   var BRAND = 'Diane Keaton Legacy Entertainment Center';
   var bar = document.getElementById('sitebar'), nav = document.getElementById('dkNav'), authEl = document.getElementById('dkAuth'), menuBtn = document.getElementById('dkMenuBtn');
@@ -11702,7 +12117,7 @@ html,body{background:#111111}
     '.dk-footer p{max-width:820px;margin:8px auto;opacity:.82}.dk-footer .dk-fc{opacity:.55;font-size:12px;margin-top:14px}</style>';
   function footer() {
     return '<footer class="dk-footer" role="contentinfo"><div class="dk-fb">THE DIANE KEATON LEGACY ENTERTAINMENT CENTER</div>' +
-      '<div class="dk-fl"><a href="index.html">HOME</a><a href="arcade.html">ARCADE</a><a href="movies.html">MOVIES &amp; TV</a><a href="northstar.html">NORTHSTAR TV</a><a href="chat.html">TALK TO DIANE</a><a href="leaderboard.html">LEADERBOARDS</a><a href="memories.html">MEMORIES</a><a href="shop.html">COIN SHOP</a><a href="bot.html">DIANE BOT</a><a href="TermsofService.html">TERMS</a><a href="PrivacyPolicy.html">PRIVACY</a></div>' +
+      '<div class="dk-fl"><a href="index.html">HOME</a><a href="arcade.html">ARCADE</a><a href="movies.html">MOVIES &amp; TV</a><a href="movienight.html">MOVIE NIGHT</a><a href="northstar.html">NORTHSTAR TV</a><a href="chat.html">TALK TO DIANE</a><a href="leaderboard.html">LEADERBOARDS</a><a href="memories.html">MEMORIES</a><a href="shop.html">COIN SHOP</a><a href="bot.html">DIANE BOT</a><a href="TermsofService.html">TERMS</a><a href="PrivacyPolicy.html">PRIVACY</a></div>' +
       '<p>An independent fan tribute honoring Diane Keaton. This site is not owned, operated, endorsed or represented by Diane Keaton, her family or her estate. “Diane,” the on-site assistant, is an independent tribute AI &mdash; not Diane Keaton.</p>' +
       '<p>NorthStar TV is a separate network owned by Good Morning Northstar News. Its channels are hosted on this site under its own name and programming.</p>' +
       '<p>Film clips are embedded from third-party services and remain the property of their owners.</p>' +

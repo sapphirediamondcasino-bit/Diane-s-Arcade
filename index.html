@@ -349,6 +349,16 @@
       throw new Error((err && err.message) || (r.data && r.data.error) || 'Diane could not answer.');
     });
   };
+  B.chatGuest = function (message, history) {
+    need();
+    return B.client.functions.invoke('diane-chat', { body: { message: message, history: history || [], page: 'chat', username: 'Guest' } }).then(function (r) {
+      if (!r.error && r.data && r.data.reply) return r.data;
+      var err = r.error, ctx = err && err.context;
+      if (ctx && typeof ctx.json === 'function') return ctx.json().then(function (j) { throw new Error((j && j.error) || 'Diane could not answer.'); }, function () { throw new Error('Diane could not answer right now.'); });
+      if (err && /404|not found|Failed to send|Failed to fetch/i.test(err.message || '')) throw new Error("Diane's server function is not deployed yet. An administrator needs to deploy diane-chat.");
+      throw new Error((err && err.message) || (r.data && r.data.error) || 'Diane could not answer.');
+    });
+  };
   B.adminMemories = function (status) { need(); var q = B.client.from('memories').select('*').order('created_at', { ascending: false }).limit(200); return status && status !== 'all' ? q.eq('status', status) : q; };
   B.adminShopItems = function () { need(); return B.client.from('shop_items').select('*').order('sort'); };
   B.adminShopSave = function (row) { need(); return adm(B.client.from('shop_items').upsert(row)); };
@@ -6499,7 +6509,7 @@ html,body{background:#111111}
                     <strong>⚠️ LEGAL WARNING:</strong><br>
                     The Diane Keaton Bot is owned by:<br>
                     • Kurrasch Gaming Merch Store LLC<br>
-                    • Kurrasch Systems<br><br>
+                    and was created by Game Killers Studio.<br><br>
                     All code is copyright protected. Stealing, copying, or distributing bot code will result in legal action.
                     You will be monitored and must sign a comprehensive NDA.
                 `
@@ -10064,7 +10074,7 @@ html,body{background:#111111}
 
 <div class="gate" id="gate" hidden>
   <h2>Talk to Diane</h2>
-  <p>Log in to chat. Your conversations are private to your account and saved so you can come back to them.</p>
+  <p>Could not reach the server. Please try again in a moment. Logging in is optional, but it saves your chats.</p>
   <a href="login.html?next=chat">Log in or sign up</a>
 </div>
 
@@ -10107,7 +10117,7 @@ html,body{background:#111111}
     'https://m.media-amazon.com/images/M/MV5BMTY5NDI5OTEyOF5BMl5BanBnXkFtZTgwMzU4NDI1NzM@._V1_.jpg'
   ];
   var AI = { ask: 'your question', teach: 'a subject', homework: 'your homework problem', quiz: 'a subject', explain: 'a concept', study: 'a topic' };
-  var S = { convs: [], active: null, sending: false, user: null, last: null };
+  var S = { convs: [], active: null, sending: false, user: null, last: null, hist: [] };
   function $(id) { return document.getElementById(id); }
   function BK() { try { return parent.DKBackend; } catch (e) { return null; } }
   function esc(x) { return String(x == null ? '' : x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -10181,6 +10191,7 @@ html,body{background:#111111}
   /* ---------- conversations ---------- */
   function day(d) { var t = new Date(); t.setHours(0, 0, 0, 0); var x = new Date(d); if (x >= t) return 'TODAY'; if (x >= new Date(t - 86400000)) return 'YESTERDAY'; if (x >= new Date(t - 7 * 86400000)) return 'PREVIOUS 7 DAYS'; return 'OLDER'; }
   function renderConvs() {
+    if (!S.user) return;
     var el = $('convs');
     if (!S.convs.length) { el.innerHTML = '<div class="noconv">No conversations yet.<br>Say hello to Diane to start one.</div>'; return; }
     var h = '', last = '';
@@ -10212,8 +10223,9 @@ html,body{background:#111111}
   function toAI(text, retry) {
     if (!retry) { if ($('thread').querySelector('.welcome')) $('thread').innerHTML = ''; addUser(text); }
     S.last = text; setBusy(true); var t = typing();
-    ensureConv().then(function (id) { return BK().chatSend(id, text, { page: 'chat' }); }).then(function (r) {
+    (S.user ? ensureConv().then(function (id) { return BK().chatSend(id, text, { page: 'chat' }); }) : BK().chatGuest(text, S.hist.slice(-12))).then(function (r) {
       t.remove(); addBot(md(r.reply));
+      if (!S.user) { S.hist.push({ role: 'user', content: text }, { role: 'assistant', content: r.reply }); S.hist = S.hist.slice(-16); return; }
       var c = S.convs.filter(function (x) { return x.id === S.active; })[0]; if (c) { if (r.title) c.title = r.title; c.updated_at = new Date().toISOString(); S.convs.sort(function (a, b) { return new Date(b.updated_at) - new Date(a.updated_at); }); renderConvs(); }
     }).catch(function (e) {
       t.remove(); var msg = (e && e.message) || String(e);
@@ -10287,6 +10299,7 @@ html,body{background:#111111}
   LOCAL.arcade = LOCAL.games; LOCAL.stats = LOCAL.rank;
 
   function runLocal(cmd, arg) {
+    if (!S.user && (cmd === 'rank' || cmd === 'stats' || cmd === 'achievements' || cmd === 'badges' || (cmd === 'profile' && !arg))) { addBot('<p>Log in to use <code>/' + esc(cmd) + '</code>.</p><a class="card" href="login.html?next=chat">🔑 Log in or sign up</a>'); return; }
     setBusy(true); var t = typing();
     LOCAL[cmd](arg).then(function (html) { t.remove(); addBot(html); }).catch(function (e) { t.remove(); addBot('<p>' + esc((e && e.message) || e) + '</p>', 'err'); }).then(function () { setBusy(false); });
   }
@@ -10343,11 +10356,16 @@ html,body{background:#111111}
     (function w() {
       if (B.user) { S.user = B.user; return go(); }
       if (n++ < 12) return setTimeout(w, 150);
-      $('gate').hidden = false;
+      S.user = null; return go();
     })();
   }).catch(function (e) { $('gate').hidden = false; $('gate').querySelector('p').textContent = (e && e.message) || 'Could not connect.'; });
   function go() {
     $('app').hidden = false; welcome();
+    if (!S.user) {
+      $('convs').innerHTML = '<div class="noconv">You are chatting as a guest.<br>Chats are not saved.<br><br><a href="login.html?next=chat" style="color:var(--blue)">Log in to save your chats</a></div>';
+      var sf = document.querySelector('.side-foot'); if (sf) sf.textContent = 'Guest chat: your messages are not saved. Diane is free to use, with no hourly or daily chat limit.';
+      $('input').focus(); return;
+    }
     loadConvs().catch(function (e) { $('convs').innerHTML = '<div class="noconv">Could not load your chats.<br>' + esc((e && e.message) || e) + '<br>Run 013_chat.sql if the tables are missing.</div>'; });
     $('input').focus();
   }

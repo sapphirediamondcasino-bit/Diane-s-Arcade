@@ -721,6 +721,14 @@ const SITE = {
   supabase: {
     url: 'https://xkjkrxnmimwmxftrrkha.supabase.co',
     key: 'sb_publishable_8rZwgg5Cz0DpNelyA45rFg_T6M6ZKi7'
+  },
+  /* NorthStar TV is a separate network; its mark is licensed from them and is
+     required wherever the network is presented. Put the official asset path or
+     URL in logo (for example '/northstar-logo.svg'). While it is empty the
+     NorthStar page shows no mark, so the contract is not satisfied. */
+  northstar: {
+    logo: '',
+    logoAlt: 'NorthStar TV'
   }
 };
 
@@ -1712,20 +1720,37 @@ const Backend = {
       this.ready = true;
       Auth.remote = {
         signIn: (email, password) => B.client.auth.signInWithPassword({ email, password }).then(r => { if (r.error) throw new Error(r.error.message); B.currentUser = r.data.user; return r.data; }),
-        signUp: (username, email, password) => B.client.auth.signUp({ email, password, options:{ data:{ username } } }).then(r => { if (r.error) throw new Error(r.error.message); B.currentUser = r.data.user; return { needsConfirm: !r.data.session }; }),
+        signUp: (username, email, password) => B.client.auth.signUp({ email, password, options:{ data:{ username } } }).then(r => {
+          if (r.error) {
+            const m = r.error.message || 'Sign-up failed.';
+            if (/confirmation email|smtp|sending/i.test(m)) {
+              throw new Error('The site database could not send the confirmation email, so the account was not created. An administrator needs to configure SMTP, or turn off “Confirm email” under Authentication → Sign In / Providers → Email in the database project.');
+            }
+            throw new Error(m);
+          }
+          B.currentUser = r.data.user; return { needsConfirm: !r.data.session };
+        }),
         oauth: (provider) => B.client.auth.signInWithOAuth({ provider, options:{ redirectTo: SITE.origin + '/' } }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }),
         signOut: () => B.client.auth.signOut(),
         userId: () => B.currentUser ? B.currentUser.id : null,
         username: () => B.currentUser && B.currentUser.user_metadata ? B.currentUser.user_metadata.username : null
       };
-      this.client.auth.onAuthStateChange((ev, sess) => { B.currentUser = sess ? sess.user : null; });
+      this.client.auth.onAuthStateChange((ev, sess) => {
+        B.currentUser = sess ? sess.user : null;
+        /* Returning from Google (or any provider): adopt the session even when the
+           first getSession() ran before the URL code was exchanged. Deferred, because
+           the SDK must not be awaited from inside its own auth callback. */
+        if (ev === 'SIGNED_IN' && sess && sess.user) setTimeout(() => { B.adopt(sess.user); }, 0);
+      });
       const sess = await this.client.auth.getSession();
-      if (sess && sess.data && sess.data.session && sess.data.session.user) {
-        const u = sess.data.session.user;
-        B.currentUser = u;
-        await Auth.startSession({ email: u.email, id: u.id, username: (u.user_metadata && u.user_metadata.username) || String(u.email).split('@')[0], provider: (u.app_metadata && u.app_metadata.provider) || 'email' });
-      }
+      if (sess && sess.data && sess.data.session && sess.data.session.user) await this.adopt(sess.data.session.user);
     } catch (e) { this.ready = false; }
+  },
+  async adopt(u) {
+    if (!u || !u.email) return;
+    if (Store.s.user && Store.s.user.id === u.id) return;
+    this.currentUser = u;
+    await Auth.startSession({ email: u.email, id: u.id, username: (u.user_metadata && u.user_metadata.username) || String(u.email).split('@')[0], provider: (u.app_metadata && u.app_metadata.provider) || 'email' });
   },
   enabled(provider) {
     if (this.providers == null) return null;
@@ -1788,12 +1813,19 @@ const Games = {
     }
     return '/';
   },
+  repoValue(v) {
+    const s = String(v || '').trim()
+      .replace(/^https?:\/\/(www\.)?github\.com\//i, '')
+      .replace(/\.git$/i, '').replace(/\/+$/, '');
+    return /^[\w.-]+\/[\w.-]+$/.test(s) ? s : '';
+  },
   repo() {
-    const s = Store.s.settings.repo;
-    if (s && /^[\w.-]+\/[\w.-]+$/.test(s)) return s;
+    const s = this.repoValue(Store.s.settings.repo);
+    if (s) return s;
     const meta = document.querySelector('meta[name="dk-repo"]');
-    if (meta && /^[\w.-]+\/[\w.-]+$/.test(meta.content)) return meta.content;
-    try { const q = new URLSearchParams(location.search).get('repo'); if (q && /^[\w.-]+\/[\w.-]+$/.test(q)) return q; } catch (e) {}
+    const m = meta && this.repoValue(meta.content);
+    if (m) return m;
+    try { const q = this.repoValue(new URLSearchParams(location.search).get('repo')); if (q) return q; } catch (e) {}
     const gh = location.hostname.match(/^([\w-]+)\.github\.io$/i);
     if (gh) {
       const seg = location.pathname.split('/').filter(Boolean)[0];
@@ -1813,12 +1845,34 @@ const Games = {
         const r = await this.timeout(fetch(this.base() + path, { cache:'no-cache' }), 4000);
         if (!r.ok) { this.diagnostics.push({ source:path, ok:false, detail:'HTTP ' + r.status }); continue; }
         const j = await r.json();
-        const list = Array.isArray(j) ? j : (j.games || []);
+        const list = this.fromManifest(j);
         this.diagnostics.push({ source:path, ok:true, detail:list.length + ' entries' });
         if (list.length) return list;
       } catch (e) { this.diagnostics.push({ source:path, ok:false, detail:e.message }); }
     }
     return [];
+  },
+  /* games.json can be written three ways: a plain array, { "games": [...] }, or
+     the per-file map this site ships ({ "_help": "…", "game.swf": { title } }),
+     where every key that is not a comment is one game. */
+  fromManifest(j) {
+    if (!j || typeof j !== 'object') return [];
+    if (Array.isArray(j)) return j;
+    if (Array.isArray(j.games)) return j.games;
+    if (Array.isArray(j.files)) return j.files;
+    const out = [];
+    Object.keys(j).forEach(key => {
+      if (/^_/.test(key)) return;                       /* _help, _comment, _readme */
+      const v = j[key];
+      if (typeof v === 'string') {
+        if (/\.(swf|html?|torrent|magnet)$/i.test(key)) out.push({ file:key, name:v });
+        else out.push({ id:this.slug(key), name:key, file:v });
+        return;
+      }
+      if (!v || typeof v !== 'object' || Array.isArray(v)) return;
+      out.push(Object.assign({ file:key }, v));
+    });
+    return out;
   },
   async tree() {
     const repo = this.repo();
@@ -3991,6 +4045,9 @@ async function submitMemory(form) {
 .mn-form{display:flex;gap:8px;border-top:1px solid var(--line);padding:10px}
 .mn-form input{flex:1;border:1px solid var(--line);padding:9px 11px;font:inherit;font-size:.85rem;min-width:0}
 .mn-now{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line-2);font-size:.82rem;color:var(--tx-2)}
+.ns-brand{display:flex;align-items:center;gap:14px;margin-top:20px}
+.ns-logo{height:54px;width:auto;max-width:260px;object-fit:contain;display:block}
+@media (max-width:640px){.ns-logo{height:40px}}
 .ns-tabs{display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:18px;scrollbar-width:none}
 .ns-tabs::-webkit-scrollbar{display:none}
 .ns-tab{border:0;background:none;padding:12px 14px;cursor:pointer;font-family:var(--sans);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-3);border-bottom:2px solid transparent;white-space:nowrap}
@@ -4448,7 +4505,11 @@ MOUNTS['movie-night'] = function () {
 
 /* ============================== NORTHSTAR TV ============================= */
 VIEWS.northstar = function () {
-  return `${pageHead('Television', 'NorthStar TV', 'A guide and a player for NorthStar’s channels: whatever is scheduled plays live at the right minute, and everything else is on demand.', `
+  const ns = SITE.northstar || {};
+  const brand = ns.logo
+    ? `<div class="ns-brand"><img id="nsLogo" class="ns-logo" src="${esc(ns.logo)}" alt="${esc(ns.logoAlt || 'NorthStar TV')}"></div>`
+    : '';
+  return `${pageHead('Television', 'NorthStar TV', 'A guide and a player for NorthStar’s channels: whatever is scheduled plays live at the right minute, and everything else is on demand.', `${brand}
     <div class="row mt-3"><span class="small">NorthStar TV is a separate network owned by Good Morning Northstar News. This site hosts the player and the guide; it does not own or operate the network.</span></div>`)}
   <section class="section tight" style="padding-top:0"><div class="wrap">
     <div class="ns-tabs" id="nsTabs"></div>
@@ -4468,6 +4529,8 @@ MOUNTS.northstar = function () {
   const S = { channels:[], items:[], programs:[], chId:null, mode:'vod', itemId:null, vid:null, vidMode:null, progId:null, player:null, ready:false, userVod:false, token:0, timer:null, ticker:null, entered:false };
   const el = id => document.getElementById(id);
   if (!el('nsTabs')) return;
+  const logo = el('nsLogo');
+  if (logo) logo.addEventListener('error', () => { const b = logo.closest('.ns-brand'); if (b) b.remove(); });
   const chById = id => S.channels.filter(c => c.id === id)[0];
   const chItems = id => S.items.filter(i => i.channel_id === id).slice().sort((a, b) => a.position - b.position);
   const chProgs = id => S.programs.filter(p => p.channel_id === id).slice().sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
@@ -4818,9 +4881,9 @@ function adminPanel(tab) {
   }
   if (tab === 'games') {
     return `<div class="admin-panel">
-      <h2>Game library</h2><p class="sub">The player reads the catalogue, <code>games/manifest.json</code>, and the repository tree. Add folders to <code>games/</code> and they appear here.</p>
+      <h2>Game library</h2><p class="sub">The player reads <code>games/manifest.json</code>, <code>games/index.json</code> and <code>games.json</code> (array, <code>{games:[…]}</code>, or one entry per file name), then the repository tree. With a repository set, adding a folder to <code>games/</code> is enough.</p>
       <form data-admin="repo" class="field-row" style="align-items:end">
-        <div class="field" style="margin:0"><label>GitHub repository (owner/repo)</label><input name="repo" value="${esc(s.settings.repo || '')}" placeholder="owner/repository"></div>
+        <div class="field" style="margin:0"><label>GitHub repository (owner/repo or full URL)</label><input name="repo" value="${esc(s.settings.repo || '')}" placeholder="https://github.com/owner/repository"></div>
         <div style="display:flex;gap:8px"><button class="btn btn-sm" type="submit">Save</button><button class="btn btn-sm btn-ghost" type="button" data-act="rescan">Re-scan</button></div>
       </form>
       <p class="small mt-1">Required on a custom domain: the browser cannot guess the repository from the hostname. The GitHub tree API allows 60 unauthenticated requests per hour; results are cached for ten minutes.</p>

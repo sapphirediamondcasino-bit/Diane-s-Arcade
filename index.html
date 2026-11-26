@@ -672,6 +672,11 @@ body.nav-open .drawer{display:block;animation:slideDown .32s var(--ease)}
         <a href="/badges" data-link>Badges</a>
         <a href="/coin-shop" data-link>Coin Shop</a>
         <a href="/leaderboard" data-link>Leaderboard</a>
+        <a href="/movies" data-link>Movies &amp; TV</a>
+        <a href="/northstar" data-link>NorthStar TV</a>
+        <a href="/movie-night" data-link>Movie Night</a>
+        <a href="/torrent" data-link>Torrent Games</a>
+        <a href="/bot" data-link>Diane Bot</a>
       </div>
       <div>
         <h4>Members</h4>
@@ -680,6 +685,9 @@ body.nav-open .drawer{display:block;animation:slideDown .32s var(--ease)}
         <a href="/register" data-link>Create Account</a>
         <a href="/about" data-link>About the Center</a>
         <a href="/legacy" data-link>The Legacy</a>
+        <a href="/chat" data-link>Talk to Diane</a>
+        <a href="/memories" data-link>Shared Memories</a>
+        <a href="/settings" data-link>Account Settings</a>
       </div>
       <div>
         <h4>A Note</h4>
@@ -1965,7 +1973,7 @@ const Games = {
 /* ---------- routing: real paths, no hash ---------- */
 const Router = {
   base: '/',
-  routes: ['home','games','achievements','badges','coin-shop','leaderboard','profile','login','register','legacy','about','community','admin','legal'],
+  routes: ['home','games','achievements','badges','coin-shop','leaderboard','profile','login','register','legacy','about','community','admin','legal','bot','movies','chat','memories','torrent','movie-night','northstar','settings'],
   init() {
     this.base = Games.base();
     if (this.base !== '/' && location.pathname === this.base.slice(0, -1)) history.replaceState({}, '', this.base);
@@ -2029,11 +2037,15 @@ function paintChrome(view) {
     nav.innerHTML = NAV.map(([key, label, href]) => {
       const active = (view === key) || (key === 'games' && (view === 'game'));
       return `<a href="${href}" data-link${active ? ' class="active" aria-current="page"' : ''}>${label}</a>`;
-    }).join('') + (isSignedIn() && isAdmin() ? '<a href="/admin" data-link class="nav-admin' + (view === 'admin' ? ' active' : '') + '">Admin</a>' : '');
+    }).join('')
+      + (typeof NAV_MORE !== 'undefined' ? `<details class="nav-more"><summary>More</summary><div class="nav-more-panel">${
+          NAV_MORE.map(([key, label, href]) => `<a href="${href}" data-link${view === key ? ' class="active"' : ''}>${label}</a>`).join('')
+        }</div></details>` : '')
+      + (isSignedIn() && isAdmin() ? '<a href="/admin" data-link class="nav-admin' + (view === 'admin' ? ' active' : '') + '">Admin</a>' : '');
   }
   const drawer = $('#drawer');
   if (drawer) {
-    drawer.innerHTML = NAV.map(([key, label, href]) => `<a href="${href}" data-link>${label}<span>0${NAV.findIndex(n => n[0] === key) + 1}</span></a>`).join('')
+    drawer.innerHTML = NAV.concat(typeof NAV_MORE !== 'undefined' ? NAV_MORE : []).map(([key, label, href]) => `<a href="${href}" data-link>${label}<span>0${NAV.findIndex(n => n[0] === key) + 1 || ''}</span></a>`).join('')
       + `<div class="drawer-foot">` + (isSignedIn()
         ? `<a href="/profile" data-link style="font-family:var(--sans);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase">My Profile<span>${esc(Store.s.profile.displayName || Store.s.user.email)}</span></a>
            ${isAdmin() ? '<a href="/admin" data-link style="font-family:var(--sans);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase">Administration<span>Staff</span></a>' : ''}
@@ -2059,7 +2071,7 @@ function paintChrome(view) {
     }
   }
   document.title = view && view !== 'home'
-    ? ({ games:'Games', game:'Play', achievements:'Achievements', badges:'Badges', 'coin-shop':'Coin Shop', leaderboard:'Leaderboard', profile:'Profile', login:'Log in', register:'Create account', legacy:'The Legacy', about:'About', community:'Salon', admin:'Administration', legal:'Terms & Privacy' }[view] || 'Page') + ' · ' + SITE.name
+    ? ({ games:'Games', game:'Play', achievements:'Achievements', badges:'Badges', 'coin-shop':'Coin Shop', leaderboard:'Leaderboard', profile:'Profile', login:'Log in', register:'Create account', legacy:'The Legacy', about:'About', community:'Salon', admin:'Administration', legal:'Terms & Privacy', bot:'Diane Bot', movies:'Movies & TV', chat:'Talk to Diane', memories:'Memories', torrent:'Torrent Games', 'movie-night':'Movie Night', northstar:'NorthStar TV', settings:'Settings' }[view] || 'Page') + ' · ' + SITE.name
     : SITE.name + ' · A legacy in frames';
 }
 
@@ -2495,6 +2507,7 @@ VIEWS.game = function (params) {
         <div class="acts">
           <button type="button" data-act="fullscreen">Fullscreen</button>
           <button type="button" data-act="restart">Restart</button>
+          <button type="button" data-act="embed" data-id="${esc(g.id)}">Embed</button>
           <button type="button" data-act="report-score">Report a score</button>
         </div>
       </div>
@@ -3444,6 +3457,1274 @@ VIEWS.notfound = function (params) {
   </div></section>`;
 };
 </script>
+
+<style>
+/* secondary navigation + FAQ disclosure */
+.nav-more{position:relative}
+.nav-more>summary{list-style:none;cursor:pointer;font-family:var(--sans);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tx-2,var(--ink));padding:6px 8px;display:flex;align-items:center;gap:5px}
+.nav-more>summary::-webkit-details-marker{display:none}
+.nav-more>summary:hover,.nav-more[open]>summary{color:var(--ink)}
+.nav-more>summary::after{content:"▾";font-size:.6rem;transform:translateY(-1px)}
+.nav-more-panel{position:absolute;right:0;top:calc(100% + 8px);background:var(--cream);border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.14);min-width:196px;padding:6px;z-index:140}
+.nav-more-panel a{display:block;padding:10px 12px;font-size:.78rem;letter-spacing:.02em;color:var(--ink)}
+.nav-more-panel a:hover{background:rgba(0,0,0,.045)}
+section details{border-bottom:1px solid var(--line-2);padding:12px 0}
+section details summary{cursor:pointer;font-weight:500;font-size:.95rem}
+section details summary::marker{color:var(--gold)}
+section details p{margin-top:8px}
+@media (max-width:900px){.nav-more{display:none}}
+</style>
+<script>
+/* ==========================================================================
+   7b. RESTORED INTEGRATIONS — the adapter surface and pages that were part of
+   the live site before this upgrade. Nothing here invents a provider: every
+   call goes to the same Supabase tables and edge function the old build used.
+   ========================================================================== */
+'use strict';
+
+/* Secondary pages live behind a "More" disclosure so the primary nav stays readable. */
+const NAV_MORE = [
+  ['bot','Diane Bot','/bot'],
+  ['movies','Movies & TV','/movies'],
+  ['northstar','NorthStar TV','/northstar'],
+  ['movie-night','Movie Night','/movie-night'],
+  ['torrent','Torrent Games','/torrent'],
+  ['chat','Talk to Diane','/chat'],
+  ['memories','Memories','/memories'],
+  ['settings','Settings','/settings']
+];
+
+function DB() {
+  if (!Backend.client) throw new Error('The site database is not connected in this browser.');
+  return Backend.client;
+}
+function needUser() {
+  if (!Store.s.user) throw new Error('Sign in first.');
+  if (Store.s.user.local) throw new Error('This needs a verified account, not a device-only one.');
+  return Store.s.user;
+}
+
+Object.assign(Backend, {
+  /* ---------- private chat with Diane (edge function: diane-chat) ---------- */
+  chatConversations() { return DB().from('chat_conversations').select('id,title,created_at,updated_at').order('updated_at', { ascending:false }).limit(60); },
+  chatCreate() { const u = needUser(); return DB().from('chat_conversations').insert({ user_id:u.id }).select('id,title,created_at,updated_at').single(); },
+  chatRename(id, title) { return DB().from('chat_conversations').update({ title }).eq('id', id); },
+  chatDelete(id) { return DB().from('chat_conversations').delete().eq('id', id); },
+  chatMessages(id) { return DB().from('chat_messages').select('id,role,content,created_at').eq('conversation_id', id).order('created_at').limit(400); },
+  chatSend(id, message, extra) {
+    const u = Store.s.user;
+    const uname = (u && u.username) || null;
+    return DB().functions.invoke('diane-chat', { body: Object.assign({ conversation_id:id, message, username:uname }, extra || {}) })
+      .then(r => {
+        if (!r.error && r.data && r.data.reply) return r.data;
+        const ctx = r.error && r.error.context;
+        if (ctx && typeof ctx.json === 'function') return ctx.json().then(j => { throw new Error((j && j.error) || 'Diane could not answer.'); }, () => { throw new Error('Diane could not answer right now.'); });
+        if (r.error && /404|not found|Failed to send|Failed to fetch/i.test(r.error.message || '')) throw new Error('Diane’s server function is not deployed yet. An administrator needs to deploy the diane-chat function.');
+        throw new Error((r.error && r.error.message) || 'Diane could not answer.');
+      });
+  },
+  chatGuest(message, history) {
+    return DB().functions.invoke('diane-chat', { body:{ message, history:history || [], page:'chat', username:'Guest' } })
+      .then(r => {
+        if (!r.error && r.data && r.data.reply) return r.data;
+        const ctx = r.error && r.error.context;
+        if (ctx && typeof ctx.json === 'function') return ctx.json().then(j => { throw new Error((j && j.error) || 'Diane could not answer.'); }, () => { throw new Error('Diane could not answer right now.'); });
+        if (r.error && /404|not found|Failed to send|Failed to fetch/i.test(r.error.message || '')) throw new Error('Diane’s server function is not deployed yet. An administrator needs to deploy the diane-chat function.');
+        throw new Error((r.error && r.error.message) || 'Diane could not answer.');
+      });
+  },
+
+  /* ---------- memories ---------- */
+  memoriesList() { return DB().from('memories').select('*').order('created_at', { ascending:false }).limit(120); },
+  profilesByIds(ids) { return ids && ids.length ? DB().from('profiles').select('id,username,avatar_url').in('id', ids) : Promise.resolve({ data:[] }); },
+  memorySave(m) { const u = needUser(); return DB().from('memories').insert(Object.assign({ user_id:u.id }, m)).select().single(); },
+  memoryUpload(blob, kind) {
+    needUser();
+    const ext = kind === 'video' ? (/webm/.test(blob.type) ? 'webm' : 'mp4') : (/png/.test(blob.type) ? 'png' : /webp/.test(blob.type) ? 'webp' : 'jpg');
+    const path = Store.s.user.id + '/' + uid() + '.' + ext;
+    return DB().storage.from('memories').upload(path, blob, { contentType:blob.type || undefined, upsert:false })
+      .then(r => { if (r.error) throw new Error(r.error.message); return path; });
+  },
+  memoryUrl(path) { return DB().storage.from('memories').getPublicUrl(path).data.publicUrl; },
+  memoryModerate(id, status) {
+    return DB().rpc('moderate_memory', { p_id:id, p_status:status }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; });
+  },
+  memoryDelete(id) { return DB().from('memories').delete().eq('id', id).then(r => { if (r.error) throw new Error(r.error.message); }); },
+
+  /* ---------- community / presence ---------- */
+  activity(limit) { return DB().from('activity').select('*, profiles(username)').order('created_at', { ascending:false }).limit(limit || 30); },
+  notifications() { return DB().from('notifications').select('*').eq('user_id', Store.s.user.id).order('created_at', { ascending:false }).limit(40); },
+  follow(uid2) { return DB().from('follows').insert({ follower:Store.s.user.id, followed:uid2 }); },
+  unfollow(uid2) { return DB().from('follows').delete().eq('follower', Store.s.user.id).eq('followed', uid2); },
+  like(type, id) { return DB().from('likes').insert({ user_id:Store.s.user.id, target_type:type, target_id:String(id) }); },
+  watchStart(provider, title) { return DB().from('watch_sessions').insert({ user_id:Store.s.user.id, provider, title }).select().single(); },
+  watchEnd(id, seconds) { return DB().from('watch_sessions').update({ ended_at:new Date().toISOString(), seconds:Math.max(0, Math.floor(seconds)) }).eq('id', id); },
+  myBoosts() { return DB().from('user_boosts').select('item_id,expires_at').eq('user_id', Store.s.user.id).gt('expires_at', new Date().toISOString()); },
+  approvedMemoryCount() { return DB().from('memories').select('id', { count:'exact', head:true }).eq('status', 'approved').then(r => r.error ? null : r.count); },
+
+  /* ---------- Diane Bot ---------- */
+  adminBotPlans() { return DB().from('bot_plans').select('id,name'); },
+  purchaseBot(plan, months, serverId, serverName) {
+    return DB().rpc('purchase_bot', { p_plan:plan, p_months:months, p_server_id:serverId, p_server_name:serverName })
+      .then(r => { if (r.error) throw new Error(/not enough coins/i.test(r.error.message || '') ? 'Not enough coins.' : r.error.message); return r.data; });
+  },
+  adminBotSubs() { return DB().from('bot_subscriptions').select('*').order('created_at'); },
+  adminReviewBotSub(id, status) {
+    return DB().rpc('admin_review_bot_sub', { p_id:id, p_status:status }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; });
+  },
+  applyBadge(itemId, answers) { return DB().from('badge_applications').insert({ user_id:Store.s.user.id, item_id:itemId, answers }).then(r => { if (r.error) throw new Error(r.error.message); }); },
+  adminApplications() { return DB().from('badge_applications').select('*').eq('status', 'pending').order('created_at'); },
+  adminReviewApp(id, status) { return DB().rpc('admin_review_application', { p_id:id, p_status:status }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); }
+});
+
+/* ---- the Discord bot's real invite, command list and support server ---- */
+const BOT = {
+  invite: 'https://discord.com/oauth2/authorize?client_id=1039406042796269590&permissions=2150688768&integration_type=0&scope=bot+applications.commands',
+  support: 'https://discord.gg/jR8tcWF',
+  dates: 'January 5, 1946 – October 11, 2025',
+  cats: [['all','All'],['learn','Learn'],['arcade','Arcade'],['progress','Progress'],['classes','Classes'],['utility','Utility'],['admin','Admin']],
+  commands: [
+    ['learn','/ask','[question]','Ask anything — concepts, problems, explanations in plain language.'],
+    ['learn','/teach','[subject]','A personalised lesson on any subject: maths, science, history, literature and more.'],
+    ['learn','/homework','[problem]','Guided, step-by-step homework help.'],
+    ['learn','/quiz','[subject]','An interactive quiz. Earn XP and level up.'],
+    ['learn','/explain','[concept]','A detailed explanation of a difficult concept in simple terms.'],
+    ['learn','/study','[topic]','Custom study guides and flashcards for a topic.'],
+    ['arcade','/arcade','','Browse the available retro arcade games with descriptions and images.'],
+    ['arcade','/play','[game]','Start a classic Flash game inside Discord.'],
+    ['arcade','/games','','The complete list of games.'],
+    ['arcade','/gamescore','[game]','High scores and leaderboards for a game.'],
+    ['progress','/profile','[@user]','Your profile, level, XP and achievements — or another member’s.'],
+    ['progress','/rank','','Your level, XP progress and ranking.'],
+    ['progress','/leaderboard','','The top learners and players on the server.'],
+    ['progress','/achievements','','Every unlocked achievement, inspired by Diane Keaton’s films.'],
+    ['progress','/badges','','Your collected badges.'],
+    ['progress','/stats','','Detailed learning and gaming statistics.'],
+    ['classes','/book','','Schedule a class with Diane.'],
+    ['classes','/cancel','','Cancel or reschedule a booked class.'],
+    ['classes','/openings','','When Diane is available to teach.'],
+    ['classes','/schedule','','Your upcoming and past classes.'],
+    ['classes','/join','','Join a class.'],
+    ['utility','/help','','Everything Diane can do.'],
+    ['utility','/about','','About Diane Keaton and the bot.'],
+    ['utility','/settings','','Notifications, difficulty, themes and more.'],
+    ['utility','/invite','','Get the invite link for other servers.'],
+    ['admin','/capacity','','How many classes can be taught here.','Admin tool'],
+    ['admin','/friend','','Manage friendship with Diane.','Admin tool'],
+    ['admin','/approvescore','','Approve a submitted score.','Admins only'],
+    ['admin','/discipline','','Manage student discipline.','Admins only'],
+    ['admin','/expand','','Add admin-verified knowledge to her database.','Admin tool'],
+    ['admin','/override','','Administrative functions.','Super Admin only']
+  ]
+};
+
+VIEWS.bot = function () {
+  return `${pageHead('Diane Bot', 'An assistant, and a small arcade.', 'A Discord bot built around curiosity: it teaches, runs classic games and keeps the films close. It is an independent fan project by Game Killers Studio, not an official Diane Keaton product.', `
+    <div class="row mt-3">
+      <a class="btn" href="${BOT.invite}" target="_blank" rel="noopener">Add to Discord</a>
+      <a class="btn btn-ghost" href="${BOT.support}" target="_blank" rel="noopener">Support server</a>
+      <a class="btn btn-ghost" href="#bot-commands" data-scroll="bot-commands">All ${BOT.commands.length} commands</a>
+    </div>
+    <div class="row mt-3"><span class="coin">In memory · ${esc(BOT.dates)}</span></div>`)}
+  <section class="section tight" style="padding-top:8px"><div class="wrap">
+    <div class="grid g-4">
+      ${[['Learn','Ask a question, work through homework, take a quiz or build a study guide.','/ask · /teach · /quiz'],
+         ['Play','Browse the arcade and play a classic game without leaving the server.','/arcade · /play'],
+         ['Grow','XP, levels, badges and achievements inspired by her films.','/rank · /badges'],
+         ['Class with Diane','Book a session, see openings, manage your schedule.','/book · /openings']]
+        .map(x => `<div class="card card-pad"><span class="eyebrow" style="letter-spacing:.2em">${esc(x[0])}</span><h3 class="serif" style="font-size:1.35rem;margin:10px 0 6px">${esc(x[1])}</h3><p class="small">${esc(x[2])}</p></div>`).join('')}
+    </div>
+  </div></section>
+  <section class="section tight" id="bot-commands"><div class="wrap">
+    <div class="section-head"><div><span class="eyebrow">Reference</span><h2 class="display" style="font-size:2rem">Commands</h2><p>Search or filter, then click a command to copy it. Type <b>/help</b> in Discord for the newest abilities.</p></div></div>
+    <div class="toolbar">
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+        <input type="search" id="botQ" placeholder="Search commands" autocomplete="off"></label>
+      <div class="chips" id="botChips">${BOT.cats.map((c, i) => `<button class="chip ${i === 0 ? 'on' : ''}" data-botcat="${c[0]}" type="button">${c[1]}</button>`).join('')}</div>
+      <span class="small" id="botCount" style="margin-left:auto"></span>
+    </div>
+    <div class="grid g-3" id="botCmds"></div>
+  </div></section>
+  <section class="section cream"><div class="wrap-narrow">
+    <div class="section-head"><div><span class="eyebrow">Questions</span><h2 class="display" style="font-size:2rem">Before you add it</h2></div></div>
+    ${[['Does it cost anything?','No. Every feature is available to everyone.'],
+       ['Does Diane really learn?','Server administrators can add verified knowledge with /expand, alongside the assistant’s own learning.'],
+       ['Do I have to use slash commands?','No. Mention her in a channel or send a direct message and talk normally.'],
+       ['Who can use the admin commands?','Server administrators have the basic tools; /override is reserved for the bot’s Super Admin.'],
+       ['Is this connected to Diane Keaton or her estate?','No. The bot and this website are an independent fan tribute, not owned, operated or endorsed by Diane Keaton, her family or her estate.'],
+       ['Where do the games come from?','The same preserved classics as the website library, played through the site’s own player technology.']]
+      .map(x => `<details><summary>${esc(x[0])}</summary><p class="small">${esc(x[1])}</p></details>`).join('')}
+    <div class="row mt-3"><a class="btn btn-ghost" href="/memories" data-link>Read or share a memory</a><a class="btn btn-ghost" href="/chat" data-link>Talk to Diane here</a></div>
+  </div></section>`;
+};
+
+MOUNTS.bot = function () {
+  const st = { q:'', cat:'all' };
+  const wrap = $('#botCmds');
+  function paint() {
+    if (!wrap) return;
+    const q = st.q.toLowerCase();
+    const rows = BOT.commands.filter(c => (st.cat === 'all' || c[0] === st.cat) && (!q || (c[1] + ' ' + c[3]).toLowerCase().includes(q)));
+    wrap.innerHTML = rows.length ? rows.map(c => `<button class="card" type="button" data-copy="${esc(c[1])}" style="text-align:left;padding:18px;cursor:pointer">
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <b style="font-family:ui-monospace,monospace;font-size:1rem;color:var(--ink)">${esc(c[1])}${c[2] ? ' <span style="color:var(--tx-3);font-weight:400">' + esc(c[2]) + '</span>' : ''}</b>
+          <span class="tiny" style="white-space:nowrap">${c[4] ? esc(c[4]) : esc((BOT.cats.filter(x => x[0] === c[0])[0] || [0,''])[1])}</span>
+        </div>
+        <p class="small" style="margin-top:6px">${esc(c[3])}</p>
+        <span class="tiny" style="margin-top:10px;color:var(--gold)">Click to copy</span>
+      </button>`).join('') : `<div class="empty" style="grid-column:1/-1"><h3>No command matches</h3><p>Try another word or category.</p></div>`;
+    const n = $('#botCount'); if (n) n.textContent = rows.length + ' commands';
+  }
+  const chips = $('#botChips');
+  if (chips) chips.addEventListener('click', e => {
+    const b = e.target.closest('[data-botcat]'); if (!b) return;
+    $$('.chip', chips).forEach(x => x.classList.remove('on')); b.classList.add('on');
+    st.cat = b.getAttribute('data-botcat'); paint();
+  });
+  const q = $('#botQ'); if (q) q.addEventListener('input', e => { st.q = e.target.value; paint(); });
+  if (wrap) wrap.addEventListener('click', e => {
+    const b = e.target.closest('[data-copy]'); if (!b) return;
+    const text = b.getAttribute('data-copy');
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => toast('Copied', text), () => toast('Copy failed', text));
+    else toast('Copy', text);
+  });
+  paint();
+  return () => {};
+};
+
+/* ---------- movies & television ---------- */
+VIEWS.movies = function () {
+  const films = LEGACY.films.slice().reverse(); /* most recent first, without mutating the source */
+  const decades = Array.from(new Set(films.map(f => f[0].slice(0, 3) + '0s'))).sort().reverse();
+  return `${pageHead('On screen', 'Films & television', 'A filmography for browsing, not a streaming service. Titles are listed with the year and the role; where to watch changes constantly, so each title links to a live availability search instead of a dead link.', `
+    <div class="row mt-3"><span class="small">${films.length} films · ${LEGACY.television.length} television roles · <a href="/legacy" data-link style="border-bottom:1px solid var(--line)">the sourced legacy</a></span></div>`)}
+  <section class="section tight" style="padding-top:6px"><div class="wrap">
+    <div class="tabs" id="filmTabs">
+      <button class="tab on" data-decade="all" type="button">All</button>
+      ${decades.map(d => `<button class="tab" data-decade="${esc(d)}" type="button">${esc(d)}</button>`).join('')}
+      <button class="tab" data-decade="tv" type="button">Television</button>
+    </div>
+    <div id="filmList">
+      ${films.map(f => `<div class="work" data-film data-decade="${esc(f[0].slice(0, 3) + '0s')}">
+        <span class="yr">${esc(f[0])}</span>
+        <span><b>${esc(f[1])}</b><small>${esc(f[2])}</small></span>
+        <span class="role-note"><a href="https://www.justwatch.com/us/search?q=${encodeURIComponent(f[1])}" target="_blank" rel="noopener" style="border-bottom:1px solid var(--line)">Where to watch ↗</a></span>
+      </div>`).join('')}
+      ${LEGACY.television.map(t => `<div class="work" data-film data-decade="tv" style="display:none">
+        <span class="yr">${esc(t[0])}</span>
+        <span><b>${esc(t[1])}</b><small>${esc(t[2])} · television</small></span>
+        <span class="role-note">Series</span>
+      </div>`).join('')}
+    </div>
+    <div class="row mt-3"><span class="small">Availability links open a live search — the Center does not host or stream films.</span></div>
+  </div></section>`;
+};
+
+MOUNTS.movies = function () {
+  const tabs = $('#filmTabs');
+  if (!tabs) return;
+  tabs.addEventListener('click', e => {
+    const b = e.target.closest('[data-decade]'); if (!b) return;
+    $$('.tab', tabs).forEach(t => t.classList.remove('on')); b.classList.add('on');
+    const d = b.getAttribute('data-decade');
+    $$('[data-film]').forEach(el => { el.style.display = (d === 'all' || el.getAttribute('data-decade') === d) ? '' : 'none'; });
+  });
+};
+
+/* ---------- talk to Diane ---------- */
+VIEWS.chat = function () {
+  const signed = isSignedIn();
+  return `${pageHead('Correspondence', 'Talk to Diane', 'A private conversation with the Center’s assistant. It is not Diane Keaton, and it does not speak for her — it is a fan-built guide that can talk about her films, the library and the site.', '')}
+  <section class="section tight" style="padding-top:0"><div class="wrap">
+    ${Backend.ready ? '' : `<div class="notice warn">The assistant runs on a Supabase edge function, which this browser cannot reach right now. ${signed ? 'Your conversations will load once the database is available.' : ''}</div>`}
+    <div class="grid" style="grid-template-columns:260px 1fr;gap:0;border:1px solid var(--line);background:#fff;min-height:520px" id="chatShell">
+      <aside style="border-right:1px solid var(--line);display:flex;flex-direction:column" id="chatSide">
+        <div style="padding:14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
+          <span class="tiny">Conversations</span>
+          ${signed ? '<button class="btn btn-sm btn-ghost" data-act="chat-new" type="button">New</button>' : ''}
+        </div>
+        <div id="chatList" style="overflow-y:auto;flex:1;padding:8px">
+          <p class="small" style="padding:10px">${signed ? 'Loading…' : 'Sign in to keep a history. Guests can still ask one-off questions.'}</p>
+        </div>
+      </aside>
+      <div style="display:flex;flex-direction:column;min-width:0">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <b class="serif" id="chatTitle" style="font-size:1.1rem">A new conversation</b>
+          <span class="tiny" id="chatState">${signed ? 'Signed in' : 'Guest'}</span>
+        </div>
+        <div id="chatThread" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;min-height:360px">
+          <div class="card card-pad" style="max-width:80%;align-self:flex-start;background:var(--cream);border:0">
+            <p class="serif" style="font-size:1.1rem">Ask about a film, a game, or where to start in the library.</p>
+          </div>
+        </div>
+        <form data-form="chat" style="border-top:1px solid var(--line);padding:12px;display:flex;gap:8px">
+          <input name="message" id="chatInput" autocomplete="off" placeholder="Write a message…" style="flex:1;border:1px solid var(--line);padding:12px;font:inherit">
+          <button class="btn btn-sm" type="submit">Send</button>
+        </form>
+        <div class="form-msg" data-msg style="margin:0 12px 12px"></div>
+      </div>
+    </div>
+    <p class="small mt-2">Conversations are private to your account. The assistant is not an official Diane Keaton channel and cannot speak on her behalf.</p>
+  </div></section>`;
+};
+
+MOUNTS.chat = function () {
+  let convId = null, history = [];
+  const list = $('#chatList'), thread = $('#chatThread'), title = $('#chatTitle'), stateEl = $('#chatState');
+
+  function add(role, text) {
+    const el = document.createElement('div');
+    const mine = role === 'user';
+    el.className = 'card card-pad';
+    el.style.cssText = 'max-width:82%;border:0;' + (mine ? 'align-self:flex-end;background:var(--ink);color:var(--cream)' : 'align-self:flex-start;background:var(--cream)');
+    el.innerHTML = `<p style="font-size:.95rem;line-height:1.6;white-space:pre-wrap">${esc(text)}</p>`;
+    thread.appendChild(el);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  async function loadConversations() {
+    if (!isSignedIn() || !Backend.ready) return;
+    try {
+      const r = await Backend.chatConversations();
+      if (r.error) throw r.error;
+      const rows = r.data || [];
+      if (!rows.length) { list.innerHTML = '<p class="small" style="padding:10px">No conversations yet.</p>'; return; }
+      list.innerHTML = rows.map(c => `<button type="button" data-conv="${esc(c.id)}" style="display:block;width:100%;text-align:left;padding:10px;border:0;background:none;cursor:pointer;border-bottom:1px solid var(--line-2)">
+        <b style="font-size:.8rem">${esc(c.title || 'Conversation')}</b><span class="tiny" style="display:block">${timeAgo(new Date(c.updated_at || c.created_at).getTime())}</span></button>`).join('');
+      list.querySelectorAll('[data-conv]').forEach(b => b.addEventListener('click', () => open(b.getAttribute('data-conv'))));
+    } catch (e) { list.innerHTML = `<p class="small" style="padding:10px">${esc(e.message)}</p>`; }
+  }
+
+  async function open(id) {
+    convId = id; history = [];
+    thread.innerHTML = '';
+    try {
+      const r = await Backend.chatMessages(id);
+      if (r.error) throw r.error;
+      (r.data || []).forEach(m => { add(m.role === 'assistant' ? 'assistant' : 'user', m.content); history.push({ role:m.role, content:m.content }); });
+      if (!(r.data || []).length) add('assistant', 'Ask about a film, a game, or where to start in the library.');
+    } catch (e) { add('assistant', 'Could not load this conversation: ' + e.message); }
+  }
+
+  async function ensureConversation() {
+    if (convId) return convId;
+    if (!isSignedIn()) return null;
+    const r = await Backend.chatCreate();
+    if (r.error) throw r.error;
+    convId = r.data.id;
+    loadConversations();
+    return convId;
+  }
+
+  document.addEventListener('click', async e => {
+    if (!e.target.closest('[data-act="chat-new"]')) return;
+    if (!isSignedIn()) { navigate('/login'); return; }
+    try { convId = null; thread.innerHTML = ''; history = []; await ensureConversation(); if (title) title.textContent = 'A new conversation'; add('assistant', 'A new conversation. What would you like to ask?'); }
+    catch (err) { toast('Could not start', err.message); }
+  });
+
+  const form = document.querySelector('form[data-form="chat"]');
+  if (form) form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const input = $('#chatInput');
+    const text = (input.value || '').trim();
+    if (!text) return;
+    input.value = '';
+    add('user', text);
+    history.push({ role:'user', content:text });
+    if (stateEl) stateEl.textContent = 'Thinking…';
+    try {
+      let reply;
+      if (isSignedIn() && Backend.ready && !Store.s.user.local) {
+        const id = await ensureConversation();
+        const r = await Backend.chatSend(id, text);
+        reply = r.reply;
+      } else {
+        const r = await Backend.chatGuest(text, history);
+        reply = r.reply;
+      }
+      add('assistant', reply);
+    } catch (err) {
+      add('assistant', err.message || 'Diane could not answer right now.');
+    }
+    if (stateEl) stateEl.textContent = isSignedIn() ? 'Signed in' : 'Guest';
+  });
+
+  loadConversations();
+  return () => {};
+};
+
+/* ---------- shared memories ---------- */
+VIEWS.memories = function () {
+  return `${pageHead('In loving memory', 'Shared memories', 'A wall for members to leave a photograph, a passage or a reason Diane Keaton’s work mattered to them. Every submission is reviewed before it appears publicly.', `
+    <div class="row mt-3"><span class="small">${esc(BOT.dates)}</span>
+    ${isSignedIn() ? '<button class="btn btn-sm" data-act="memory-open" type="button" style="margin-left:auto">Share a memory</button>' : '<a class="btn btn-sm" href="/login" data-link style="margin-left:auto">Sign in to share</a>'}</div>`)}
+  <section class="section tight" style="padding-top:6px"><div class="wrap">
+    <div class="memorial" style="border:1px solid var(--line);background:var(--cream);padding:clamp(22px,4vw,40px);text-align:center;margin-bottom:34px">
+      <p class="serif" style="font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.4;max-width:46ch;margin:0 auto">“I think that the joy in attending to something outside of yourself and giving your time to something is a joyful thing.”</p>
+      <div class="tiny mt-2">Diane Keaton</div>
+    </div>
+    <div id="memoryGrid" class="grid g-3">
+      <p class="small" style="grid-column:1/-1;text-align:center;padding:40px 0">Loading memories…</p>
+    </div>
+    <p class="small mt-3">Memories are member-created and moderated. They are not statements from Diane Keaton or her estate.</p>
+  </div></section>`;
+};
+
+MOUNTS.memories = function () {
+  const grid = $('#memoryGrid');
+  let rows = [];
+
+  function card(m, author) {
+    const mine = isSignedIn() && m.user_id === Store.s.user.id;
+    const media = m.image_path ? (m.media_type === 'video' || /\.(mp4|webm)$/i.test(m.image_path)
+      ? `<video src="${esc(Backend.memoryUrl(m.image_path))}" controls style="width:100%;aspect-ratio:4/3;object-fit:cover;background:#000"></video>`
+      : `<img src="${esc(Backend.memoryUrl(m.image_path))}" alt="" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover">`) : '';
+    const name = m.author_name || (author && author.username) || 'Member';
+    return `<article class="card" data-mid="${esc(m.id)}">
+      ${media}
+      <div class="card-pad">
+        <div class="row" style="gap:10px">
+          <span class="acct-av">${esc(name.charAt(0).toUpperCase())}</span>
+          <span><b style="font-size:.84rem">${esc(name)}</b><span class="tiny" style="display:block">${timeAgo(new Date(m.created_at).getTime())}</span></span>
+        </div>
+        <p class="serif mt-2" style="font-size:1.08rem;line-height:1.55">${esc(m.body || '')}</p>
+        ${m.inspiration ? `<p class="small" style="border-left:2px solid var(--gold);padding-left:12px;margin-top:10px"><b>What inspired me:</b> ${esc(m.inspiration)}</p>` : ''}
+        ${m.status === 'rejected' ? '<p class="tiny mt-2" style="color:var(--wine)">Hidden by a moderator' + (mine ? ' — only you can see this' : '') + '</p>' : ''}
+        ${isAdmin() || mine ? `<div class="row mt-2">
+          ${isAdmin() ? `<button class="btn btn-sm btn-ghost" data-mem-mod="${esc(m.id)}" data-status="${m.status === 'rejected' ? 'approved' : 'rejected'}" type="button">${m.status === 'rejected' ? 'Restore' : 'Hide'}</button>` : ''}
+          <button class="btn btn-sm btn-ghost" data-mem-del="${esc(m.id)}" type="button">Delete</button></div>` : ''}
+      </div>
+    </article>`;
+  }
+
+  async function load() {
+    if (!grid) return;
+    if (!Backend.ready) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><h3>The wall is not connected</h3><p>The database cannot be reached from this browser, so memories cannot be loaded right now.</p></div>'; return; }
+    try {
+      const r = await Backend.memoriesList();
+      if (r.error) throw r.error;
+      rows = r.data || [];
+      const ids = Array.from(new Set(rows.map(x => x.user_id).filter(Boolean)));
+      let byId = {};
+      if (ids.length) { const p = await Backend.profilesByIds(ids); (p.data || []).forEach(u => { byId[u.id] = u; }); }
+      grid.innerHTML = rows.length ? rows.map(m => card(m, byId[m.user_id])).join('')
+        : '<div class="empty" style="grid-column:1/-1"><h3>No memories yet</h3><p>Be the first to leave one. A photograph and a few honest sentences are enough.</p></div>';
+    } catch (e) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><h3>Could not load memories</h3><p>${esc(e.message)}</p></div>`;
+    }
+  }
+
+  grid && grid.addEventListener('click', async e => {
+    const mod = e.target.closest('[data-mem-mod]');
+    const del = e.target.closest('[data-mem-del]');
+    try {
+      if (mod) { await Backend.memoryModerate(mod.getAttribute('data-mem-mod'), mod.getAttribute('data-status')); toast('Moderated', 'The wall has been updated.'); load(); }
+      if (del) { await Backend.memoryDelete(del.getAttribute('data-mem-del')); toast('Deleted', 'The memory has been removed.'); load(); }
+    } catch (err) { toast('Could not complete', err.message); }
+  });
+
+  load();
+  document.addEventListener('memories-refresh', load);
+  return () => document.removeEventListener('memories-refresh', load);
+};
+
+function openMemoryComposer() {
+  if (!isSignedIn()) { navigate('/login'); return; }
+  modal(`<button class="icon-btn x" data-close aria-label="Close">✕</button>
+    <span class="eyebrow">Shared memories</span><h2 style="margin-top:10px">Share a memory</h2>
+    <p class="small">A photograph or short video is required, with a few sentences. Submissions are reviewed before they appear.</p>
+    <form data-form="memory" class="mt-2">
+      <div class="field"><label for="memText">Your memory</label><textarea id="memText" name="body" required maxlength="1200" placeholder="A moment, a scene, what stayed with you…"></textarea></div>
+      <div class="field"><label for="memInsp">What inspired you</label><input id="memInsp" name="inspiration" required maxlength="140" placeholder="Her humour, her houses, her photographs…"></div>
+      <div class="field"><label for="memFile">Photo or video</label><input id="memFile" name="file" type="file" accept="image/*,video/*" required><div class="hint">Images are resized in the browser; 50 MB maximum.</div></div>
+      <div class="form-msg" data-msg></div>
+      <div class="modal-actions"><button class="btn btn-ghost" data-close type="button">Cancel</button><button class="btn" type="submit">Submit memory</button></div>
+    </form>`, { wide:true });
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-act="memory-open"]')) { e.preventDefault(); openMemoryComposer(); return; }
+  if (e.target.closest('a[data-link]')) { const d = document.querySelector('.nav-more[open]'); if (d) d.removeAttribute('open'); }
+});
+
+document.addEventListener('click', e => {
+  const d = document.querySelector('.nav-more[open]');
+  if (d && !e.target.closest('.nav-more')) d.removeAttribute('open');
+});
+
+async function submitMemory(form) {
+  const data = new FormData(form);
+  const body = String(data.get('body') || '').trim();
+  const inspiration = String(data.get('inspiration') || '').trim();
+  const file = form.querySelector('#memFile').files[0];
+  if (!body || !inspiration) { formMsg(form, 'Please complete both text fields.', true); return; }
+  if (!file) { formMsg(form, 'Please attach a photograph or video.', true); return; }
+  if (file.size > 50 * 1024 * 1024) { formMsg(form, 'That file is over 50 MB.', true); return; }
+  formBusy(form, true);
+  try {
+    const kind = file.type.indexOf('video') === 0 ? 'video' : 'image';
+    const path = await Backend.memoryUpload(file, kind);
+    const r = await Backend.memorySave({ title:body.slice(0, 80), body, inspiration, image_path:path, media_type:kind });
+    if (r && r.error) throw r.error;
+    closeModal();
+    toast('Thank you', 'Your memory has been submitted for review.');
+    document.dispatchEvent(new Event('memories-refresh'));
+  } catch (e) { formMsg(form, e.message || 'Could not submit the memory.', true); }
+  formBusy(form, false);
+}
+</script>
+<style>
+/* ---------- restored member pages: torrent, movie night, NorthStar TV, settings ---------- */
+.mn-grid{display:grid;grid-template-columns:1fr 330px;gap:20px;align-items:start}
+@media (max-width:900px){.mn-grid{grid-template-columns:1fr}}
+.mn-stage{position:relative;width:100%;aspect-ratio:16/9;background:#0B0A08;border:1px solid var(--line);overflow:hidden}
+.mn-stage iframe,.mn-stage #mnPlayer{position:absolute;inset:0;width:100%;height:100%}
+.mn-shield{position:absolute;inset:0;background:transparent;cursor:default}
+.mn-enter{position:absolute;inset:0;display:grid;place-items:center;background:rgba(11,10,8,.72);border:0;cursor:pointer;color:var(--cream);font-family:var(--sans);font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;text-align:center;padding:20px}
+.mn-chat{display:flex;flex-direction:column;border:1px solid var(--line);background:#fff;max-height:520px}
+.mn-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:260px}
+.mn-msg{font-size:.85rem;line-height:1.5}
+.mn-msg b{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:block}
+.mn-msg .body{display:block;margin-top:2px}
+.mn-msg small{color:var(--tx-3);font-size:.66rem}
+.mn-form{display:flex;gap:8px;border-top:1px solid var(--line);padding:10px}
+.mn-form input{flex:1;border:1px solid var(--line);padding:9px 11px;font:inherit;font-size:.85rem;min-width:0}
+.mn-now{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line-2);font-size:.82rem;color:var(--tx-2)}
+.ns-tabs{display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:18px;scrollbar-width:none}
+.ns-tabs::-webkit-scrollbar{display:none}
+.ns-tab{border:0;background:none;padding:12px 14px;cursor:pointer;font-family:var(--sans);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-3);border-bottom:2px solid transparent;white-space:nowrap}
+.ns-tab.on{color:var(--ink);border-color:var(--gold)}
+.ns-sched{list-style:none;margin:12px 0 0;padding:0}
+.ns-sched li{display:grid;grid-template-columns:130px 1fr auto;gap:14px;padding:11px 0;border-bottom:1px solid var(--line-2);font-size:.86rem;align-items:baseline}
+.ns-sched li.now{background:rgba(201,174,121,.1)}
+.ns-sched .t{font-size:.72rem;color:var(--tx-3);font-variant-numeric:tabular-nums}
+.ns-tag{font-size:.58rem;letter-spacing:.16em;border:1px solid var(--gold);color:var(--gold);padding:2px 7px;text-transform:uppercase}
+.ns-lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.ns-item{text-align:left;border:1px solid var(--line);background:#fff;padding:12px;cursor:pointer}
+.ns-fallback{position:absolute;inset:0;display:grid;place-items:center;padding:26px;text-align:center;background:rgba(11,10,8,.92);color:var(--cream);font-size:.85rem;line-height:1.6;z-index:2}
+@media (max-width:640px){.ns-sched li{grid-template-columns:1fr;gap:4px}}
+</style>
+<script>
+/* ==========================================================================
+   7c. THE REST OF THE ORIGINAL SITE — torrent library, Movie Night,
+   NorthStar TV and account settings, plus the adapter calls they need.
+   Same tables, same RPCs and the same edge function as before.
+   ========================================================================== */
+'use strict';
+
+Object.assign(Backend, {
+  /* ---- realtime ---- */
+  subscribe(table, filter, cb) {
+    const c = DB();
+    const ch = c.channel('rt-' + table + '-' + Math.random().toString(36).slice(2))
+      .on('postgres_changes', Object.assign({ event:'*', schema:'public', table }, filter ? { filter } : {}), cb)
+      .subscribe();
+    return () => { try { c.removeChannel(ch); } catch (e) {} };
+  },
+  evaluateAchievements() { return DB().rpc('evaluate_achievements').then(r => { if (r.error) throw r.error; return r.data; }); },
+  claimDaily() { return DB().rpc('claim_daily_reward').then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  recordFilm(slug) { return DB().rpc('record_film_watch', { p_film:String(slug) }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  myLedger(limit) { return DB().from('coin_transactions').select('*').eq('user_id', Store.s.user.id).order('created_at', { ascending:false }).limit(limit || 50); },
+  myPurchases() { return DB().from('purchases').select('*').eq('user_id', Store.s.user.id).order('created_at', { ascending:false }).limit(50); },
+  profileById(id) { return DB().from('profiles').select('*').eq('id', id).maybeSingle(); },
+  profileByUsername(n) { return DB().from('profiles').select('*').ilike('username', String(n).replace(/([%_\\])/g, '\\$1')).limit(1).maybeSingle(); },
+  userAchievements(id) { return DB().from('user_achievements').select('achievement_id').eq('user_id', id); },
+  userMemories(id) { return DB().from('memories').select('*').eq('user_id', id).order('created_at', { ascending:false }).limit(50); },
+  shopCatalog() { return DB().from('shop_items').select('id,name,description,price,kind'); },
+
+  /* ---- Movie Night ---- */
+  myPasses() {
+    return DB().from('inventory').select('quantity').eq('user_id', Store.s.user.id).eq('item_id', 'movie_night_pass')
+      .then(r => { if (r.error) throw new Error(r.error.message); return (r.data || []).reduce((a, x) => a + (x.quantity == null ? 1 : x.quantity), 0); });
+  },
+  mnCurrent() { return DB().from('movie_nights').select('*').in('status', ['scheduled', 'live']).order('created_at', { ascending:false }).limit(1).maybeSingle(); },
+  mnState(id) { return DB().rpc('mn_state', { p_night:id }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  mnTicket(id) { return DB().from('movie_night_tickets').select('night_id').eq('night_id', id).eq('user_id', Store.s.user.id).maybeSingle(); },
+  mnJoin(id) { return DB().rpc('mn_join', { p_night:id }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  mnCreate(title, video, starts) { return DB().rpc('mn_create', { p_title:title, p_video:video, p_starts:starts || null }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  mnControl(id, action, pos, video) { return DB().rpc('mn_control', { p_night:id, p_action:action, p_pos:pos || 0, p_video:video || null }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  mnEnd(id) { return DB().rpc('mn_end', { p_night:id }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  mnSay(id, text) { return DB().rpc('mn_say', { p_night:id, p_body:text }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  mnChat(id) { return DB().from('movie_night_chat').select('*').eq('night_id', id).order('id').limit(150); },
+  mnHistory() { return DB().from('movie_nights').select('id,title,attendees,created_at').eq('status', 'ended').order('created_at', { ascending:false }).limit(10); },
+
+  /* ---- NorthStar TV channels ---- */
+  tvChannels() { return DB().from('channels').select('*').eq('is_active', true).order('number'); },
+  tvAllItems() { return DB().from('channel_items').select('*').order('position'); },
+  tvPrograms() { return DB().from('tv_programs').select('*').order('starts_at'); },
+  tvAdminChannels() { return DB().from('channels').select('*').order('number'); },
+  tvSaveChannel(ch) { return DB().from('channels').upsert(ch).select().single(); },
+  tvSaveItem(it) { return DB().from('channel_items').upsert(it).select().single(); },
+  tvRemoveItem(id) { return DB().from('channel_items').delete().eq('id', id); },
+  tvSaveProgram(p) { return DB().from('tv_programs').upsert(p).select().single(); },
+  tvRemoveProgram(id) { return DB().from('tv_programs').delete().eq('id', id); },
+  tvRemoveChannel(id) { return DB().from('channels').delete().eq('id', id); },
+  tvReorderChannels(ids) { return DB().rpc('tv_reorder_channels', { p_ids:ids }); },
+
+  /* ---- staff ---- */
+  isRemoteAdmin() {
+    if (!Backend.client || !Store.s.user) return Promise.resolve(false);
+    return DB().rpc('my_admin_info').then(r => {
+      if (r.error) return DB().from('admins').select('user_id').eq('user_id', Store.s.user.id).maybeSingle().then(x => !!x.data, () => false);
+      return !!(r.data && r.data.active);
+    }, () => false);
+  },
+  myAdminInfo() { return DB().rpc('my_admin_info').then(r => { if (r.error) return null; return r.data; }); },
+  adminUsers() { return DB().rpc('admin_list_users').then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  adminAction(username, action, amount, reason) {
+    return DB().rpc('staff_give_coins', { p_username:username, p_amount:amount, p_reason:reason || '' })
+      .then(r => { if (r.error) throw new Error(r.error.message); return r.data; });
+  },
+  adminGiveBadge(username, item) { return DB().rpc('staff_give_badge', { p_username:username, p_item:item }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+  adminAudit(limit) { return DB().from('admin_audit_log').select('*').order('created_at', { ascending:false }).limit(limit || 50); },
+  adminLedger(uid, limit) { const q = DB().from('coin_transactions').select('*').order('created_at', { ascending:false }).limit(limit || 100); return uid ? q.eq('user_id', uid) : q; },
+  adminMemories(status) { const q = DB().from('memories').select('*').order('created_at', { ascending:false }).limit(200); return status && status !== 'all' ? q.eq('status', status) : q; },
+
+  /* ---- local backup (never deletes anything) ---- */
+  backupLocal() {
+    const dump = {};
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); dump[k] = localStorage.getItem(k); }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type:'application/json' }));
+    a.download = 'diane-keaton-center-backup-' + dayKey() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+});
+
+/* The rest of the original adapter surface. Guarded so nothing that already works
+   in this build is overwritten: a name that exists keeps its implementation. */
+(function restoreAdapter() {
+  const extra = {
+    purchaseItem(id) { return DB().rpc('purchase_item', { p_item:id }).then(rpcErr); },
+    submitScore() { return Promise.reject(new Error('Scores are recorded by the game itself. They cannot be entered by hand.')); },
+    recordPlay(game) { return DB().rpc('record_game_play', { p_game:String(game) }).then(r => { if (r.error) throw r.error; return r.data; }); },
+    leaderboard(game, limit) { return DB().from('game_best').select('user_id,game_id,best_score,achieved_at,username,avatar_url').eq('game_id', game).order('best_score', { ascending:false }).limit(limit || 50); },
+    userBestScores(uid) { return DB().from('game_best').select('game_id,best_score,achieved_at').eq('user_id', uid).order('best_score', { ascending:false }); },
+    scoreBegin(game) { return DB().rpc('start_game_session', { p_game:String(game) }).then(rpcErr); },
+    scoreFinish(session, score) { return DB().rpc('finish_game_session', { p_session:session, p_score:Math.floor(score) }).then(rpcErr); },
+    adminFlags() { return DB().from('score_flags').select('*').eq('status', 'pending').order('created_at'); },
+    adminReviewScore(id, approve) { return DB().rpc('admin_review_score', { p_flag:id, p_approve:!!approve }).then(rpcErr); },
+    adminLimits() { return DB().from('game_limits').select('*').order('game_id'); },
+    adminSetLimit(game, max, pps, min) { return DB().rpc('admin_set_game_limit', { p_game:game, p_max:max, p_pps:pps, p_min:min }).then(rpcErr); },
+    xpLeaderboard(limit) { return DB().from('profiles').select('username,xp,level,avatar_url').order('xp', { ascending:false }).limit(limit || 50); },
+    globalLeaderboard(limit) { return DB().from('profiles').select('username,points,level').order('points', { ascending:false }).limit(limit || 25); },
+    uploadProfileImage(blob, kind) {
+      const u = needUser();
+      const ext = /png/.test(blob.type) ? 'png' : /webp/.test(blob.type) ? 'webp' : /gif/.test(blob.type) ? 'gif' : 'jpg';
+      const path = u.id + '/' + kind + '-' + Date.now() + '.' + ext;
+      return DB().storage.from('avatars').upload(path, blob, { contentType:blob.type || undefined, upsert:false })
+        .then(r => { if (r.error) throw new Error(r.error.message); return DB().storage.from('avatars').getPublicUrl(path).data.publicUrl; });
+    },
+    updateProfile(fields) { needUser(); return DB().from('profiles').update(fields).eq('id', Store.s.user.id).then(r => { if (r.error) throw new Error(r.error.message); }); },
+    myInventory() { return DB().from('inventory').select('item_id,quantity').eq('user_id', Store.s.user.id); },
+    userBadges(id) { return DB().from('inventory').select('item_id').eq('user_id', id); },
+    resetPassword(email) { return DB().auth.resetPasswordForEmail(String(email), { redirectTo:SITE.origin + '/login' }); },
+    updatePassword(pw) { return DB().auth.updateUser({ password:String(pw) }).then(r => { if (r.error) throw new Error(r.error.message); return r.data; }); },
+    contentGet(key) { return DB().from('site_content').select('body').eq('key', key).maybeSingle(); },
+    contentSave(key, body) { return DB().from('site_content').upsert({ key, body, updated_at:new Date().toISOString(), updated_by:Store.s.user.id }).then(r => { if (r.error) throw new Error(r.error.message); }); },
+    aiPing() { return DB().functions.invoke('diane-chat', { body:{ message:'Hello! Reply with one short sentence.', history:[], page:'admin', username:'admin-test' } }).then(r => { if (r.error) throw r.error; return r.data; }); },
+    friendRequest(uid) { return DB().from('friendships').insert({ requester:Store.s.user.id, addressee:uid }); },
+    migrateLocal() {
+      needUser();
+      return Promise.resolve({ found:false, note:'Local records are already imported by this build when you sign in.' });
+    }
+  };
+  function rpcErr(r) {
+    if (r.error) {
+      let m = r.error.message || '';
+      if (/not enough coins/i.test(m)) m = 'Not enough coins.';
+      else if (/sign in/i.test(m)) m = 'Please log in first.';
+      else if (/unavailable/i.test(m)) m = 'That item is not available.';
+      throw new Error(m);
+    }
+    return r.data;
+  }
+  Object.keys(extra).forEach(k => { if (typeof Backend[k] === 'undefined') Backend[k] = extra[k]; });
+})();
+
+/* Old shop sold Movie Night Passes; keep them purchasable if the catalogue lost the row. */
+if (typeof SHOP_ITEMS !== 'undefined' && !SHOP_ITEMS.some(i => i.id === 'movie_night_pass')) {
+  SHOP_ITEMS.push({ id:'movie_night_pass', name:'Movie Night Pass', cat:'Passes', slot:'pass', tier:'gold', art:'ticket', price:500,
+    desc:'Admits one member to a live Movie Night. The film itself is free; a pass covers the room.' });
+}
+
+/* ---- shared YouTube helper ---- */
+let __ytState = { promise:null };
+function loadYouTubeApi() {
+  if (window.YT && window.YT.Player) return Promise.resolve(true);
+  if (__ytState.promise) return __ytState.promise;
+  __ytState.promise = new Promise(resolve => {
+    let done = false;
+    const finish = ok => { if (done) return; done = true; resolve(ok); };
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => { try { if (prev) prev(); } catch (e) {} finish(true); };
+    const s = document.createElement('script');
+    s.src = 'https://www.youtube.com/iframe_api';
+    s.onerror = () => finish(false);
+    document.head.appendChild(s);
+    setTimeout(() => finish(!!(window.YT && window.YT.Player)), 10000);
+  });
+  return __ytState.promise;
+}
+function ytId(v) {
+  const s = String(v || '').trim();
+  if (/^[\w-]{11}$/.test(s)) return s;
+  const m = s.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+function mmss(t) {
+  t = Math.max(0, Math.floor(Number(t) || 0));
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(s).padStart(2, '0');
+}
+
+/* ============================== TORRENT ================================== */
+VIEWS.torrent = function () {
+  const all = Games.visible().filter(g => /\.(torrent|magnet)$/i.test(String(g.file || '')) || g.entryType === 'torrent');
+  return `${pageHead('Peer to peer', 'Torrent library', 'Games packaged as torrent files. Each one is fetched from its torrent straight into the player — nothing is stored on this server, and a game only loads while someone is seeding it.', `
+    <div class="row mt-3"><span class="small">${all.length} torrent ${all.length === 1 ? 'game' : 'games'} in the catalogue</span>
+      <a class="btn btn-sm btn-ghost" href="/admin" data-link style="margin-left:auto">Manage library</a></div>`)}
+  <section class="section tight" style="padding-top:6px"><div class="wrap">
+    ${all.length ? `<div class="grid g-3">${all.map(g => `<article class="card">
+        <a href="/games/${encodeURIComponent(Games.slug(g.id))}" data-link style="display:block">
+          <img src="${esc(g.image || placeholderThumb(g.name))}" alt="" loading="lazy" style="width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--cream-2)">
+        </a>
+        <div class="card-pad">
+          <span class="tiny">${esc(g.category || 'Torrent')}</span>
+          <h3 class="serif" style="font-size:1.2rem;margin:4px 0 6px"><a href="/games/${encodeURIComponent(Games.slug(g.id))}" data-link>${esc(g.name)}</a></h3>
+          <p class="small">${esc(g.desc || 'A torrent-packaged game.')}</p>
+          <div class="row" style="justify-content:space-between;margin-top:12px">
+            <span class="tiny" style="font-family:ui-monospace,monospace">${esc(g.file)}</span>
+            <a class="btn btn-sm" href="/games/${encodeURIComponent(Games.slug(g.id))}" data-link>Play</a>
+          </div>
+        </div>
+      </article>`).join('')}</div>`
+      : `<div class="empty"><h3>No torrent games found</h3><p>The library scans for <code>.torrent</code> and <code>.magnet</code> entries in the games folder. Add one and it appears here.</p><a class="btn btn-ghost" href="/games" data-link>Open the library</a></div>`}
+    <div class="notice mt-3">
+      <b>How this works.</b> The player loads WebTorrent in your browser and streams the game's files from WebRTC peers. If nobody is seeding, a torrent will not finish — that is how peer-to-peer works, not a fault in the site. The magnet file or torrent is read from <code>games/</code> exactly where it sits.
+    </div>
+  </div></section>`;
+};
+
+/* ============================== MOVIE NIGHT ============================== */
+VIEWS['movie-night'] = function () {
+  return `${pageHead('Members only', 'Movie Night', 'One film, one room, everybody on the same second. A host presses play and every screen follows; the chat runs down the side. A Movie Night Pass covers entry — the film itself is free.', '')}
+  <section class="section tight" style="padding-top:0"><div class="wrap">
+    <div id="mnGate" class="card card-pad"><p class="small">Loading the room…</p></div>
+    <div id="mnRoom" hidden>
+      <div class="mn-grid">
+        <div>
+          <div class="mn-stage" id="mnStage">
+            <div id="mnPlayer"></div>
+            <div class="mn-shield" id="mnShield" hidden></div>
+            <button class="mn-enter" id="mnEnter" type="button">Enter the room<br><span style="font-size:.62rem;opacity:.7">sound and playback start here</span></button>
+          </div>
+          <div class="mn-now"><span id="mnTitle" class="serif" style="font-size:1.1rem"></span><span id="mnTickets" class="tiny"></span></div>
+          <p class="small mt-1" id="mnStatus">Waiting for the host.</p>
+          <div class="row mt-1"><button class="btn btn-sm btn-ghost" data-mn="fs" type="button">Fullscreen</button></div>
+          <div id="mnHost" hidden style="border:1px solid var(--line);background:var(--cream);padding:16px;margin-top:18px">
+            <span class="eyebrow">Host console</span>
+            <div class="row mt-2" style="gap:8px">
+              <button class="btn btn-sm" data-mn="play" type="button">Play</button>
+              <button class="btn btn-sm btn-ghost" data-mn="pause" type="button">Pause</button>
+              <button class="btn btn-sm btn-ghost" data-mn="seek-10" type="button">−10s</button>
+              <button class="btn btn-sm btn-ghost" data-mn="seek+10" type="button">+10s</button>
+              <button class="btn btn-sm btn-ghost" data-mn="reset" type="button">Restart</button>
+              <button class="btn btn-sm btn-ghost" data-mn="end" type="button" style="margin-left:auto;color:var(--wine)">End night</button>
+            </div>
+            <div class="row mt-2" style="gap:8px">
+              <input id="mnJump" placeholder="Jump to 12:30" style="flex:1;border:1px solid var(--line);padding:9px 11px;font:inherit;font-size:.84rem;min-width:120px">
+              <button class="btn btn-sm btn-ghost" data-mn="jump" type="button">Jump</button>
+            </div>
+            <div class="row mt-2" style="gap:8px">
+              <input id="mnVideo" placeholder="Swap the film: YouTube link or ID" style="flex:1;border:1px solid var(--line);padding:9px 11px;font:inherit;font-size:.84rem;min-width:160px">
+              <button class="btn btn-sm btn-ghost" data-mn="load" type="button">Load</button>
+            </div>
+            <div class="row mt-2" style="gap:8px">
+              <input id="mnSay" placeholder="Announce something in the room" style="flex:1;border:1px solid var(--line);padding:9px 11px;font:inherit;font-size:.84rem;min-width:160px">
+              <button class="btn btn-sm" data-mn="say" type="button">Send</button>
+            </div>
+          </div>
+          <div id="mnCreateBox" hidden style="border:1px solid var(--line);padding:16px;margin-top:18px">
+            <span class="eyebrow">Open a night</span>
+            <div class="field" style="margin-top:10px"><label for="mnNewTitle">Title</label><input id="mnNewTitle" maxlength="80" placeholder="Sunday screening"></div>
+            <div class="field"><label for="mnNewLink">YouTube link</label><input id="mnNewLink" placeholder="https://youtube.com/watch?v=…"><div class="hint">Only films you are allowed to stream. YouTube embedding rules apply.</div></div>
+            <div class="field"><label for="mnNewStart">Starts (optional)</label><input id="mnNewStart" type="datetime-local"></div>
+            <button class="btn btn-sm" data-mn="create" type="button">Create movie night</button>
+          </div>
+        </div>
+        <aside class="mn-chat">
+          <div class="mn-msgs" id="mnMsgs"><div class="mn-msg"><b>Movie Night</b><span class="body">Announcements from the host appear here.</span></div></div>
+          <form class="mn-form" id="mnSayForm" autocomplete="off">
+            <input id="mnSayInput" placeholder="Say something…" maxlength="280">
+            <button class="btn btn-sm" type="submit">Send</button>
+          </form>
+        </aside>
+      </div>
+      <div class="mt-3" id="mnHistory"></div>
+    </div>
+  </div></section>`;
+};
+
+MOUNTS['movie-night'] = function () {
+  const S = { night:null, staff:false, player:null, ready:false, offset:0, poll:null, seen:{}, unsub:[], entered:false, vid:null, apply:0, ticket:false };
+  const el = id => document.getElementById(id);
+  const gate = el('mnGate'), room = el('mnRoom');
+  if (!gate) return;
+
+  function show(html) { gate.hidden = false; gate.innerHTML = html; room.hidden = true; }
+  function status(t) { const s = el('mnStatus'); if (s) s.textContent = t; }
+
+  function expected() {
+    const n = S.night; if (!n) return 0;
+    const p = Number(n.pos_seconds) || 0;
+    return n.playing ? p + Math.max(0, (Date.now() + S.offset - Date.parse(n.state_at)) / 1000) : p;
+  }
+  function parseTime(t) {
+    const parts = String(t || '').trim().split(':').map(Number);
+    if (!parts.length || parts.some(isNaN)) return null;
+    return parts.reduce((a, x) => a * 60 + x, 0);
+  }
+
+  function setNight(n, serverNow) {
+    if (!n) return;
+    if (serverNow) S.offset = Date.parse(serverNow) - Date.now();
+    S.night = n;
+    if (el('mnTitle')) el('mnTitle').textContent = n.title || '';
+    if (el('mnTickets')) el('mnTickets').textContent = (n.attendees || 0) + ' ticket' + (n.attendees === 1 ? '' : 's') + ' used';
+    if (n.status === 'ended') status('This movie night has ended.');
+    applyState();
+  }
+  function addMsg(m) {
+    if (!m || S.seen[m.id]) return; S.seen[m.id] = 1;
+    const box = el('mnMsgs'); if (!box) return;
+    const d = document.createElement('div'); d.className = 'mn-msg';
+    const who = m.role === 'host' ? 'Host' : m.role === 'bot' ? 'Movie Night' : (m.username || 'Staff');
+    d.innerHTML = `<b>${esc(who)}</b><span class="body">${esc(m.body || '')}</span><small>${m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) : ''}</small>`;
+    box.appendChild(d); box.scrollTop = box.scrollHeight;
+  }
+
+  function startPlayer() {
+    if (S.entered || !S.night) return;
+    S.entered = true;
+    if (el('mnEnter')) el('mnEnter').hidden = true;
+    loadYouTubeApi().then(ok => {
+      if (!ok) { status('The YouTube player could not load — check your connection or a content blocker.'); S.entered = false; if (el('mnEnter')) el('mnEnter').hidden = false; return; }
+      S.player = new YT.Player('mnPlayer', {
+        width:'100%', height:'100%', videoId:S.night.youtube_id,
+        playerVars:{ controls:0, disablekb:1, rel:0, modestbranding:1, playsinline:1, fs:0, iv_load_policy:3 },
+        events:{ onReady:() => { S.ready = true; S.vid = S.night.youtube_id; applyState(); }, onStateChange:onState,
+                 onError:() => status('This video cannot be played here — it may be private, removed, or have embedding switched off.') }
+      });
+    });
+  }
+  function onState(e) {
+    const n = S.night; if (!n || !S.player || Date.now() - S.apply < 900) return;
+    if (n.status === 'ended') return;
+    if (n.playing && e.data === 2) { S.apply = Date.now(); try { S.player.playVideo(); } catch (x) {} }
+    else if (!n.playing && e.data === 1) { S.apply = Date.now(); try { S.player.pauseVideo(); } catch (x) {} }
+  }
+  function applyState() {
+    const n = S.night, p = S.player;
+    if (!n || !p || !S.ready || !S.entered) return;
+    S.apply = Date.now();
+    if (n.status === 'ended') { try { p.pauseVideo(); } catch (e) {} return; }
+    const exp = expected(), pos = Number(n.pos_seconds) || 0;
+    if (S.vid !== n.youtube_id) {
+      S.vid = n.youtube_id;
+      if (n.playing) p.loadVideoById({ videoId:n.youtube_id, startSeconds:exp });
+      else p.cueVideoById({ videoId:n.youtube_id, startSeconds:pos });
+      return;
+    }
+    let cur = 0, st = -1;
+    try { cur = p.getCurrentTime() || 0; st = p.getPlayerState(); } catch (e) {}
+    if (n.playing) { if (Math.abs(cur - exp) > 3) p.seekTo(exp, true); if (st !== 1 && st !== 3) p.playVideo(); }
+    else { if (st === 1 || st === 3) p.pauseVideo(); if (Math.abs(cur - pos) > 1.5) p.seekTo(pos, true); }
+  }
+
+  function enterRoom() {
+    gate.hidden = true; room.hidden = false;
+    const id = S.night.id;
+    Backend.mnState(id).then(r => setNight(r, r && r.server_now)).catch(e => status(e.message));
+    Backend.mnChat(id).then(r => (r.data || []).forEach(addMsg)).catch(() => {});
+    try {
+      S.unsub.push(Backend.subscribe('movie_nights', 'id=eq.' + id, p => { if (p && p.new && p.new.id === id) setNight(p.new); }));
+      S.unsub.push(Backend.subscribe('movie_night_chat', 'night_id=eq.' + id, p => { if (p && p.new) addMsg(p.new); }));
+    } catch (e) {}
+    clearInterval(S.poll);
+    S.poll = setInterval(() => { Backend.mnState(id).then(r => { if (r) setNight(r, r.server_now); }).catch(() => {}); }, 8000);
+  }
+
+  function history() {
+    if (!S.staff) return;
+    Backend.mnHistory().then(r => {
+      const rows = r.data || [];
+      el('mnHistory').innerHTML = '<span class="eyebrow">Past nights</span>' + (rows.length
+        ? rows.map(n => `<div class="kv"><span>${esc(n.title)} <span class="tiny">${new Date(n.created_at).toLocaleDateString()}</span></span><b>${n.attendees || 0} attended</b></div>`).join('')
+        : '<p class="small">No past nights yet.</p>');
+    }).catch(() => {});
+  }
+
+  function ctl(action, pos, video) {
+    if (!S.night) return;
+    Backend.mnControl(S.night.id, action, pos, video || null)
+      .then(r => { setNight(r, r && r.server_now); status(action === 'play' ? 'Playing for everyone.' : action === 'pause' ? 'Paused for everyone.' : 'The room has been moved.'); })
+      .catch(e => status(e.message));
+  }
+
+  const onRoomClick = e => {
+    if (e.target.id === 'mnEnter') { startPlayer(); return; }
+    const b = e.target.closest('[data-mn]'); if (!b) return;
+    const act = b.getAttribute('data-mn');
+    if (act === 'fs') { const s = el('mnStage'); (s.requestFullscreen || s.webkitRequestFullscreen || (() => {})).call(s); return; }
+    if (!S.staff) return;
+    if (act === 'play') ctl('play', expected());
+    else if (act === 'pause') ctl('pause', expected());
+    else if (act === 'seek-10') ctl('seek', Math.max(0, expected() - 10));
+    else if (act === 'seek+10') ctl('seek', expected() + 10);
+    else if (act === 'reset') ctl('seek', 0);
+    else if (act === 'jump') { const t = parseTime(el('mnJump').value); if (t == null) return toast('Check the time', 'Use a time such as 12:30 or 1:05:00.'); ctl('seek', t); }
+    else if (act === 'load') { const v = ytId(el('mnVideo').value); if (!v) return toast('Check the link', 'That is not a YouTube link or ID.'); ctl('load', 0, v); el('mnVideo').value = ''; }
+    else if (act === 'say') { const t = el('mnSay').value.trim(); if (t) Backend.mnSay(S.night.id, t).then(() => { el('mnSay').value = ''; }).catch(err => status(err.message)); }
+    else if (act === 'end') { if (confirm('End this movie night for everyone?')) Backend.mnEnd(S.night.id).then(() => { toast('Night ended', 'The room is closed.'); initRoom(); }).catch(err => status(err.message)); }
+    else if (act === 'create') {
+      const title = el('mnNewTitle').value.trim(), v = ytId(el('mnNewLink').value), st = el('mnNewStart').value;
+      if (title.length < 2) return toast('Give it a title', 'Two characters at least.');
+      if (!v) return toast('Check the link', 'Paste a YouTube link or video ID.');
+      Backend.mnCreate(title, v, st ? new Date(st).toISOString() : null)
+        .then(() => { toast('Night created', 'The room is open.'); initRoom(); }).catch(err => status(err.message));
+    }
+  };
+  room.addEventListener('click', onRoomClick);
+
+  const sayForm = el('mnSayForm');
+  if (sayForm) sayForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const input = el('mnSayInput'); const t = input.value.trim(); if (!t || !S.night) return;
+    Backend.mnSay(S.night.id, t).then(() => { input.value = ''; }).catch(() => {});
+  });
+
+  function initRoom() {
+    if (!gate) return;
+    gate.hidden = false; gate.innerHTML = '<p class="small">Loading the room…</p>'; room.hidden = true;
+    if (!Backend.ready) { show('<h3 class="serif">The room needs the database</h3><p class="small">Movie Night runs on the site’s Supabase project, which this browser cannot reach right now.</p>'); return; }
+    if (!isSignedIn()) { show(`<h3 class="serif">Sign in to join</h3><p class="small">Movie Night is for signed-in members. A pass covers entry; the film is free.</p><div class="row mt-2"><a class="btn" href="/login" data-link>Log in</a><a class="btn btn-ghost" href="/register" data-link>Create an account</a></div>`); return; }
+    Promise.all([Backend.isRemoteAdmin().catch(() => false)]).then(([staff]) => {
+      S.staff = !!staff || isAdmin();
+      if (el('mnHost')) el('mnHost').hidden = !S.staff;
+      if (el('mnCreateBox')) el('mnCreateBox').hidden = !S.staff;
+      history();
+      return Backend.mnCurrent();
+    }).then(res => {
+      const n = res && res.data;
+      if (!n) {
+        show(`<h3 class="serif">No movie night right now</h3><p class="small">${S.staff ? 'Open one with the host console below.' : 'Staff announce the next one. A Movie Night Pass in the Coin Shop means you are ready when it starts.'}</p><div class="row mt-2"><a class="btn btn-ghost" href="/coin-shop" data-link>Coin Shop</a></div>`);
+        room.hidden = false; gate.hidden = false;
+        if (S.staff) { el('mnCreateBox').hidden = false; }
+        return;
+      }
+      S.night = n;
+      return Backend.mnTicket(n.id).then(t => {
+        const inRoom = (t && t.data) || S.staff;
+        if (inRoom) { enterRoom(); return; }
+        return Backend.myPasses().then(count => {
+          show(`<h3 class="serif">${esc(n.title)}</h3><p class="small">A night is on. You need a Movie Night Pass to enter — the film itself is free.</p><p class="small">You hold <b>${count}</b> pass${count === 1 ? '' : 'es'}.</p>
+            <div class="row mt-2">${count > 0 ? '<button class="btn" id="mnUsePass" type="button">Use a pass and join</button>' : ''}<a class="btn btn-ghost" href="/coin-shop" data-link>Get a pass</a></div>`);
+          const use = el('mnUsePass');
+          if (use) use.addEventListener('click', () => { use.disabled = true; Backend.mnJoin(n.id).then(() => enterRoom()).catch(e => { use.disabled = false; toast('Could not join', e.message); }); });
+        });
+      });
+    }).catch(e => show(`<h3 class="serif">The room did not open</h3><p class="small">${esc(e.message || String(e))}</p>`));
+  }
+
+  initRoom();
+  return () => {
+    clearInterval(S.poll);
+    S.unsub.forEach(f => { try { f(); } catch (e) {} });
+    if (S.player) { try { S.player.destroy(); } catch (e) {} }
+  };
+};
+
+/* ============================== NORTHSTAR TV ============================= */
+VIEWS.northstar = function () {
+  return `${pageHead('Television', 'NorthStar TV', 'A guide and a player for NorthStar’s channels: whatever is scheduled plays live at the right minute, and everything else is on demand.', `
+    <div class="row mt-3"><span class="small">NorthStar TV is a separate network owned by Good Morning Northstar News. This site hosts the player and the guide; it does not own or operate the network.</span></div>`)}
+  <section class="section tight" style="padding-top:0"><div class="wrap">
+    <div class="ns-tabs" id="nsTabs"></div>
+    <div class="mn-stage" id="nsStage">
+      <div id="nsPlayer"></div>
+      <div class="mn-shield" id="nsShield" hidden></div>
+      <div class="ns-fallback" id="nsFallback" hidden></div>
+      <button class="mn-enter" id="nsEnter" type="button">Tune in<br><span style="font-size:.62rem;opacity:.7">sound starts here</span></button>
+    </div>
+    <div class="mn-now"><span id="nsNow" class="small"></span><button class="btn btn-sm btn-ghost" id="nsFs" type="button">Fullscreen</button></div>
+    <p class="small mt-1" id="nsMsg"></p>
+    <div id="nsGuide"></div>
+  </div></section>`;
+};
+
+MOUNTS.northstar = function () {
+  const S = { channels:[], items:[], programs:[], chId:null, mode:'vod', itemId:null, vid:null, vidMode:null, progId:null, player:null, ready:false, userVod:false, token:0, timer:null, ticker:null, entered:false };
+  const el = id => document.getElementById(id);
+  if (!el('nsTabs')) return;
+  const chById = id => S.channels.filter(c => c.id === id)[0];
+  const chItems = id => S.items.filter(i => i.channel_id === id).slice().sort((a, b) => a.position - b.position);
+  const chProgs = id => S.programs.filter(p => p.channel_id === id).slice().sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+  const fmtT = iso => new Date(iso).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+  const fmtD = iso => new Date(iso).toLocaleString([], { weekday:'short', hour:'numeric', minute:'2-digit' });
+  function msg(t) { const m = el('nsMsg'); if (m) m.textContent = t || ''; }
+  function fail(text, link) {
+    const f = el('nsFallback'); if (!f) return;
+    f.innerHTML = '<div>' + esc(text) + (link ? '<br><a href="' + esc(link) + '" target="_blank" rel="noopener" style="color:var(--gold);border-bottom:1px solid currentColor">Open on YouTube ↗</a>' : '') + '</div>';
+    f.hidden = false;
+  }
+  function nowNext(id, t) {
+    let cur = null, next = null;
+    chProgs(id).forEach(p => {
+      const s = +new Date(p.starts_at), e = +new Date(p.ends_at);
+      if (s <= t && t < e) cur = p; else if (s > t && !next) next = p;
+    });
+    return { cur, next };
+  }
+
+  function ensurePlayer(cb) {
+    if (S.player) return cb(S.player);
+    loadYouTubeApi().then(ok => {
+      if (!ok) return cb(null);
+      if (S.player) return cb(S.player);
+      S.player = new YT.Player('nsPlayer', {
+        width:'100%', height:'100%', playerVars:{ rel:0, playsinline:1, modestbranding:1 },
+        events:{ onReady:() => { S.ready = true; cb(S.player); }, onStateChange:onState, onError:onErr }
+      });
+    });
+  }
+  function onState(e) {
+    if (S.mode === 'live') {
+      if (e.data === YT.PlayerState.PAUSED) { try { S.player.playVideo(); } catch (x) {} }
+      else if (e.data === YT.PlayerState.ENDED) setTimeout(() => { S.vidMode = null; evaluate(); }, 600);
+    } else if (e.data === YT.PlayerState.ENDED) playNext();
+  }
+  function onErr() { fail('This video cannot be played here — it may be private, removed, or have embedding switched off.', S.vid ? 'https://www.youtube.com/watch?v=' + S.vid : ''); }
+  function startVideo(vid, startSec, autoplay) {
+    const token = ++S.token;
+    ensurePlayer(p => {
+      if (token !== S.token) return;
+      if (!p) return fail('The YouTube player could not load — check your connection or a content blocker.', 'https://www.youtube.com/watch?v=' + vid);
+      el('nsFallback').hidden = true;
+      S.vid = vid;
+      const o = { videoId:vid }; if (startSec > 0) o.startSeconds = startSec;
+      if (autoplay) p.loadVideoById(o); else p.cueVideoById(o);
+    });
+  }
+  function noContent() { S.vid = null; try { if (S.player) S.player.stopVideo(); } catch (e) {} fail('No programming on this channel yet.'); }
+
+  function selectItem(itemId, autoplay, fromUser) {
+    const it = S.items.filter(i => i.id === itemId)[0]; if (!it) return;
+    if (fromUser && S.mode === 'live') { S.userVod = true; clearTimeout(S.timer); }
+    S.mode = 'vod'; S.itemId = itemId; S.progId = null;
+    const v = ytId(it.video_id) || ytId(it.url);
+    if (!v) { S.vid = null; fail('“' + it.title + '” is not a YouTube video.', it.url || ''); }
+    else if (!(S.vid === v && S.vidMode === 'vod')) { S.vidMode = 'vod'; startVideo(v, 0, autoplay); }
+    renderNow(); renderGuide();
+  }
+  function playNext() {
+    const its = chItems(S.chId); if (!its.length) return;
+    let i = 0; its.forEach((x, n) => { if (x.id === S.itemId) i = n; });
+    selectItem(its[(i + 1) % its.length].id, true, false);
+  }
+
+  function evaluate() {
+    clearTimeout(S.timer);
+    const id = S.chId; if (!id) return;
+    const t = Date.now(), nn = nowNext(id, t);
+    if (nn.cur && !S.userVod) {
+      S.mode = 'live';
+      if (S.progId !== nn.cur.id || S.vidMode !== 'live') {
+        S.progId = nn.cur.id; S.vidMode = 'live';
+        const v = ytId(nn.cur.media_url);
+        if (v) startVideo(v, Math.max(0, Math.floor((t - new Date(nn.cur.starts_at)) / 1000)), true);
+        else fail('“' + nn.cur.title + '” is not a YouTube source and cannot be embedded.', nn.cur.media_url || '');
+      }
+      S.timer = setTimeout(evaluate, Math.max(1000, new Date(nn.cur.ends_at) - t) + 300);
+    } else {
+      const wasLive = S.mode === 'live';
+      S.mode = 'vod'; S.progId = null;
+      if (wasLive || S.vidMode === null) {
+        const its = chItems(id);
+        if (its.length) selectItem(its[0].id, wasLive, false); else noContent();
+      }
+    }
+    renderNow(); renderGuide();
+  }
+
+  function renderTabs() {
+    el('nsTabs').innerHTML = S.channels.map(c => `<button type="button" class="ns-tab${c.id === S.chId ? ' on' : ''}" data-ch="${esc(c.id)}">${esc(c.number)} · ${esc(c.name)}</button>`).join('');
+    const live = S.mode === 'live';
+    const sh = el('nsShield'); if (sh) sh.hidden = !live;
+  }
+  function renderNow() {
+    const id = S.chId, box = el('nsNow'); if (!box) return;
+    if (!id) { box.innerHTML = ''; return; }
+    const nn = nowNext(id, Date.now());
+    let h = '';
+    if (S.mode === 'live' && nn.cur) h = `<b>Now:</b> ${esc(nn.cur.title)} (${fmtT(nn.cur.starts_at)} – ${fmtT(nn.cur.ends_at)})`;
+    else {
+      const it = S.items.filter(i => i.id === S.itemId)[0];
+      h = `<b>On demand:</b> ${it ? esc(it.title) + (it.year ? ' (' + esc(it.year) + ')' : '') : 'choose a video below'}`;
+    }
+    if (nn.next) h += ` &nbsp;·&nbsp; <b>Next:</b> ${esc(nn.next.title)} at ${fmtD(nn.next.starts_at)}`;
+    if (S.userVod && nn.cur) h += ` &nbsp;<button type="button" class="btn btn-sm btn-ghost" id="nsGoLive">Back to live</button>`;
+    box.innerHTML = h;
+  }
+  function renderGuide() {
+    const id = S.chId, box = el('nsGuide'); if (!box) return;
+    if (!id) { box.innerHTML = ''; return; }
+    const t = Date.now(), nn = nowNext(id, t);
+    const ps = chProgs(id).filter(p => new Date(p.ends_at) > t).slice(0, 12);
+    let h = ps.length ? '<span class="eyebrow" style="display:block;margin-top:26px">Schedule</span><ul class="ns-sched">' + ps.map(p => {
+      const cls = nn.cur && nn.cur.id === p.id ? 'now' : (nn.next && nn.next.id === p.id ? 'next' : '');
+      return `<li class="${cls}"><span class="t">${fmtD(p.starts_at)} – ${fmtT(p.ends_at)}</span><span>${esc(p.title)}${p.description ? '<br><span class="tiny">' + esc(p.description) + '</span>' : ''}</span><span>${cls ? '<span class="ns-tag">' + (cls === 'now' ? 'Now' : 'Next') + '</span>' : ''}</span></li>`;
+    }).join('') + '</ul>' : '';
+    const its = chItems(id);
+    h += '<span class="eyebrow" style="display:block;margin-top:26px">On demand</span>';
+    h += its.length ? '<div class="ns-lib">' + its.map(i => `<button type="button" class="ns-item${S.mode === 'vod' && i.id === S.itemId ? ' on' : ''}" data-item="${esc(i.id)}" style="${S.mode === 'vod' && i.id === S.itemId ? 'border-color:var(--gold)' : ''}">
+        <b style="font-weight:500">${esc(i.title)}</b><span class="tiny" style="display:block;margin-top:2px">${esc(i.year || '')}${i.description ? ' · ' + esc(i.description) : ''}</span></button>`).join('') + '</div>'
+      : '<p class="small">No videos on this channel yet.</p>';
+    box.innerHTML = h;
+  }
+
+  function selectChannel(id, byUser) {
+    if (!chById(id) || id === S.chId) return;
+    S.chId = id; S.userVod = false; S.itemId = null; S.vidMode = null; S.progId = null; S.mode = 'vod';
+    renderTabs(); evaluate();
+    if (byUser) msg('');
+  }
+
+  el('nsTabs').addEventListener('click', e => { const b = e.target.closest('[data-ch]'); if (b) selectChannel(b.getAttribute('data-ch'), true); });
+  el('nsGuide').addEventListener('click', e => {
+    const b = e.target.closest('[data-item]'); if (b) selectItem(b.getAttribute('data-item'), true, true);
+    if (e.target.id === 'nsGoLive') { S.userVod = false; S.vidMode = null; evaluate(); }
+  });
+  const enter = el('nsEnter');
+  if (enter) enter.addEventListener('click', () => {
+    S.entered = true; enter.hidden = true;
+    if (S.player) { try { S.player.unMute(); S.player.playVideo(); } catch (e) {} }
+    else evaluate();
+  });
+  el('nsFs').addEventListener('click', () => { const s = el('nsStage'); (s.requestFullscreen || s.webkitRequestFullscreen || (() => {})).call(s); });
+  const sh = el('nsShield');
+  if (sh) sh.addEventListener('click', () => { try { S.player.playVideo(); } catch (e) {} });
+
+  if (!Backend.ready) { msg('NorthStar TV needs the site database, which this browser cannot reach right now.'); return; }
+  Promise.all([Backend.tvChannels(), Backend.tvAllItems(), Backend.tvPrograms()]).then(r => {
+    const bad = r.find(x => x.error);
+    if (bad) throw bad.error;
+    S.channels = (r[0].data || []).filter(c => c.kind === 'northstar' || !c.kind);
+    S.items = r[1].data || [];
+    S.programs = r[2].data || [];
+    if (!S.channels.length) { msg('NorthStar TV channels appear here as soon as they are added in Administration → NorthStar.'); return; }
+    S.chId = S.channels[0].id;
+    renderTabs(); evaluate();
+    try { Backend.subscribe('channel_items', null, () => { clearTimeout(S.timer); S.timer = setTimeout(() => location.reload(), 1200); }); } catch (e) {}
+    S.ticker = setInterval(() => {
+      const nn = S.chId ? nowNext(S.chId, Date.now()) : {};
+      if (S.mode === 'live' && (!nn.cur || nn.cur.id !== S.progId)) evaluate(); else { renderNow(); renderGuide(); }
+    }, 15000);
+  }).catch(e => {
+    const m = String((e && e.message) || e);
+    if (/does not exist|Could not find|schema cache|404/i.test(m)) {
+      msg('The NorthStar TV guide needs three tables that are not in this project yet: channels, channel_items and tv_programs. Until an administrator creates them there is nothing to tune into — the page and player are ready and will fill in as soon as the tables exist.');
+    } else {
+      msg('NorthStar TV could not load the guide: ' + m);
+    }
+  });
+
+  return () => { clearTimeout(S.timer); clearInterval(S.ticker); if (S.player) { try { S.player.destroy(); } catch (e) {} } };
+};
+
+/* ============================== SETTINGS ================================= */
+VIEWS.settings = function () {
+  if (!isSignedIn()) {
+    return `${pageHead('Account', 'Settings', 'Sign in to manage your account, password and data.', '')}
+    <section class="section tight"><div class="wrap"><div class="card card-pad center" style="max-width:520px;margin:0 auto">
+      <h3 class="serif">No account on this device</h3>
+      <p class="small mt-1">Log in to see your details, change your password, or export your data.</p>
+      <div class="row mt-2" style="justify-content:center"><a class="btn" href="/login" data-link>Log in</a><a class="btn btn-ghost" href="/register" data-link>Join</a></div>
+    </div></div></section>`;
+  }
+  const u = Store.s.user, p = Store.s.profile;
+  const lvl = levelFor(Store.s.wallet.xp);
+  const remote = !u.local;
+  return `${pageHead('Account', 'Settings', 'Your details, your password, your data. Nothing here is shared without you.', '')}
+  <section class="section tight" style="padding-top:0"><div class="wrap-narrow">
+    <div class="grid g-4" style="margin-bottom:26px">
+      ${[['Level', lvl.level, 'of 99'], ['XP', fmt(Store.s.wallet.xp), fmt(Math.max(0, lvl.need - lvl.into)) + ' to the next level'],
+         ['Coins', fmt(Store.s.wallet.coins), 'in your purse'], ['Games', fmt(Object.keys(Store.s.stats.plays || {}).length), 'played']]
+        .map(x => `<div class="card card-pad"><span class="eyebrow">${esc(x[0])}</span><div class="display" style="font-size:2rem;margin:6px 0 2px">${esc(String(x[1]))}</div><span class="tiny">${esc(x[2])}</span></div>`).join('')}
+    </div>
+
+    <div class="card card-pad" style="margin-bottom:18px">
+      <span class="eyebrow">Identity</span>
+      <div class="kv mt-2"><span>Username</span><b>${esc(p.username || '—')}</b></div>
+      <div class="kv"><span>Display name</span><b>${esc(p.displayName || '—')}</b></div>
+      <div class="kv"><span>Email</span><b>${esc(u.email || '—')}</b></div>
+      <div class="kv"><span>Account type</span><b>${remote ? 'Verified ' + (ROLE_LABEL[roleOf()] || 'member') : 'Device-only'}</b></div>
+      <div class="row mt-2"><button class="btn btn-sm btn-ghost" data-act="edit-profile" type="button">Edit profile card</button><a class="btn btn-sm btn-ghost" href="/profile" data-link>View public profile</a></div>
+      ${remote ? '' : '<p class="small mt-2">A device-only account lives in this browser. It has no email of its own, so it can never hold staff permissions and cannot be recovered on another computer.</p>'}
+    </div>
+
+    <div class="card card-pad" style="margin-bottom:18px">
+      <span class="eyebrow">Password</span>
+      ${remote ? `<form data-form="password" class="mt-2">
+        <div class="field"><label for="pw1">New password</label><input id="pw1" name="password" type="password" autocomplete="new-password" required minlength="8"><div class="hint">At least eight characters.</div></div>
+        <div class="field"><label for="pw2">Repeat it</label><input id="pw2" name="password2" type="password" autocomplete="new-password" required minlength="8"></div>
+        <div class="form-msg" data-msg></div>
+        <button class="btn btn-sm" type="submit">Change password</button>
+      </form>`
+      : '<p class="small mt-2">Device-only accounts have no server password to change. Create a verified account to sign in from other devices.</p>'}
+    </div>
+
+    <div class="card card-pad" style="margin-bottom:18px">
+      <span class="eyebrow">Your data</span>
+      <p class="small mt-2">Everything the site keeps about you on this device — coins, achievements, notes, settings — can be exported as JSON. The export is a copy; it does not change anything.</p>
+      <div class="row mt-2"><button class="btn btn-sm btn-ghost" data-act="export" type="button">Export this device’s data</button>${remote ? '<button class="btn btn-sm btn-ghost" data-act="ledger" type="button">Coin ledger</button>' : ''}</div>
+      <div id="ledgerBox" class="mt-2"></div>
+    </div>
+
+    <div style="border:1px solid var(--wine);padding:20px">
+      <span class="eyebrow" style="color:var(--wine)">Careful</span>
+      <p class="small mt-2">Clearing device data removes the local copy of profiles, coins and notes stored in this browser. It does not touch the site database and cannot be undone on this device.</p>
+      <div class="row mt-2"><button class="btn btn-sm btn-ghost" data-act="wipe" type="button" style="color:var(--wine);border-color:var(--wine)">Clear this device’s data</button><button class="btn btn-sm btn-ghost" data-act="delete-account" type="button" style="color:var(--wine);border-color:var(--wine)">Delete my account</button></div>
+    </div>
+    <p class="small mt-3">Account deletion is not something a page can do safely by itself — a signed-in member cannot remove their own auth record without a server-side function. Use the button for the exact route to ask staff.</p>
+  </div></section>`;
+};
+
+MOUNTS.settings = function () {
+  const box = document.getElementById('ledgerBox');
+  document.addEventListener('click', function ledgerClick(e) {
+    if (!e.target.closest('[data-act="ledger"]')) return;
+    if (!box) return;
+    box.innerHTML = '<p class="small">Loading…</p>';
+    Backend.myLedger(25).then(r => {
+      if (r.error) throw r.error;
+      const rows = r.data || [];
+      box.innerHTML = rows.length ? rows.map(t => `<div class="kv"><span>${esc(t.note || t.kind || 'Coins')} <span class="tiny">${new Date(t.created_at).toLocaleDateString()}</span></span><b style="color:${t.amount < 0 ? 'var(--wine)' : 'var(--sage)'}">${t.amount > 0 ? '+' : ''}${fmt(t.amount)}</b></div>`).join('')
+        : '<p class="small">No ledger entries yet.</p>';
+    }).catch(e => { box.innerHTML = `<p class="small">${esc(e.message)}</p>`; });
+  });
+  document.addEventListener('click', function delAccount(e) {
+    if (!e.target.closest('[data-act="delete-account"]')) return;
+    modal(`<button class="icon-btn x" data-close aria-label="Close">✕</button>
+      <span class="eyebrow" style="color:var(--wine)">Account deletion</span>
+      <h2 style="margin-top:10px">Ask staff to remove it</h2>
+      <p class="small">Deleting an account means deleting the auth record that owns your coins, achievements, memories and scores. The site has no client-side function that can do that, and it should not pretend to: a page cannot revoke your login. Ask an administrator, or use the Contact link in the footer of the Salon, and they will remove the account and its rows.</p>
+      <div class="modal-actions"><button class="btn" data-close type="button">Close</button></div>`);
+  });
+  return () => {};
+};
+</script>
 <script>
 /* ==========================================================================
    8. ADMINISTRATION, ACTIONS AND BOOT
@@ -3749,6 +5030,24 @@ document.addEventListener('click', function (e) {
     if (f && f.requestFullscreen) f.requestFullscreen().catch(() => toast('Fullscreen blocked', 'Your browser refused the request.'));
   }
   else if (act === 'restart') { render(); }
+  else if (act === 'embed') {
+    const slug = Games.slug(id || (Router.parse().params || {}).id || '');
+    const base = Router.base === '/' ? '' : Router.base.replace(/\/$/, '');
+    const src = location.origin + base + '/games/' + encodeURIComponent(slug);
+    const code = '<iframe src="' + src + '" width="960" height="540" style="border:0;max-width:100%" allowfullscreen></iframe>';
+    modal(`<button class="icon-btn x" data-close aria-label="Close">✕</button>
+      <span class="eyebrow">Embed</span><h2 style="margin-top:10px">Put this game on your page</h2>
+      <p class="small">Paste this where the game should appear. The frame loads the same player, so scores and playtime still count for the signed-in member on the other site.</p>
+      <textarea id="embedCode" readonly rows="4" style="width:100%;font-family:ui-monospace,monospace;font-size:.75rem;line-height:1.5;border:1px solid var(--line);padding:12px;background:var(--cream)">${esc(code)}</textarea>
+      <div class="modal-actions"><button class="btn btn-ghost" data-act="embed-copy" type="button">Copy code</button><button class="btn" data-close type="button">Done</button></div>`);
+  }
+  else if (act === 'embed-copy') {
+    const t = $('#embedCode');
+    if (!t) return;
+    t.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t.value).then(() => toast('Copied', 'Embed code is on your clipboard.'), () => toast('Copy it manually', 'Select the text and copy it.'));
+    else toast('Copy it manually', 'Select the text and copy it.');
+  }
   else if (act === 'report-score') {
     modal(`<button class="icon-btn x" data-close aria-label="Close">✕</button>
       <span class="eyebrow">Scores</span><h2 style="margin-top:10px">Scores are reported by the game</h2>
@@ -3843,6 +5142,19 @@ document.addEventListener('submit', async function (e) {
       Store.s.profile.avatar = String(data.get('avatar') || '').trim().slice(0, 500);
       Store.save(); evaluateAchievements(); closeModal();
       toast('Profile saved', 'Your card has been updated.'); render();
+    } else if (kind === 'memory') {
+      await submitMemory(form);
+    } else if (kind === 'password') {
+      if (data.get('password') !== data.get('password2')) { formMsg(form, 'The two passwords do not match.', true); return; }
+      formBusy(form, true);
+      try {
+        if (!Backend.ready || !Backend.client) throw new Error('Changing a password needs the site database, which is unreachable from this browser.');
+        const r = await Backend.client.auth.updateUser({ password:String(data.get('password')) });
+        if (r.error) throw new Error(r.error.message);
+        form.reset();
+        formMsg(form, 'Password changed.');
+      } catch (err) { formMsg(form, err.message || 'Could not change the password.', true); }
+      formBusy(form, false);
     } else if (kind === 'note') {
       const text = String(data.get('text') || '').trim();
       if (text.length < 2) { formMsg(form, 'Write a few more words.', true); return; }
